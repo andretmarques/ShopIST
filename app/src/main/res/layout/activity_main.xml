@@ -19,7 +19,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@android:drawable/ic_input_add"
         android:onClick="onClickButton"
-        android:contentDescription="@string/app_name" />
+        android:contentDescription="@string/New" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/join_btn"
