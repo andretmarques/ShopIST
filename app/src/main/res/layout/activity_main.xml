@@ -45,6 +45,7 @@
         android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:onClick="showCreatePopUp"
         app:layout_constraintBottom_toTopOf="@+id/join_btn"
         app:layout_constraintEnd_toEndOf="@+id/join_btn"
         app:icon="@drawable/ic_baseline_playlist_add_24" />
