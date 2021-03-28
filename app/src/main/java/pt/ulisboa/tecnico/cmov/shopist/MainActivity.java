@@ -3,11 +3,13 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
+import android.widget.LinearLayout;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -35,7 +37,19 @@ public class MainActivity extends AppCompatActivity {
         toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
+    }
 
+    public void showCreatePopUp(View v){
+        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.new_list_layout, (LinearLayout) findViewById(R.id.newListContainer));
+        bottomSheetView.findViewById(R.id.cancel_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bottomSheetDialog.dismiss();
+            }
+        });
+        bottomSheetDialog.setContentView(bottomSheetView);
+        bottomSheetDialog.show();
     }
 
     public void onClickButton(View v){
@@ -46,12 +60,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void setVisibility(Boolean clicked){
         if(!clicked) {
+            joinButton.setClickable(true);
             joinButton.setVisibility(View.VISIBLE);
             createButton.setVisibility(View.VISIBLE);
         }
         else{
-            joinButton.setVisibility(View.INVISIBLE);
-            createButton.setVisibility(View.INVISIBLE);
+            createButton.setClickable(false);
+            joinButton.setVisibility(View.GONE);
+            createButton.setVisibility(View.GONE);
 
         }
     }
@@ -68,4 +84,6 @@ public class MainActivity extends AppCompatActivity {
             addButton.startAnimation(rotateClose);
         }
     }
+
+
 }
