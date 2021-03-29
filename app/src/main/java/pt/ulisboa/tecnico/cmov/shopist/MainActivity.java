@@ -6,12 +6,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -45,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient mFusedLocationClient;
     public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 9002;
-    double globalLatitude, globalLongitude;
+    String addressLine = "";
 
 
     @Override
@@ -62,12 +60,6 @@ public class MainActivity extends AppCompatActivity {
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            getLocationPermission();
-        }
-        getLocationPermission();
-
 
     }
 
@@ -100,31 +92,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void getLastKnownLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
-                @Override
-                public void onComplete(@NonNull Task<Location> task) {
-                    if(task.isSuccessful()) {
-                        Location location = task.getResult();
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                        globalLatitude = latLng.latitude;
-                        globalLongitude = latLng.longitude;
-                        Log.d("INFO", "onComplete: latitude " + globalLatitude);
-                        Log.d("INFO", "onComplete: longitude " + globalLongitude);
-                    }
-
-                }
-            });
-            getRoadName();
-        }
-
-    }
-
-    private void getLocationPermission() {
+    public void getLocationPermission(View view) {
         /*
          * Request location permission, so that we can get the location of the
          * device. The result of the permission request is handled by a callback,
@@ -141,17 +109,46 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void getRoadName() {
-        String myCity = "";
-        Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+    public void getLastKnownLocation() {
 
-        try {
-            List<Address> addresses = geocoder.getFromLocation(globalLatitude, globalLongitude,1);
-            String address = addresses.get(0).getAddressLine(0);
-            myCity = addresses.get(0).getAddressLine(0);
-            Log.d("TAG", "Address: " + address);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
+                @Override
+                public void onComplete(@NonNull Task<android.location.Location> task) {
+                    double globalLatitude = 0, globalLongitude = 0;
+                    if (task.isSuccessful()) {
+                        Location location = task.getResult();
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        globalLatitude = location.getLatitude();
+                        globalLongitude = location.getLongitude();
+                        Log.d("INFO", "onComplete: latitude " + globalLatitude);
+                        Log.d("INFO", "onComplete: longitude " + globalLongitude);
+                    }
+                    addressLine = getRoadName(globalLatitude, globalLongitude);
+                }
+            });
         }
+        Log.d("INFO", "onComplete: address " + addressLine);
     }
+
+        public String getRoadName(double latitude, double longitude) {
+            String myCity = "";
+            String address = "";
+            Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+            Log.d("INFO", "road: latitude " + latitude);
+            Log.d("INFO", "road: longitude " + longitude);
+
+            try {
+                List<Address> addresses = geocoder.getFromLocation(latitude, longitude,1);
+                address = addresses.get(0).getAddressLine(0);
+                Log.d("TAG", "Address: " + address);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return address;
+        }
+
+
 }
