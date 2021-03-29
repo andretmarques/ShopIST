@@ -6,19 +6,26 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.CancellationToken;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -40,11 +47,12 @@ public class MainActivity extends AppCompatActivity {
     ExtendedFloatingActionButton createButton;
     FloatingActionButton addButton;
 
+    GPSLocation mGPS = new GPSLocation(this);
+    TextView text = findViewById(R.id.GPSRoad);
 
-    private FusedLocationProviderClient mFusedLocationClient;
+    public FusedLocationProviderClient mFusedLocationClient;
     public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 9002;
     String addressLine = "";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
     }
 
     public void onClickButton(View v) {
@@ -92,6 +99,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void updateLocation(View v) {
+        if(mGPS.canGetLocation ){
+            mGPS.getLocation();
+            text.setText("Lat "+mGPS.getLatitude()+"Lon "+mGPS.getLongitude());
+        }else{
+            text.setText("Unable to find location");
+            System.out.println("Unable");
+        }
+    }
+
     public void getLocationPermission(View view) {
         /*
          * Request location permission, so that we can get the location of the
@@ -110,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getLastKnownLocation() {
-
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
