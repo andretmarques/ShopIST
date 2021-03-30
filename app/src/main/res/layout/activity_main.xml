@@ -7,7 +7,6 @@
     tools:context=".MainActivity">
 
 
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_btn"
         android:layout_width="wrap_content"
