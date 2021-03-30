@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity{
         public void onLocationChanged(Location location) {
             Log.d("OLA", "onLocationChanged: "+location);
             String address = getRoad(location.getLatitude(), location.getLongitude());
+            GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
             GPStext.setText(address);
         }
         @Override
