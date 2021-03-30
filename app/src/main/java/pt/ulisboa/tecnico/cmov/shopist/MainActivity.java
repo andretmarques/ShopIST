@@ -20,14 +20,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.tasks.CancellationToken;
-import com.google.android.gms.tasks.CancellationTokenSource;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -36,7 +28,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     private Animation fromBottom;
     private Animation toBottom;
@@ -47,12 +39,9 @@ public class MainActivity extends AppCompatActivity {
     ExtendedFloatingActionButton createButton;
     FloatingActionButton addButton;
 
-    GPSLocation mGPS = new GPSLocation(this);
-    TextView text = findViewById(R.id.GPSRoad);
-
-    public FusedLocationProviderClient mFusedLocationClient;
-    public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 9002;
-    String addressLine = "";
+    protected LocationManager locationManager;
+    GPSUpdater mGPS;
+    TextView GPStext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +56,34 @@ public class MainActivity extends AppCompatActivity {
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mGPS = new GPSUpdater(this.getApplicationContext());
+
+        GPStext = findViewById(R.id.GPSRoad);
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            Log.d("OLA", "Permission");
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
+        }
     }
+    LocationListener LocationListenerGPS = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d("OLA", "onLocationChanged: "+location);
+            String address = getRoad(location.getLatitude(), location.getLongitude());
+            GPStext.setText(address);
+        }
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d("Latitude","disable");
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d("Latitude","enable");
+        }
+    };
 
     public void onClickButton(View v) {
         setVisibility(clicked);
@@ -99,72 +114,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void updateLocation(View v) {
-        if(mGPS.canGetLocation ){
-            mGPS.getLocation();
-            text.setText("Lat "+mGPS.getLatitude()+"Lon "+mGPS.getLongitude());
-        }else{
-            text.setText("Unable to find location");
-            System.out.println("Unable");
+    public String getRoad(double latitude, double longitude) {
+        String address = "";
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        Log.d("INFO", "road: latitude " + latitude);
+        Log.d("INFO", "road: longitude " + longitude);
+
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude,1);
+            address = addresses.get(0).getAddressLine(0);
+            Log.d("TAG", "Address: " + address);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return address;
     }
-
-    public void getLocationPermission(View view) {
-        /*
-         * Request location permission, so that we can get the location of the
-         * device. The result of the permission request is handled by a callback,
-         * onRequestPermissionsResult.
-         */
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            getLastKnownLocation();
-        } else {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
-
-    public void getLastKnownLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
-                @Override
-                public void onComplete(@NonNull Task<android.location.Location> task) {
-                    double globalLatitude = 0, globalLongitude = 0;
-                    if (task.isSuccessful()) {
-                        Location location = task.getResult();
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                        globalLatitude = location.getLatitude();
-                        globalLongitude = location.getLongitude();
-                        Log.d("INFO", "onComplete: latitude " + globalLatitude);
-                        Log.d("INFO", "onComplete: longitude " + globalLongitude);
-                    }
-                    addressLine = getRoadName(globalLatitude, globalLongitude);
-                }
-            });
-        }
-        Log.d("INFO", "onComplete: address " + addressLine);
-    }
-
-        public String getRoadName(double latitude, double longitude) {
-            String myCity = "";
-            String address = "";
-            Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
-            Log.d("INFO", "road: latitude " + latitude);
-            Log.d("INFO", "road: longitude " + longitude);
-
-            try {
-                List<Address> addresses = geocoder.getFromLocation(latitude, longitude,1);
-                address = addresses.get(0).getAddressLine(0);
-                Log.d("TAG", "Address: " + address);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return address;
-        }
-
-
 }
