@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.Animation;
@@ -11,7 +12,7 @@ import android.widget.Button;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     private Animation fromBottom;
     private Animation toBottom;
