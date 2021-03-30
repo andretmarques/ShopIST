@@ -1,19 +1,37 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 import android.widget.LinearLayout;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-public class MainActivity extends AppCompatActivity {
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+
+public class MainActivity extends AppCompatActivity{
 
     private Animation fromBottom;
     private Animation toBottom;
@@ -24,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
     ExtendedFloatingActionButton createButton;
     FloatingActionButton addButton;
 
+    protected LocationManager locationManager;
+    GPSUpdater mGPS;
+    TextView GPStext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
-    }
 
     public void showCreatePopUp(View v){
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
@@ -50,9 +70,37 @@ public class MainActivity extends AppCompatActivity {
         });
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
-    }
+        mGPS = new GPSUpdater(this.getApplicationContext());
 
-    public void onClickButton(View v){
+        GPStext = findViewById(R.id.GPSRoad);
+
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            Log.d("OLA", "Permission");
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
+        }
+    }
+    LocationListener LocationListenerGPS = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d("OLA", "onLocationChanged: "+location);
+            String address = getRoad(location.getLatitude(), location.getLongitude());
+            GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
+            GPStext.setText(address);
+        }
+        @Override
+        public void onProviderDisabled(String provider) {
+            Log.d("Latitude","disable");
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+            Log.d("Latitude","enable");
+        }
+    };
+
+    public void onClickButton(View v) {
         setVisibility(clicked);
         setAnimation(clicked);
         clicked = !clicked;
@@ -85,5 +133,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public String getRoad(double latitude, double longitude) {
+        String address = "";
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        Log.d("INFO", "road: latitude " + latitude);
+        Log.d("INFO", "road: longitude " + longitude);
 
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude,1);
+            address = addresses.get(0).getAddressLine(0);
+            Log.d("TAG", "Address: " + address);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return address;
+    }
 }
