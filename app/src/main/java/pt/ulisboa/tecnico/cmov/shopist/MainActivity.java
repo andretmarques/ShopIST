@@ -51,15 +51,46 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        addButton = (FloatingActionButton)findViewById(R.id.add_btn);
-        joinButton = (ExtendedFloatingActionButton)findViewById(R.id.join_btn);
-        createButton = (ExtendedFloatingActionButton)findViewById(R.id.create_btn);
+        addButton = (FloatingActionButton) findViewById(R.id.add_btn);
+        joinButton = (ExtendedFloatingActionButton) findViewById(R.id.join_btn);
+        createButton = (ExtendedFloatingActionButton) findViewById(R.id.create_btn);
         fromBottom = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
         toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
 
-    public void showCreatePopUp(View v){
+
+        mGPS = new GPSUpdater(this.getApplicationContext());
+
+        GPStext = findViewById(R.id.GPSRoad);
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
+        }
+    }
+
+        LocationListener LocationListenerGPS = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                Log.d("OLA", "onLocationChanged: " + location);
+                String address = getRoad(location.getLatitude(), location.getLongitude());
+                GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
+                GPStext.setText(address);
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                Log.d("Latitude", "disable");
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                Log.d("Latitude", "enable");
+            }
+        };
+
+    public void showCreatePopUp (View v){
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.new_list_layout, (LinearLayout) findViewById(R.id.newListContainer));
         bottomSheetView.findViewById(R.id.cancel_button).setOnClickListener(new View.OnClickListener() {
@@ -70,35 +101,7 @@ public class MainActivity extends AppCompatActivity{
         });
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
-        mGPS = new GPSUpdater(this.getApplicationContext());
-
-        GPStext = findViewById(R.id.GPSRoad);
-
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            Log.d("OLA", "Permission");
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
-        }
     }
-    LocationListener LocationListenerGPS = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            Log.d("OLA", "onLocationChanged: "+location);
-            String address = getRoad(location.getLatitude(), location.getLongitude());
-            GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
-            GPStext.setText(address);
-        }
-        @Override
-        public void onProviderDisabled(String provider) {
-            Log.d("Latitude","disable");
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-            Log.d("Latitude","enable");
-        }
-    };
 
     public void onClickButton(View v) {
         setVisibility(clicked);
