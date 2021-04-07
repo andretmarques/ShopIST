@@ -6,18 +6,21 @@
         android:id="@+id/overflowMenu"
         android:icon="@drawable/ic_baseline_menu_24"
         android:title=""
-        app:showAsAction="always">
+        app:showAsAction="ifRoom">
 
         <menu>
+
             <item
                 android:id="@+id/settings"
                 android:icon="@drawable/ic_baseline_settings_24"
+                android:iconTint="@color/black"
                 android:title="@string/settings"
                 />
 
             <item
                 android:id="@+id/rate"
                 android:icon="@drawable/ic_baseline_favorite_border_24"
+                android:iconTint="@color/black"
                 android:title="@string/rate"
                 />
         </menu>

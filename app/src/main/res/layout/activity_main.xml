@@ -7,11 +7,12 @@
     tools:context=".MainActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/my_toolbar"
+        android:id="@+id/toolbar_main"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:title="@string/app_name"
         android:background="@color/darkGrey"
         app:titleTextColor="@color/white"
         />
