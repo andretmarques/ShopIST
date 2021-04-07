@@ -39,7 +39,6 @@ public class MainActivity extends AppCompatActivity{
     FloatingActionButton addButton;
 
     protected LocationManager locationManager;
-    GPSUpdater mGPS;
     TextView GPStext;
 
     @Override
@@ -54,8 +53,6 @@ public class MainActivity extends AppCompatActivity{
         toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
-
-        mGPS = new GPSUpdater(this.getApplicationContext());
 
         GPStext = findViewById(R.id.GPSRoad);
 
