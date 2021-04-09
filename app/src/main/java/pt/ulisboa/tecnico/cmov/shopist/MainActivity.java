@@ -54,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
     protected LocationManager locationManager;
     GPSUpdater mGPS;
     TextView GPStext;
+    TextView locationPicker;
+    double lat = 0;
+    double lon = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,8 +79,9 @@ public class MainActivity extends AppCompatActivity {
 
         GPStext = findViewById(R.id.GPSRoad);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
         }
     }
@@ -102,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void showCreatePopUp(View v) {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
         View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.new_list_layout, (LinearLayout) findViewById(R.id.newListContainer));
         bottomSheetView.findViewById(R.id.cancel_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -113,10 +118,17 @@ public class MainActivity extends AppCompatActivity {
         bottomSheetDialog.setContentView(bottomSheetView);
         bottomSheetDialog.show();
 
+
+
         bottomSheetView.findViewById(R.id.pick_location).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showPlacePicker();
+                locationPicker = bottomSheetView.findViewById(R.id.list_location);
+                if (updateTextView() != null) {
+                    locationPicker.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
+                    locationPicker.setText(updateTextView());
+                }
             }
         });
     }
@@ -179,6 +191,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 100) {
             try {
                 AddressData addressData = data.getParcelableExtra("ADDRESS_INTENT");
+                lat = addressData.getLatitude();
+                lon = addressData.getLongitude();
                 Log.d("DDDDDDDDDOOOOONNNNEEEE", "onActivityResult: " + addressData.toString());
             } catch (Exception e) {
                 Log.e("MainActivity", e.getMessage());
@@ -186,6 +200,12 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+    }
+
+    public String updateTextView() {
+        if (lat != 0 && lon != 0) {
+            return getRoad(lat, lon);
+        } else return null;
     }
 
 
