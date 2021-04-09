@@ -33,7 +33,9 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.schibstedspain.leku.LocationPickerActivity;
+import com.sucho.placepicker.AddressData;
+import com.sucho.placepicker.MapType;
+import com.sucho.placepicker.PlacePicker;
 
 
 import java.io.IOException;
@@ -123,22 +125,21 @@ public class MainActivity extends AppCompatActivity {
 
     private void showPlacePicker() {
 
-        Intent locationPickerIntent = new LocationPickerActivity.Builder()
-                .withLocation(41.4036299, 2.1743558)
-                .withGeolocApiKey(getString(R.string.key_google_apis_android))
-                .withSearchZone("es_ES")
-                .withDefaultLocaleSearchZone()
-                .shouldReturnOkOnBackPressed()
-                .withStreetHidden()
-                .withCityHidden()
-                .withZipCodeHidden()
-                .withSatelliteViewHidden()
-                .withGoogleTimeZoneEnabled()
-                .withVoiceSearchHidden()
-                .withUnnamedRoadHidden()
-                .build(this.getApplicationContext());
+        Intent intent = new PlacePicker.IntentBuilder()
+                .setLatLong(40.748672, -73.985628)  // Initial Latitude and Longitude the Map will load into
+                .showLatLong(true)  // Show Coordinates in the Activity
+                .setMapZoom(12.0f)  // Map Zoom Level. Default: 14.0
+                .setAddressRequired(true) // Set If return only Coordinates if cannot fetch Address for the coordinates. Default: True
+                .hideMarkerShadow(true) // Hides the shadow under the map marker. Default: False
+                .setMarkerImageImageColor(R.color.colorPrimary)
+                .setMapType(MapType.NORMAL)
+                .setPlaceSearchBar(true, getString(R.string.key_google_apis_android)) //Activate GooglePlace Search Bar. Default is false/not activated. SearchBar is a chargeable feature by Google
+                .onlyCoordinates(true)  //Get only Coordinates from Place Picker
+                .hideLocationButton(true)   //Hide Location Button (Default: false)
+                .disableMarkerAnimation(true)   //Disable Marker Animation (Default: false)
+                .build(MainActivity.this);
         try {
-            startActivityForResult(locationPickerIntent, 1);
+            startActivityForResult(intent, 100);
 
         } catch (Exception ex) {
             Log.d("FAIL_BRO", "showPlacePicker: RIP");
@@ -146,26 +147,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == Activity.RESULT_OK && data != null) {
-            Log.d("RESULT****", "OK");
-            if (requestCode == 1) {
-                double latitude = data.getDoubleExtra("LATITUDE", 0.0);
-                Log.d("LATITUDE****", "lat" + latitude);
-                double longitude = data.getDoubleExtra("LONGITUDE", 0.0);
-                Log.d("LONGITUDE****", "" + longitude);
-            } else if (requestCode == 2) {
-                double latitude = data.getDoubleExtra("LATITUDE", 0.0);
-                Log.d("LATITUDE****", "lat" + latitude);
-                double longitude = data.getDoubleExtra("LONGITUDE", 0.0);
-                Log.d("LONGITUDE****", "" + longitude);
-                String address = data.getStringExtra("LOCATION_ADDRESS");
-                Log.d("ADDRESS****", address);
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == 100) {
+            try {
+                AddressData addressData = data.getParcelableExtra("ADDRESS_INTENT");
+                Log.d("DDDDDDDDDOOOOONNNNEEEE", "onActivityResult: " + addressData.toString());
+            } catch (Exception e) {
+                Log.e("MainActivity", e.getMessage());
             }
-        }
-        if (resultCode == Activity.RESULT_CANCELED) {
+        } else {
             super.onActivityResult(requestCode, resultCode, data);
-            Log.d("RESULT****", "CANCELLED");
         }
     }
 

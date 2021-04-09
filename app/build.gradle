@@ -39,6 +39,7 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-    implementation 'com.schibstedspain.android:leku:8.0.0'
+    implementation 'com.sucho:placepicker:1.1.2'
     implementation 'com.google.android.libraries.places:places:2.4.0'
+    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.21"
 }
