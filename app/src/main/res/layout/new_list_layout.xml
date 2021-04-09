@@ -70,6 +70,30 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
+    <TextView
+        android:id="@+id/list_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/list_name"
+        app:layout_constraintVertical_bias="0.174" />
+
+    <Button
+        android:id="@+id/pick_location"
+        android:layout_width="56dp"
+        android:layout_height="59dp"
+        android:layout_marginTop="32dp"
+
+        app:icon="@drawable/ic_baseline_location_on_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/list_location" />
+
     <EditText
         android:id="@+id/list_name"
         android:layout_width="match_parent"
@@ -86,6 +110,7 @@
         app:layout_constraintTop_toBottomOf="@+id/top_title" />
 
     <View
+        android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="172dp"
