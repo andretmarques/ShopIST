@@ -1,13 +1,10 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,20 +13,20 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.provider.SyncStateContract;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
-import com.google.android.gms.common.internal.Constants;
 import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -63,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         Places.initialize(getApplicationContext(),getString(R.string.key_google_apis_android));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setSupportActionBar(findViewById(R.id.toolbar_main));
 
         addButton = (FloatingActionButton) findViewById(R.id.add_btn);
         joinButton = (ExtendedFloatingActionButton) findViewById(R.id.join_btn);
@@ -121,6 +119,36 @@ public class MainActivity extends AppCompatActivity {
                 showPlacePicker();
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.settings:
+                // User chose the "Settings" item, show the app settings UI...
+                Log.d("TAG", "onOptionsItemSelected: Settings");
+                return true;
+
+            case R.id.rate:
+                // User chose the "Favorite" action, mark the current item
+                // as a favorite...
+                Log.d("TAG", "onOptionsItemSelected: Rate");
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 
     private void showPlacePicker() {
