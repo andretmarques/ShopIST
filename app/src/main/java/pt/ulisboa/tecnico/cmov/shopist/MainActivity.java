@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -20,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -51,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     ExtendedFloatingActionButton createButton;
     FloatingActionButton addButton;
 
+
     protected LocationManager locationManager;
     GPSUpdater mGPS;
     TextView GPStext;
@@ -71,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
 
 
+
+
         mGPS = new GPSUpdater(this.getApplicationContext());
 
         GPStext = findViewById(R.id.GPSRoad);
@@ -80,11 +85,33 @@ public class MainActivity extends AppCompatActivity {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
         }
     }
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event){
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (clicked) {
+                Rect outRectAdd = new Rect();
+                Rect outRectNew = new Rect();
+                Rect outRectCreate = new Rect();
+                addButton.getGlobalVisibleRect(outRectAdd);
+                createButton.getGlobalVisibleRect(outRectNew);
+                joinButton.getGlobalVisibleRect(outRectCreate);
+                if(!outRectAdd.contains((int)event.getRawX(), (int)event.getRawY())
+                        && !outRectNew.contains((int)event.getRawX(), (int)event.getRawY()) &&
+                        !outRectCreate.contains((int)event.getRawX(), (int)event.getRawY())) {
+                    setVisibility(clicked);
+                    setAnimation(clicked);
+                    clicked = !clicked;
+                    return false;
+                }
+            }
+        }
+        return super.dispatchTouchEvent(event);
+    }
+
 
     LocationListener LocationListenerGPS = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            Log.d("OLA", "onLocationChanged: " + location);
             String address = getRoad(location.getLatitude(), location.getLongitude());
             GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
             GPStext.setText(address);
@@ -103,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void showCreatePopUp(View v) {
         final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
+        onClickButton(v);
         View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.new_list_layout, (LinearLayout) findViewById(R.id.newListContainer));
         bottomSheetView.findViewById(R.id.cancel_button).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -160,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                 .setAddressRequired(true) // Set If return only Coordinates if cannot fetch Address for the coordinates. Default: True
                 .hideMarkerShadow(true) // Hides the shadow under the map marker. Default: False
                 .setMarkerImageImageColor(R.color.colorPrimary)
+                .setMapRawResourceStyle(R.raw.places_keep)
                 .setMapType(MapType.NORMAL)
                 .setPlaceSearchBar(true, getString(R.string.key_google_apis_android)) //Activate GooglePlace Search Bar. Default is false/not activated. SearchBar is a chargeable feature by Google
                 .onlyCoordinates(true)  //Get only Coordinates from Place Picker
@@ -179,7 +208,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 100) {
             try {
                 AddressData addressData = data.getParcelableExtra("ADDRESS_INTENT");
-                Log.d("DDDDDDDDDOOOOONNNNEEEE", "onActivityResult: " + addressData.toString());
             } catch (Exception e) {
                 Log.e("MainActivity", e.getMessage());
             }
@@ -197,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void setVisibility(Boolean clicked){
         if(!clicked) {
-            joinButton.setClickable(true);
+            createButton.setClickable(true);
             joinButton.setVisibility(View.VISIBLE);
             createButton.setVisibility(View.VISIBLE);
         }

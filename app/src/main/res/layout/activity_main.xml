@@ -68,4 +68,8 @@
         app:layout_constraintBottom_toTopOf="@+id/join_btn"
         app:layout_constraintEnd_toEndOf="@+id/join_btn"
         app:icon="@drawable/ic_baseline_playlist_add_24" />
+
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
