@@ -68,4 +68,10 @@
         app:layout_constraintBottom_toTopOf="@+id/join_btn"
         app:layout_constraintEnd_toEndOf="@+id/join_btn"
         app:icon="@drawable/ic_baseline_playlist_add_24" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+
+    <nl.dionsegijn.konfetti.KonfettiView
+        android:id="@+id/viewKonfetti"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>

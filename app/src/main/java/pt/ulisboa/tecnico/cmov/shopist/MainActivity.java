@@ -1,13 +1,22 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -23,8 +32,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.LinearLayout;
+import android.widget.ViewAnimator;
 
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -38,6 +50,10 @@ import com.sucho.placepicker.PlacePicker;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+
+import nl.dionsegijn.konfetti.KonfettiView;
+import nl.dionsegijn.konfetti.models.Shape;
+import nl.dionsegijn.konfetti.models.Size;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -54,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     protected LocationManager locationManager;
     GPSUpdater mGPS;
     TextView GPStext;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
         }
+
     }
 
     LocationListener LocationListenerGPS = new LocationListener() {
@@ -178,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == 100) {
             try {
+                assert data != null;
                 AddressData addressData = data.getParcelableExtra("ADDRESS_INTENT");
                 Log.d("DDDDDDDDDOOOOONNNNEEEE", "onActivityResult: " + addressData.toString());
             } catch (Exception e) {
@@ -234,5 +253,42 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return address;
+    }
+
+
+    public void onClickShareLove(MenuItem item) {
+        @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)
+                .getLayoutInflater().inflate(R.layout.share_your_love, null);
+
+        ImageView image = (ImageView) contentView.findViewById(R.id.heart);
+        final AnimatedVectorDrawable animation = (AnimatedVectorDrawable) image.getDrawable();
+
+        final KonfettiView konfettiView = findViewById(R.id.viewKonfetti);
+        konfettiView.build()
+                .addColors(Color.YELLOW, Color.GREEN, Color.RED, Color.BLUE, 16711935)
+                .setDirection(0.0, 359.0)
+                .setSpeed(1f, 10f)
+                .setFadeOutEnabled(true)
+                .setTimeToLive(3000L)
+                .addShapes(Shape.Square.INSTANCE, Shape.Circle.INSTANCE)
+                .addSizes(new Size(12, 5f))
+                .setPosition(-50f, konfettiView.getWidth() + 50f, -50f, -50f)
+                .streamFor(450, 5000L);
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(contentView)
+                .setNegativeButton(R.string.close_button_love, null)
+                .setMessage("We appreciate your love!")
+                .setTitle("Thanks");
+
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                    animation.start();
+            }
+        });
+        alertDialog.show();
     }
 }
