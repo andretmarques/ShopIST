@@ -67,8 +67,6 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView listMainRecycler;
     ListRecyclerAdapter listRecyclerAdapter;
     private String locationPicked;
-    private Dialog bottomSheetDialog;
-    private View bottomSheetView;
 
 
     protected LocationManager locationManager;
@@ -89,8 +87,6 @@ public class MainActivity extends AppCompatActivity {
         toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
-        bottomSheetDialog = new Dialog(MainActivity.this, R.style.BottomSheetDialogTheme);
-        bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.new_list_layout, (LinearLayout) findViewById(R.id.newListContainer));
 
         setMainItemRecycler(pantryList);
 
@@ -135,10 +131,11 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void showCreatePopUp(View v) {
-
+        final Dialog bottomSheetDialog = new Dialog(MainActivity.this, R.style.BottomSheetDialogTheme);
         setVisibility(clicked);
         setAnimation(clicked);
         clicked = !clicked;
+        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.new_list_layout, (LinearLayout) findViewById(R.id.newListContainer));
         TextView textView = bottomSheetView.findViewById(R.id.list_name);
         TextView listLocation = bottomSheetView.findViewById(R.id.list_location);
         listLocation.setText(locationPicked);
