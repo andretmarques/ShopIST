@@ -74,21 +74,23 @@
         android:id="@+id/list_location"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/list_name"
-        app:layout_constraintVertical_bias="0.174" />
+        app:layout_constraintTop_toBottomOf="@+id/list_name" />
 
     <Button
         android:id="@+id/pick_location"
-        android:layout_width="56dp"
-        android:layout_height="59dp"
-        android:layout_marginTop="32dp"
-
-        app:icon="@drawable/ic_baseline_location_on_24"
+        android:layout_width="106dp"
+        android:layout_height="82dp"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/location_button_layout"
+        android:drawableTop="@drawable/ic_baseline_add_location_24"
+        android:text="Choose Location"
+        android:textColor="@color/white"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
@@ -96,27 +98,20 @@
 
     <EditText
         android:id="@+id/list_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
+        android:maxLength="25"
+        android:layout_width="271dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/intup_text"
         android:ems="10"
-        android:hint="Title"
+        android:hint="Enter the list name"
         android:importantForAutofill="no"
         android:inputType="textShortMessage"
+        android:padding="9dp"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/top_title" />
-
-    <View
-        android:id="@+id/view"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="172dp"
-        android:elevation="4dp"
-        app:layout_constraintTop_toBottomOf="@+id/list_name"
-        tools:layout_editor_absoluteX="0dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

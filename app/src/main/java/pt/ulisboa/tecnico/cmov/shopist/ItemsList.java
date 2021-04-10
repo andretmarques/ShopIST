@@ -1,18 +1,24 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 import java.util.ArrayList;
 
-import pt.ulisboa.tecnico.cmov.shopist.Item;
-
-public class ItemLists {
-    private enum listType {
+public class ItemsList {
+    public enum ListType {
         SHOP,
         PANTRY,
         CART;
     };
     ArrayList<Item> itemList;
-    private listType listType;
+    private ListType listType;
     private String name;
+    private String location = "";
 
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
     public ArrayList<Item> getItemList() {
         return itemList;
@@ -30,11 +36,11 @@ public class ItemLists {
         itemList.remove(item);
     }
 
-    public void setListType(ItemLists.listType listType) {
+    public void setListType(ListType listType) {
         this.listType = listType;
     }
 
-    public ItemLists.listType getListType() {
+    public ListType getListType() {
         return listType;
     }
 
@@ -46,7 +52,13 @@ public class ItemLists {
         this.name = name;
     }
 
-    public ItemLists(String name) {
+    public String getNumberItems(){
+        return "" + itemList.size();
+    }
+
+    public ItemsList(String name, ListType type) {
         this.name = name;
+        itemList = new ArrayList<Item>();
+        this.listType = type;
     }
 }
