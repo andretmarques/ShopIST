@@ -22,7 +22,6 @@
                 android:icon="@drawable/ic_baseline_favorite_border_24"
                 android:iconTint="@color/black"
                 android:title="@string/rate"
-                android:onClick="onClickShareLove"
                 />
         </menu>
     </item>

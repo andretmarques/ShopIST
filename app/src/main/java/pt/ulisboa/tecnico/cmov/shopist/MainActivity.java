@@ -179,8 +179,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.rate:
-                // User chose the "Favorite" action, mark the current item
-                // as a favorite...
+                onClickShareLove();
                 Log.d("TAG", "onOptionsItemSelected: Rate");
                 return true;
 
@@ -267,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void onClickShareLove(MenuItem item) {
+    public void onClickShareLove() {
         @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)
                 .getLayoutInflater().inflate(R.layout.share_your_love, null);
 
