@@ -1,13 +1,45 @@
 package pt.ulisboa.tecnico.cmov.shopist;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ItemsList {
+public class ItemsList implements Parcelable {
+    protected ItemsList(Parcel in) {
+        name = in.readString();
+        location = in.readString();
+    }
+
+    public static final Creator<ItemsList> CREATOR = new Creator<ItemsList>() {
+        @Override
+        public ItemsList createFromParcel(Parcel in) {
+            return new ItemsList(in);
+        }
+
+        @Override
+        public ItemsList[] newArray(int size) {
+            return new ItemsList[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeString(location);
+    }
+
     public enum ListType {
         SHOP,
         PANTRY,
-        CART;
-    };
-    ArrayList<Item> itemList;
+        CART
+    }
+    ArrayList<Item> itemList = new ArrayList<>();
     private ListType listType;
     private String name;
     private String location = "";
@@ -58,7 +90,6 @@ public class ItemsList {
 
     public ItemsList(String name, ListType type) {
         this.name = name;
-        itemList = new ArrayList<Item>();
         this.listType = type;
     }
 }

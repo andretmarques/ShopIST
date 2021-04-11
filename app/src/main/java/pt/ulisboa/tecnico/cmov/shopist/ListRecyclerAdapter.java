@@ -13,8 +13,8 @@ import java.util.List;
 
 public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapter.MainViewHolder> {
 
-    private Context context;
-    private List<ItemsList> allLists;
+    private final Context context;
+    private final List<ItemsList> allLists;
 
     public ListRecyclerAdapter(Context context, List<ItemsList> allLists) {
         this.context = context;

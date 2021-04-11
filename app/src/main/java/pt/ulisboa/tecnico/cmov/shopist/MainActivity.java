@@ -1,20 +1,15 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -23,7 +18,6 @@ import android.location.LocationManager;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,14 +28,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.LinearLayout;
 
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.sucho.placepicker.AddressData;
-import com.sucho.placepicker.MapType;
-import com.sucho.placepicker.PlacePicker;
 
 
 import java.io.IOException;
@@ -63,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> items;
     private ArrayAdapter<String> itemsAdapter;
     private ListView listLists;
-    private final ArrayList<ItemsList> pantryList = new ArrayList<>();
+    private final ArrayList<ItemsList> lists = new ArrayList<>();
     RecyclerView listMainRecycler;
     ListRecyclerAdapter listRecyclerAdapter;
     private String locationPicked;
@@ -88,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
 
-        setMainItemRecycler(pantryList);
+        setMainItemRecycler(lists);
 
 
 
@@ -96,8 +86,9 @@ public class MainActivity extends AppCompatActivity {
 
         GPStext = findViewById(R.id.GPSRoad);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
         }
     }
@@ -131,46 +122,25 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void showCreatePopUp(View v) {
-        final Dialog bottomSheetDialog = new Dialog(MainActivity.this, R.style.BottomSheetDialogTheme);
-        setVisibility(clicked);
-        setAnimation(clicked);
-        clicked = !clicked;
-        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.new_list_layout, (LinearLayout) findViewById(R.id.newListContainer));
-        TextView textView = bottomSheetView.findViewById(R.id.list_name);
-        TextView listLocation = bottomSheetView.findViewById(R.id.list_location);
-        listLocation.setText(locationPicked);
-        bottomSheetView.findViewById(R.id.cancel_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bottomSheetDialog.dismiss();
-            }
-        });
-        bottomSheetDialog.setContentView(bottomSheetView);
-        bottomSheetDialog.show();
+        Intent i = new Intent(this, CreateListActivity.class);
+        handleAddMenu();
+        startActivityForResult(i, 10001);
+    }
 
-        bottomSheetView.findViewById(R.id.pick_location).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPlacePicker();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == 10001) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // get the list of strings here
+                ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
+                lists.add(pantryList);
 
             }
-        });
-        bottomSheetView.findViewById(R.id.new_list).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (textView.getText().toString().equals("")) {
-                    textView.setError("Name should not be empty");
-                }
-                else {
-                    ItemsList newList = new ItemsList(textView.getText().toString(), ItemsList.ListType.PANTRY);
-                    newList.setLocation(locationPicked);
-                    pantryList.add(newList);
-                    bottomSheetDialog.dismiss();
-                    locationPicked = "";
-                }
-            }
-        });
-
+        } else{
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
@@ -203,44 +173,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showPlacePicker() {
-        Intent intent = new PlacePicker.IntentBuilder()
-                .setLatLong(40.748672, -73.985628)  // Initial Latitude and Longitude the Map will load into
-                .showLatLong(true)  // Show Coordinates in the Activity
-                .setMapZoom(12.0f)  // Map Zoom Level. Default: 14.0
-                .setAddressRequired(true) // Set If return only Coordinates if cannot fetch Address for the coordinates. Default: True
-                .hideMarkerShadow(true) // Hides the shadow under the map marker. Default: False
-                .setMarkerImageImageColor(R.color.colorPrimary)
-                .setMapType(MapType.NORMAL)
-                .setPlaceSearchBar(true, getString(R.string.key_google_apis_android)) //Activate GooglePlace Search Bar. Default is false/not activated. SearchBar is a chargeable feature by Google
-                .onlyCoordinates(true)  //Get only Coordinates from Place Picker
-                .hideLocationButton(true)   //Hide Location Button (Default: false)
-                .disableMarkerAnimation(true)   //Disable Marker Animation (Default: false)
-                .build(MainActivity.this);
-        //intent.putExtra("locationPicked", locationPicked);
-        try {
-            startActivityForResult(intent, 100);
-
-        } catch (Exception ex) {
-            Log.d("FAIL_BRO", "showPlacePicker: RIP");
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == 100) {
-            try {
-                AddressData addressData = data.getParcelableExtra("ADDRESS_INTENT");
-                if(addressData != null)
-                    locationPicked = getRoad(addressData.getLatitude(), addressData.getLongitude());
-
-            } catch (Exception e) {
-                Log.e("MainActivity", e.getMessage());
-            }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event){
@@ -255,9 +187,7 @@ public class MainActivity extends AppCompatActivity {
                 if(!outRectAdd.contains((int)event.getRawX(), (int)event.getRawY())
                         && !outRectNew.contains((int)event.getRawX(), (int)event.getRawY()) &&
                         !outRectCreate.contains((int)event.getRawX(), (int)event.getRawY())) {
-                    setVisibility(clicked);
-                    setAnimation(clicked);
-                    clicked = !clicked;
+                    handleAddMenu();
                     return false;
                 }
             }
@@ -265,12 +195,14 @@ public class MainActivity extends AppCompatActivity {
         return super.dispatchTouchEvent(event);
     }
 
-
-
-    public void onClickButton(View v) {
+    private void handleAddMenu(){
         setVisibility(clicked);
         setAnimation(clicked);
         clicked = !clicked;
+    }
+
+    public void onClickButton(View v) {
+        handleAddMenu();
     }
 
     public void setVisibility(Boolean clicked){
