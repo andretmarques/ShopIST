@@ -5,6 +5,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
@@ -13,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.graphics.Color;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
@@ -25,13 +28,15 @@ import android.location.LocationManager;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -39,15 +44,12 @@ import android.widget.LinearLayout;
 import android.widget.ViewAnimator;
 
 import com.google.android.libraries.places.api.Places;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.sucho.placepicker.AddressData;
-import com.sucho.placepicker.MapType;
-import com.sucho.placepicker.PlacePicker;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -66,6 +68,14 @@ public class MainActivity extends AppCompatActivity {
     ExtendedFloatingActionButton joinButton;
     ExtendedFloatingActionButton createButton;
     FloatingActionButton addButton;
+    private ArrayList<String> items;
+    private ArrayAdapter<String> itemsAdapter;
+    private ListView listLists;
+    private final ArrayList<ItemsList> lists = new ArrayList<>();
+    RecyclerView listMainRecycler;
+    ListRecyclerAdapter listRecyclerAdapter;
+    private String locationPicked;
+
 
     protected LocationManager locationManager;
     GPSUpdater mGPS;
@@ -87,22 +97,33 @@ public class MainActivity extends AppCompatActivity {
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
 
+        setMainItemRecycler(lists);
+
+
 
         mGPS = new GPSUpdater(this.getApplicationContext());
 
         GPStext = findViewById(R.id.GPSRoad);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, LocationListenerGPS);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 100, LocationListenerGPS);
         }
+    }
 
+    private void setMainItemRecycler(List<ItemsList> allLists){
+
+        listMainRecycler = findViewById(R.id.main_recycler);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        listMainRecycler.setLayoutManager(layoutManager);
+        listRecyclerAdapter = new ListRecyclerAdapter(this, allLists);
+        listMainRecycler.setAdapter(listRecyclerAdapter);
     }
 
     LocationListener LocationListenerGPS = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            Log.d("OLA", "onLocationChanged: " + location);
             String address = getRoad(location.getLatitude(), location.getLongitude());
             GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
             GPStext.setText(address);
@@ -120,23 +141,25 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public void showCreatePopUp(View v) {
-        final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(MainActivity.this, R.style.BottomSheetDialogTheme);
-        View bottomSheetView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.new_list_layout, (LinearLayout) findViewById(R.id.newListContainer));
-        bottomSheetView.findViewById(R.id.cancel_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bottomSheetDialog.dismiss();
-            }
-        });
-        bottomSheetDialog.setContentView(bottomSheetView);
-        bottomSheetDialog.show();
+        Intent i = new Intent(this, CreateListActivity.class);
+        handleAddMenu();
+        startActivityForResult(i, 10001);
+    }
 
-        bottomSheetView.findViewById(R.id.pick_location).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPlacePicker();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == 10001) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // get the list of strings here
+                ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
+                lists.add(pantryList);
+
             }
-        });
+        } else{
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
     @Override
@@ -169,54 +192,42 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void showPlacePicker() {
-
-        Intent intent = new PlacePicker.IntentBuilder()
-                .setLatLong(40.748672, -73.985628)  // Initial Latitude and Longitude the Map will load into
-                .showLatLong(true)  // Show Coordinates in the Activity
-                .setMapZoom(12.0f)  // Map Zoom Level. Default: 14.0
-                .setAddressRequired(true) // Set If return only Coordinates if cannot fetch Address for the coordinates. Default: True
-                .hideMarkerShadow(true) // Hides the shadow under the map marker. Default: False
-                .setMarkerImageImageColor(R.color.colorPrimary)
-                .setMapType(MapType.NORMAL)
-                .setPlaceSearchBar(true, getString(R.string.key_google_apis_android)) //Activate GooglePlace Search Bar. Default is false/not activated. SearchBar is a chargeable feature by Google
-                .onlyCoordinates(true)  //Get only Coordinates from Place Picker
-                .hideLocationButton(true)   //Hide Location Button (Default: false)
-                .disableMarkerAnimation(true)   //Disable Marker Animation (Default: false)
-                .build(MainActivity.this);
-        try {
-            startActivityForResult(intent, 100);
-
-        } catch (Exception ex) {
-            Log.d("FAIL_BRO", "showPlacePicker: RIP");
-        }
-    }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == 100) {
-            try {
-                assert data != null;
-                AddressData addressData = data.getParcelableExtra("ADDRESS_INTENT");
-                Log.d("DDDDDDDDDOOOOONNNNEEEE", "onActivityResult: " + addressData.toString());
-            } catch (Exception e) {
-                Log.e("MainActivity", e.getMessage());
+    public boolean dispatchTouchEvent(MotionEvent event){
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            if (clicked) {
+                Rect outRectAdd = new Rect();
+                Rect outRectNew = new Rect();
+                Rect outRectCreate = new Rect();
+                addButton.getGlobalVisibleRect(outRectAdd);
+                createButton.getGlobalVisibleRect(outRectNew);
+                joinButton.getGlobalVisibleRect(outRectCreate);
+                if(!outRectAdd.contains((int)event.getRawX(), (int)event.getRawY())
+                        && !outRectNew.contains((int)event.getRawX(), (int)event.getRawY()) &&
+                        !outRectCreate.contains((int)event.getRawX(), (int)event.getRawY())) {
+                    handleAddMenu();
+                    return false;
+                }
             }
-        } else {
-            super.onActivityResult(requestCode, resultCode, data);
         }
+        return super.dispatchTouchEvent(event);
     }
 
 
-    public void onClickButton(View v) {
+    private void handleAddMenu(){
         setVisibility(clicked);
         setAnimation(clicked);
         clicked = !clicked;
     }
 
+    public void onClickButton(View v) {
+        handleAddMenu();
+    }
+
     public void setVisibility(Boolean clicked){
         if(!clicked) {
-            joinButton.setClickable(true);
+            createButton.setClickable(true);
             joinButton.setVisibility(View.VISIBLE);
             createButton.setVisibility(View.VISIBLE);
         }

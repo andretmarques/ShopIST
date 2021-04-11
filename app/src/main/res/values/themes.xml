@@ -16,7 +16,7 @@
         <item name="windowActionBar">false</item>
     </style>
 
-    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+    <style name="BottomSheetDialogTheme" parent="Theme.MaterialComponents.Light.DialogWhenLarge">
         <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
     </style>
 
