@@ -275,15 +275,15 @@ public class MainActivity extends AppCompatActivity {
 
         final KonfettiView konfettiView = findViewById(R.id.viewKonfetti);
         konfettiView.build()
-                .addColors(Color.YELLOW, Color.GREEN, Color.RED, Color.BLUE, 16711935)
+                .addColors(Color.RED, Color.GREEN, Color.YELLOW, 16753920, 15631086)
                 .setDirection(0.0, 359.0)
                 .setSpeed(1f, 10f)
                 .setFadeOutEnabled(true)
-                .setTimeToLive(3000L)
+                .setTimeToLive(1200L)
                 .addShapes(Shape.Square.INSTANCE, Shape.Circle.INSTANCE)
                 .addSizes(new Size(12, 5f))
                 .setPosition(-50f, konfettiView.getWidth() + 50f, -50f, -50f)
-                .streamFor(450, 5000L);
+                .streamFor(600, 1200L);
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
