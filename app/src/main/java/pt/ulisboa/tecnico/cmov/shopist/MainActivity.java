@@ -112,9 +112,6 @@ public class MainActivity extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
         boolean net = isNetworkAvailable(this.getApplication());
-        Log.d("TAG", "net?????????????" + net);
-
-
 
 
         mGPS = new GPSUpdater(this.getApplicationContext());
