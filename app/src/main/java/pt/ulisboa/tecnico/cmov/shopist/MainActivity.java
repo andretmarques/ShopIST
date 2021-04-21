@@ -266,10 +266,6 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
-                Item i = new Item("gelado", 5, 8);
-                Item pao = new Item("pao", 5, 50);
-                pantryList.getItemList().add(i);
-                pantryList.getItemList().add(pao);
                 pantryLists.add(pantryList);
                 myRef.child("Pantries").setValue(pantryLists);
 
