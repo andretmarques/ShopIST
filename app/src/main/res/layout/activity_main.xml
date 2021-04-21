@@ -27,6 +27,7 @@
         app:selectionRequired="true"
         android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
+        app:checkedButton="@+id/pantries"
         app:layout_constraintTop_toBottomOf="@+id/GPSRoad">
 
         <Button

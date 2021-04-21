@@ -92,4 +92,7 @@ public class ItemsList implements Parcelable {
         this.name = name;
         this.listType = type;
     }
+
+    public ItemsList() {
+    }
 }

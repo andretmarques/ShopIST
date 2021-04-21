@@ -44,4 +44,7 @@ public class Item {
         this.quantity += quantity;
         this.price = price;
     }
+
+    public Item() {
+    }
 }

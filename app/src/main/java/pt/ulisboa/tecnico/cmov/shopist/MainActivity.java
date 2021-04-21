@@ -1,11 +1,13 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,6 +18,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.annotation.SuppressLint;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -30,9 +37,17 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 
 
 import java.io.IOException;
@@ -55,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> items;
     private ArrayAdapter<String> itemsAdapter;
     private ListView listLists;
-    private final ArrayList<ItemsList> pantryLists = new ArrayList<>();
-    private final ArrayList<ItemsList> shoppingLists = new ArrayList<>();
+    private ArrayList<ItemsList> pantryLists;
+    private ArrayList<ItemsList> shoppingLists;
     RecyclerView pantryListMainRecycler;
     RecyclerView shoppingListMainRecycler;
     ListRecyclerAdapter pantryListRecyclerAdapter;
@@ -65,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
     private String locationPicked;
     private double actualLongitude;
     private double actualLatitude;
+    private DatabaseReference myRef;
+
 
 
     protected LocationManager locationManager;
@@ -87,11 +104,16 @@ public class MainActivity extends AppCompatActivity {
         toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
-        viewPantries = findViewById(R.id.pantries);
+        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
+        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
 
+        shoppingListMainRecycler.setVisibility(View.GONE);
+        pantryListMainRecycler.setVisibility(View.VISIBLE);
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        myRef = database.getReference();
+        boolean net = isNetworkAvailable(this.getApplication());
+        Log.d("TAG", "net?????????????" + net);
 
-        setPantryRecycler(pantryLists);
-        setShoppingRecycler(shoppingLists);
 
 
 
@@ -104,7 +126,70 @@ public class MainActivity extends AppCompatActivity {
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 100, LocationListenerGPS);
         }
+        if (net){
+            updateData();
+        }else{
+            pantryLists = new ArrayList<>();
+            shoppingLists = new ArrayList<>();
+            setPantryRecycler(pantryLists);
+            setShoppingRecycler(shoppingLists);
+
+        }
+
+
     }
+
+    private Boolean isNetworkAvailable(Application application) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network nw = connectivityManager.getActiveNetwork();
+        if (nw == null) return false;
+        NetworkCapabilities actNw = connectivityManager.getNetworkCapabilities(nw);
+        return actNw != null && (actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH));
+    }
+
+    private void updateData(){
+        myRef.child("Pantries").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() != null) {
+                    GenericTypeIndicator<ArrayList<ItemsList>> t = new GenericTypeIndicator<ArrayList<ItemsList>>() {};
+                    pantryLists = dataSnapshot.getValue(t);
+                }
+                else{
+                    pantryLists = new ArrayList<>();
+                }
+                setPantryRecycler(pantryLists);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i("TAG", "onCancelled", databaseError.toException());
+            }
+        });
+
+        myRef.child("Stores").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() != null) {
+                    GenericTypeIndicator<ArrayList<ItemsList>> t = new GenericTypeIndicator<ArrayList<ItemsList>>() {};
+                    shoppingLists = dataSnapshot.getValue(t);
+                }
+                else{
+                    shoppingLists = new ArrayList<>();
+                }
+                setShoppingRecycler(shoppingLists);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i("TAG", "onCancelled", databaseError.toException());
+            }
+        });
+    }
+
 
     private void setPantryRecycler(List<ItemsList> allLists) {
 
@@ -125,17 +210,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showPantries(View v){
-        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
         shoppingListMainRecycler.setVisibility(View.GONE);
-        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
         pantryListMainRecycler.setVisibility(View.VISIBLE);
 
     }
 
     public void showStores(View v){
-        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
         pantryListMainRecycler.setVisibility(View.GONE);
-        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
         shoppingListMainRecycler.setVisibility(View.VISIBLE);
     }
 
@@ -185,7 +266,12 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
+                Item i = new Item("gelado", 5, 8);
+                Item pao = new Item("pao", 5, 50);
+                pantryList.getItemList().add(i);
+                pantryList.getItemList().add(pao);
                 pantryLists.add(pantryList);
+                myRef.child("Pantries").setValue(pantryLists);
 
             }
             return;
@@ -196,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
                 // get the list of strings here
                 ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
                 shoppingLists.add(shoppingList);
-
+                myRef.child("Stores").setValue(shoppingLists);
             }
             return;
         }
