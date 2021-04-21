@@ -32,7 +32,13 @@
         </activity>
 
         <activity
-            android:name=".CreateListActivity"
+            android:name=".CreatePantryActivity"
+            android:hardwareAccelerated="false">
+
+        </activity>
+
+        <activity
+            android:name=".CreateShopActivity"
             android:hardwareAccelerated="false">
 
         </activity>
