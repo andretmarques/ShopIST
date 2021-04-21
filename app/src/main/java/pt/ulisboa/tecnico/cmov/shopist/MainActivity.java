@@ -1,25 +1,15 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
-import android.graphics.Color;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -36,12 +26,9 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.LinearLayout;
-import android.widget.ViewAnimator;
 
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -53,10 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import nl.dionsegijn.konfetti.KonfettiView;
-import nl.dionsegijn.konfetti.models.Shape;
-import nl.dionsegijn.konfetti.models.Size;
-
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,15 +49,22 @@ public class MainActivity extends AppCompatActivity {
     private Animation rotateClose;
     private boolean clicked = false;
     ExtendedFloatingActionButton joinButton;
-    ExtendedFloatingActionButton createButton;
+    ExtendedFloatingActionButton createPantryButton;
+    ExtendedFloatingActionButton createShopButton;
     FloatingActionButton addButton;
     private ArrayList<String> items;
     private ArrayAdapter<String> itemsAdapter;
     private ListView listLists;
-    private final ArrayList<ItemsList> lists = new ArrayList<>();
-    RecyclerView listMainRecycler;
-    ListRecyclerAdapter listRecyclerAdapter;
+    private final ArrayList<ItemsList> pantryLists = new ArrayList<>();
+    private final ArrayList<ItemsList> shoppingLists = new ArrayList<>();
+    RecyclerView pantryListMainRecycler;
+    RecyclerView shoppingListMainRecycler;
+    ListRecyclerAdapter pantryListRecyclerAdapter;
+    ListRecyclerAdapter shoppingListRecyclerAdapter;
+    Button viewPantries;
     private String locationPicked;
+    private double actualLongitude;
+    private double actualLatitude;
 
 
     protected LocationManager locationManager;
@@ -84,20 +74,24 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Places.initialize(getApplicationContext(),getString(R.string.key_google_apis_android));
+        Places.initialize(getApplicationContext(), getString(R.string.key_google_apis_android));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar_main));
 
-        addButton = (FloatingActionButton) findViewById(R.id.add_btn);
-        joinButton = (ExtendedFloatingActionButton) findViewById(R.id.join_btn);
-        createButton = (ExtendedFloatingActionButton) findViewById(R.id.create_btn);
+        addButton = findViewById(R.id.add_btn);
+        joinButton = findViewById(R.id.join_btn);
+        createPantryButton = findViewById(R.id.create_pantry_btn);
+        createShopButton = findViewById(R.id.create_shop_btn);
         fromBottom = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
         toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
+        viewPantries = findViewById(R.id.pantries);
 
-        setMainItemRecycler(lists);
+
+        setPantryRecycler(pantryLists);
+        setShoppingRecycler(shoppingLists);
 
 
 
@@ -112,19 +106,45 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setMainItemRecycler(List<ItemsList> allLists){
+    private void setPantryRecycler(List<ItemsList> allLists) {
 
-        listMainRecycler = findViewById(R.id.main_recycler);
+        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        listMainRecycler.setLayoutManager(layoutManager);
-        listRecyclerAdapter = new ListRecyclerAdapter(this, allLists);
-        listMainRecycler.setAdapter(listRecyclerAdapter);
+        pantryListMainRecycler.setLayoutManager(layoutManager);
+        pantryListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "PANTRY");
+        pantryListMainRecycler.setAdapter(pantryListRecyclerAdapter);
+    }
+
+    private void setShoppingRecycler(List<ItemsList> allLists) {
+
+        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        shoppingListMainRecycler.setLayoutManager(layoutManager);
+        shoppingListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "SHOP");
+        shoppingListMainRecycler.setAdapter(shoppingListRecyclerAdapter);
+    }
+
+    public void showPantries(View v){
+        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
+        shoppingListMainRecycler.setVisibility(View.GONE);
+        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
+        pantryListMainRecycler.setVisibility(View.VISIBLE);
+
+    }
+
+    public void showStores(View v){
+        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
+        pantryListMainRecycler.setVisibility(View.GONE);
+        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
+        shoppingListMainRecycler.setVisibility(View.VISIBLE);
     }
 
     LocationListener LocationListenerGPS = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
             String address = getRoad(location.getLatitude(), location.getLongitude());
+            actualLatitude = location.getLatitude();
+            actualLongitude = location.getLongitude();
             GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
             GPStext.setText(address);
         }
@@ -140,10 +160,21 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void showCreatePopUp(View v) {
-        Intent i = new Intent(this, CreateListActivity.class);
+    public void showCreatePantryPopUp(View v) {
+        Intent i = new Intent(this, CreatePantryActivity.class);
+        if (actualLatitude != 0.0 && actualLongitude != 0.0 ){
+            i.putExtra("ActualLatitude", actualLatitude);
+            i.putExtra("ActualLongitude", actualLongitude);
+        }
         handleAddMenu();
         startActivityForResult(i, 10001);
+    }
+
+    public void showCreateShopPopUp(View v) {
+        Intent i = new Intent(this, CreateShopActivity.class);
+
+        handleAddMenu();
+        startActivityForResult(i, 10002);
     }
 
     @Override
@@ -154,12 +185,23 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
-                lists.add(pantryList);
+                pantryLists.add(pantryList);
 
             }
-        } else{
-            super.onActivityResult(requestCode, resultCode, data);
+            return;
         }
+        if (requestCode == 10002) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // get the list of strings here
+                ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
+                shoppingLists.add(shoppingList);
+
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+
     }
 
     @Override
@@ -179,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
 
             case R.id.rate:
-                onClickShareLove();
+                //onClickShareLove();
                 Log.d("TAG", "onOptionsItemSelected: Rate");
                 return true;
 
@@ -193,18 +235,21 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
-    public boolean dispatchTouchEvent(MotionEvent event){
+    public boolean dispatchTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             if (clicked) {
                 Rect outRectAdd = new Rect();
-                Rect outRectNew = new Rect();
+                Rect outRectPantry= new Rect();
+                Rect outRectShop= new Rect();
                 Rect outRectCreate = new Rect();
                 addButton.getGlobalVisibleRect(outRectAdd);
-                createButton.getGlobalVisibleRect(outRectNew);
+                createPantryButton.getGlobalVisibleRect(outRectPantry);
+                createShopButton.getGlobalVisibleRect(outRectShop);
                 joinButton.getGlobalVisibleRect(outRectCreate);
-                if(!outRectAdd.contains((int)event.getRawX(), (int)event.getRawY())
-                        && !outRectNew.contains((int)event.getRawX(), (int)event.getRawY()) &&
-                        !outRectCreate.contains((int)event.getRawX(), (int)event.getRawY())) {
+                if (!outRectAdd.contains((int) event.getRawX(), (int) event.getRawY())
+                        && !outRectPantry.contains((int) event.getRawX(), (int) event.getRawY()) &&
+                        !outRectShop.contains((int) event.getRawX(), (int) event.getRawY()) &&
+                        !outRectCreate.contains((int) event.getRawX(), (int) event.getRawY())) {
                     handleAddMenu();
                     return false;
                 }
@@ -214,7 +259,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void handleAddMenu(){
+    private void handleAddMenu() {
         setVisibility(clicked);
         setAnimation(clicked);
         clicked = !clicked;
@@ -224,29 +269,33 @@ public class MainActivity extends AppCompatActivity {
         handleAddMenu();
     }
 
-    public void setVisibility(Boolean clicked){
-        if(!clicked) {
-            createButton.setClickable(true);
+    public void setVisibility(Boolean clicked) {
+        if (!clicked) {
+            createShopButton.setClickable(true);
+            createPantryButton.setClickable(true);
             joinButton.setVisibility(View.VISIBLE);
-            createButton.setVisibility(View.VISIBLE);
-        }
-        else{
-            createButton.setClickable(false);
+            createPantryButton.setVisibility(View.VISIBLE);
+            createShopButton.setVisibility(View.VISIBLE);
+        } else {
+            createShopButton.setClickable(false);
+            createPantryButton.setClickable(false);
             joinButton.setVisibility(View.GONE);
-            createButton.setVisibility(View.GONE);
+            createPantryButton.setVisibility(View.GONE);
+            createShopButton.setVisibility(View.GONE);
 
         }
     }
 
-    public void setAnimation(Boolean clicked){
-        if(!clicked){
+    public void setAnimation(Boolean clicked) {
+        if (!clicked) {
             addButton.startAnimation(rotateOpen);
             joinButton.startAnimation(fromBottom);
-            createButton.startAnimation(fromBottom);
-        }
-        else {
+            createPantryButton.startAnimation(fromBottom);
+            createShopButton.startAnimation(fromBottom);
+        } else {
             joinButton.startAnimation(toBottom);
-            createButton.startAnimation(toBottom);
+            createPantryButton.startAnimation(toBottom);
+            createShopButton.startAnimation(toBottom);
             addButton.startAnimation(rotateClose);
         }
     }
@@ -256,7 +305,7 @@ public class MainActivity extends AppCompatActivity {
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
 
         try {
-            List<Address> addresses = geocoder.getFromLocation(latitude, longitude,1);
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
             address = addresses.get(0).getAddressLine(0);
 
         } catch (IOException e) {
@@ -266,7 +315,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void onClickShareLove() {
+   /* public void onClickShareLove() {
         @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)
                 .getLayoutInflater().inflate(R.layout.share_your_love, null);
 
@@ -301,4 +350,5 @@ public class MainActivity extends AppCompatActivity {
         });
         alertDialog.show();
     }
+    */
 }

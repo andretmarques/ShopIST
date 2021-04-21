@@ -15,16 +15,22 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
 
     private final Context context;
     private final List<ItemsList> allLists;
+    private final String type;
 
-    public ListRecyclerAdapter(Context context, List<ItemsList> allLists) {
+    public ListRecyclerAdapter(Context context, List<ItemsList> allLists, String type) {
         this.context = context;
         this.allLists = allLists;
+        this.type = type;
     }
 
     @NonNull
     @Override
     public MainViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        return new MainViewHolder(LayoutInflater.from(context).inflate(R.layout.list_recycler_row, parent, false));
+        if (type.equals("SHOP")){
+            return new MainViewHolder(LayoutInflater.from(context).inflate(R.layout.pantry_recycler_row, parent, false));
+        }
+        else
+            return new MainViewHolder(LayoutInflater.from(context).inflate(R.layout.shop_recycler_row, parent, false));
     }
 
     @Override

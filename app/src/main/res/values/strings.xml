@@ -2,9 +2,18 @@
     <string name="app_name">ShopIST</string>
     <string name="Join">JOIN</string>
     <string name="New">NEW</string>
-    <string name="new_list">New list</string>
+    <string name="new_pantry">New pantry list</string>
+    <string name="new_shop">New shopping list</string>
     <string name="key_google_apis_android">AIzaSyB1im9jFRyduQ_7BVN4BCeeHa4sT5MPDFo</string>
     <string name="settings">Settings</string>
     <string name="rate">Share your love</string>
     <string name="close_button_love">Close</string>
+    <string name="pantries">Pantries</string>
+    <string name="stores">Stores</string>
+    <string name="choose_location">Choose Location</string>
+    <string name="cancel">Cancel</string>
+    <string name="create">Create</string>
+    <string name="choose_your_home_s_location">Choose your home\'s location</string>
+    <string name="set_your_actual_location">Set your actual location</string>
+    <string name="enter_the_list_name">Enter the list name</string>
 </resources>
