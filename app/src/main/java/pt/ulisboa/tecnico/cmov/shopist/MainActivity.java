@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.annotation.SuppressLint;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -98,9 +104,16 @@ public class MainActivity extends AppCompatActivity {
         toBottom = AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim);
         rotateClose = AnimationUtils.loadAnimation(this, R.anim.rotate_close);
         rotateOpen = AnimationUtils.loadAnimation(this, R.anim.rotate_open);
-        viewPantries = findViewById(R.id.pantries);
+        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
+        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
+
+        shoppingListMainRecycler.setVisibility(View.GONE);
+        pantryListMainRecycler.setVisibility(View.VISIBLE);
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
+        boolean net = isNetworkAvailable(this.getApplication());
+        Log.d("TAG", "net?????????????" + net);
+
 
 
 
@@ -113,8 +126,28 @@ public class MainActivity extends AppCompatActivity {
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 100, LocationListenerGPS);
         }
-        updateData();
+        if (net){
+            updateData();
+        }else{
+            pantryLists = new ArrayList<>();
+            shoppingLists = new ArrayList<>();
+            setPantryRecycler(pantryLists);
+            setShoppingRecycler(shoppingLists);
 
+        }
+
+
+    }
+
+    private Boolean isNetworkAvailable(Application application) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network nw = connectivityManager.getActiveNetwork();
+        if (nw == null) return false;
+        NetworkCapabilities actNw = connectivityManager.getNetworkCapabilities(nw);
+        return actNw != null && (actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH));
     }
 
     private void updateData(){
@@ -177,17 +210,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showPantries(View v){
-        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
         shoppingListMainRecycler.setVisibility(View.GONE);
-        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
         pantryListMainRecycler.setVisibility(View.VISIBLE);
 
     }
 
     public void showStores(View v){
-        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
         pantryListMainRecycler.setVisibility(View.GONE);
-        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
         shoppingListMainRecycler.setVisibility(View.VISIBLE);
     }
 
