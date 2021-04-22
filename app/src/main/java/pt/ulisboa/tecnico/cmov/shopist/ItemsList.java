@@ -4,6 +4,7 @@ import android.os.Parcelable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ItemsList implements Parcelable {
     protected ItemsList(Parcel in) {
@@ -43,6 +44,16 @@ public class ItemsList implements Parcelable {
     private ListType listType;
     private String name;
     private String location = "";
+    private String id;
+
+    public String getId() {
+        return id;
+    }
+
+    public void generateId(){
+        this.id = UUID.randomUUID().toString();
+
+    }
 
     public String getLocation() {
         return location;

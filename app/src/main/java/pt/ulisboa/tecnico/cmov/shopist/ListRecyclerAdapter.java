@@ -35,13 +35,27 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
 
     @Override
     public void onBindViewHolder(@NonNull MainViewHolder holder, int position) {
-        String numberItemsString = "Number of items: " + allLists.get(position).getNumberItems();
-        holder.listTitle.setText(allLists.get(position).getName());
-        holder.itemCount.setText(numberItemsString);
-        holder.listLocation.setText(allLists.get(position).getLocation());
+        if(allLists.get(position)!=null) {
+            String numberItemsString = "Number of items: " + allLists.get(position).getNumberItems();
+            holder.listTitle.setText(allLists.get(position).getName());
+            holder.itemCount.setText(numberItemsString);
+            holder.listLocation.setText(allLists.get(position).getLocation());
+        }
 //        setItemRecycler(holder.itemRecycler, allLists.get(position).getItemList());
 
     }
+    public void removeItem(int position){
+        allLists.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, allLists.size());
+    }
+
+    public void restoreItem(ItemsList deleted, int position){
+        allLists.add(position, deleted);
+        notifyItemInserted(position);
+    }
+
+
 
     @Override
     public int getItemCount() {

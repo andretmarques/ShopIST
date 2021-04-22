@@ -1,0 +1,15 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval">
+                <solid android:color="@color/quantum_googred"/>
+                <size android:width="60dp" android:height="60dp"/>
+            </shape>
+    </item>
+
+    <item
+        android:drawable="@drawable/ic_baseline_delete_24"
+        android:width="30dp" android:height="30dp"
+        android:gravity="center">
+
+    </item>
+</layer-list>

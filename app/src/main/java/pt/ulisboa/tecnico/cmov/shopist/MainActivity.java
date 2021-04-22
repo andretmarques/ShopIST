@@ -3,6 +3,8 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,7 +13,10 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -21,8 +26,6 @@ import android.annotation.SuppressLint;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -32,16 +35,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -67,17 +66,12 @@ public class MainActivity extends AppCompatActivity {
     ExtendedFloatingActionButton createPantryButton;
     ExtendedFloatingActionButton createShopButton;
     FloatingActionButton addButton;
-    private ArrayList<String> items;
-    private ArrayAdapter<String> itemsAdapter;
-    private ListView listLists;
-    private ArrayList<ItemsList> pantryLists;
-    private ArrayList<ItemsList> shoppingLists;
+    private ArrayList<ItemsList> pantryLists = new ArrayList<>();
+    private ArrayList<ItemsList> shoppingLists = new ArrayList<>();
     RecyclerView pantryListMainRecycler;
     RecyclerView shoppingListMainRecycler;
     ListRecyclerAdapter pantryListRecyclerAdapter;
     ListRecyclerAdapter shoppingListRecyclerAdapter;
-    Button viewPantries;
-    private String locationPicked;
     private double actualLongitude;
     private double actualLatitude;
     private DatabaseReference myRef;
@@ -126,12 +120,12 @@ public class MainActivity extends AppCompatActivity {
         if (net){
             updateData();
         }else{
-            pantryLists = new ArrayList<>();
-            shoppingLists = new ArrayList<>();
             setPantryRecycler(pantryLists);
             setShoppingRecycler(shoppingLists);
 
         }
+        eneableSwipePantry();
+        enableSwipeStore();
 
 
     }
@@ -152,11 +146,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
-                    GenericTypeIndicator<ArrayList<ItemsList>> t = new GenericTypeIndicator<ArrayList<ItemsList>>() {};
-                    pantryLists = dataSnapshot.getValue(t);
-                }
-                else{
-                    pantryLists = new ArrayList<>();
+                    GenericTypeIndicator<ItemsList> t = new GenericTypeIndicator<ItemsList>() {};
+                    for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                        ItemsList itemsList = singleSnapshot.getValue(t);
+                        pantryLists.add(itemsList);
+                    }
                 }
                 setPantryRecycler(pantryLists);
             }
@@ -171,11 +165,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
-                    GenericTypeIndicator<ArrayList<ItemsList>> t = new GenericTypeIndicator<ArrayList<ItemsList>>() {};
-                    shoppingLists = dataSnapshot.getValue(t);
-                }
-                else{
-                    shoppingLists = new ArrayList<>();
+                    GenericTypeIndicator<ItemsList> t = new GenericTypeIndicator<ItemsList>() {};
+                    for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                        ItemsList itemsList = singleSnapshot.getValue(t);
+                        shoppingLists.add(itemsList);
+                    }
                 }
                 setShoppingRecycler(shoppingLists);
             }
@@ -204,6 +198,115 @@ public class MainActivity extends AppCompatActivity {
         shoppingListMainRecycler.setLayoutManager(layoutManager);
         shoppingListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "SHOP");
         shoppingListMainRecycler.setAdapter(shoppingListRecyclerAdapter);
+    }
+
+    private void eneableSwipePantry() {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+
+                if (direction == ItemTouchHelper.LEFT) {
+                    final ItemsList deletedModel = pantryLists.get(position);
+                    final int deletedPosition = position;
+                    pantryListRecyclerAdapter.removeItem(position);
+                    Snackbar snackbar = Snackbar.make(pantryListMainRecycler, "List " + deletedModel.getName() + " Removed", Snackbar.LENGTH_SHORT);
+                    snackbar.setAction("UNDO", (view) -> pantryListRecyclerAdapter.restoreItem(deletedModel, deletedPosition));
+                    snackbar.setActionTextColor(Color.YELLOW);
+                    snackbar.show();
+                    snackbar.addCallback(new Snackbar.Callback() {
+                        @Override
+                        public void onDismissed(Snackbar snackbar, int event) {
+                            myRef.child("Pantries").child(deletedModel.getId()).removeValue();
+                        }
+
+                    });
+                }
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                View itemView = viewHolder.itemView;
+                int itemHeight = itemView.getHeight();
+                Drawable drawable = ContextCompat.getDrawable(MainActivity.this,R.drawable.delete_swipe_layout);
+                assert drawable != null;
+                int intrinsicWidth = drawable.getIntrinsicWidth();
+                int intrinsicHeight = drawable.getIntrinsicHeight();
+
+                int deleteIconTop = itemView.getTop() + (itemHeight - intrinsicHeight) / 2;
+                int deleteIconMargin = (itemHeight - intrinsicHeight) / 2;
+                int deleteIconLeft = itemView.getRight() - deleteIconMargin - intrinsicWidth;
+                int deleteIconRight = itemView.getRight() - deleteIconMargin;
+                int deleteIconBottom = deleteIconTop + intrinsicHeight;
+                drawable.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
+                drawable.draw(c);
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+            }
+
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(pantryListMainRecycler);
+    }
+
+    private void enableSwipeStore() {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+
+                if (direction == ItemTouchHelper.LEFT) {
+                    final ItemsList deletedModel = shoppingLists.get(position);
+                    final int deletedPosition = position;
+                    shoppingListRecyclerAdapter.removeItem(position);
+                    Snackbar snackbar = Snackbar.make(shoppingListMainRecycler, "List " + deletedModel.getName() + " Removed", Snackbar.LENGTH_SHORT);
+                    snackbar.setAction("UNDO", (view) -> shoppingListRecyclerAdapter.restoreItem(deletedModel, deletedPosition));
+                    snackbar.setActionTextColor(Color.YELLOW);
+                    snackbar.show();
+                    snackbar.addCallback(new Snackbar.Callback() {
+                        @Override
+                        public void onDismissed(Snackbar snackbar, int event) {
+                            myRef.child("Stores").child(deletedModel.getId()).removeValue();
+                        }
+
+                    });
+                }
+
+            }
+
+            @Override
+            public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+                View itemView = viewHolder.itemView;
+                int itemHeight = itemView.getHeight();
+                Drawable drawable = ContextCompat.getDrawable(MainActivity.this,R.drawable.delete_swipe_layout);
+                assert drawable != null;
+                int intrinsicWidth = drawable.getIntrinsicWidth();
+                int intrinsicHeight = drawable.getIntrinsicHeight();
+
+                int deleteIconTop = itemView.getTop() + (itemHeight - intrinsicHeight) / 2;
+                int deleteIconMargin = (itemHeight - intrinsicHeight) / 2;
+                int deleteIconLeft = itemView.getRight() - deleteIconMargin - intrinsicWidth;
+                int deleteIconRight = itemView.getRight() - deleteIconMargin;
+                int deleteIconBottom = deleteIconTop + intrinsicHeight;
+                drawable.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom);
+                drawable.draw(c);
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+
+            }
+
+        };
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(shoppingListMainRecycler);
     }
 
     public void showPantries(View v){
@@ -264,7 +367,9 @@ public class MainActivity extends AppCompatActivity {
                 // get the list of strings here
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
                 pantryLists.add(pantryList);
-                myRef.child("Pantries").setValue(pantryLists);
+                pantryList.generateId();
+                myRef.child("Pantries").child(pantryList.getId()).setValue(pantryList);
+
 
             }
             return;
@@ -275,7 +380,8 @@ public class MainActivity extends AppCompatActivity {
                 // get the list of strings here
                 ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
                 shoppingLists.add(shoppingList);
-                myRef.child("Stores").setValue(shoppingLists);
+                shoppingList.generateId();
+                myRef.child("Stores").child(shoppingList.getId()).setValue(shoppingList);
             }
             return;
         }
