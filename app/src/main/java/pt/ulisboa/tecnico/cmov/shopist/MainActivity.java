@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar_main));
 
+
         addButton = findViewById(R.id.add_btn);
         joinButton = findViewById(R.id.join_btn);
         createPantryButton = findViewById(R.id.create_pantry_btn);
