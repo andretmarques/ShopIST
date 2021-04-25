@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ListRecyclerAdapter.OnListListener {
 
     private Animation fromBottom;
     private Animation toBottom;
@@ -66,8 +66,8 @@ public class MainActivity extends AppCompatActivity {
     ExtendedFloatingActionButton createPantryButton;
     ExtendedFloatingActionButton createShopButton;
     FloatingActionButton addButton;
-    private ArrayList<ItemsList> pantryLists = new ArrayList<>();
-    private ArrayList<ItemsList> shoppingLists = new ArrayList<>();
+    private final ArrayList<ItemsList> pantryLists = new ArrayList<>();
+    private final ArrayList<ItemsList> shoppingLists = new ArrayList<>();
     RecyclerView pantryListMainRecycler;
     RecyclerView shoppingListMainRecycler;
     ListRecyclerAdapter pantryListRecyclerAdapter;
@@ -183,21 +183,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void setPantryRecycler(List<ItemsList> allLists) {
+    private void setPantryRecycler(ArrayList<ItemsList> allLists) {
 
-        pantryListMainRecycler = findViewById(R.id.pantry_recycler);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         pantryListMainRecycler.setLayoutManager(layoutManager);
-        pantryListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "PANTRY");
+        pantryListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "PANTRY", this);
         pantryListMainRecycler.setAdapter(pantryListRecyclerAdapter);
     }
 
-    private void setShoppingRecycler(List<ItemsList> allLists) {
+    private void setShoppingRecycler(ArrayList<ItemsList> allLists) {
 
-        shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         shoppingListMainRecycler.setLayoutManager(layoutManager);
-        shoppingListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "SHOP");
+        shoppingListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "SHOP", this);
         shoppingListMainRecycler.setAdapter(shoppingListRecyclerAdapter);
     }
 
@@ -367,6 +365,12 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
+                Item pao = new Item("Pão", 5, 7);
+                Item pao2 = new Item("Maça", 20, 7);
+                Item pao3 = new Item("alface", 10, 7);
+                pantryList.getItemList().add(pao);
+                pantryList.getItemList().add(pao2);
+                pantryList.getItemList().add(pao3);
                 pantryLists.add(pantryList);
                 pantryList.generateId();
                 myRef.child("Pantries").child(pantryList.getId()).setValue(pantryList);
@@ -380,6 +384,10 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
+                Item pao = new Item("Pão", 5, 7);
+                Item pao2 = new Item("Maça", 20, 7);
+                shoppingList.getItemList().add(pao);
+                shoppingList.getItemList().add(pao2);
                 shoppingLists.add(shoppingList);
                 shoppingList.generateId();
                 myRef.child("Stores").child(shoppingList.getId()).setValue(shoppingList);
@@ -498,6 +506,22 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
         return address;
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        if ((pantryListMainRecycler.getVisibility() == View.VISIBLE) && (shoppingListMainRecycler.getVisibility() == View.GONE)) {
+            Intent i = new Intent(this, PantryInside.class);
+            i.putExtra("pantryProductsList", pantryLists.get(position).itemList);
+            i.putExtra("pantryListName", pantryLists.get(position).getName());
+            startActivity(i);
+        }else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
+            Intent i = new Intent(this, ShoppingInside.class);
+            i.putExtra("shoppingProductsList", shoppingLists.get(position).itemList);
+            i.putExtra("shoppingListName", shoppingLists.get(position).getName());
+            startActivity(i);
+        }
+
     }
 
 
