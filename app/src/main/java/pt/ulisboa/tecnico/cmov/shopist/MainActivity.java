@@ -365,9 +365,12 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
-                Item pao = new Item("Pão", 5, 7);
-                Item pao2 = new Item("Maça", 20, 7);
-                Item pao3 = new Item("alface", 10, 7);
+                Item pao = new Item("Pão", 7);
+                Item pao2 = new Item("Maça", 7);
+                Item pao3 = new Item("alface", 7);
+                pao.generateId();
+                pao2.generateId();
+                pao3.generateId();
                 pantryList.getItemList().add(pao);
                 pantryList.getItemList().add(pao2);
                 pantryList.getItemList().add(pao3);
@@ -384,8 +387,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
-                Item pao = new Item("Pão", 5, 7);
-                Item pao2 = new Item("Maça", 20, 7);
+                Item pao = new Item("Pão", 7);
+                Item pao2 = new Item("Maça", 7);
                 shoppingList.getItemList().add(pao);
                 shoppingList.getItemList().add(pao2);
                 shoppingLists.add(shoppingList);

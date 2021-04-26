@@ -27,10 +27,13 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
     @NonNull
     @Override
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if(type.equals("P")) {
-            return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.pantry_item_recycler_adapter, parent, false));
-        }else if(type.equals("S")) {
-            return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.shopping_item_recycler_adapter, parent, false));
+        switch (type) {
+            case "P":
+                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.pantry_item_recycler_adapter, parent, false));
+            case "S":
+                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.shopping_item_recycler_adapter, parent, false));
+            case "ALL":
+                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.all_item_recycler_adapter, parent, false));
         }
         return null;
     }
@@ -51,9 +54,11 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
 
 
         holder.itemName.setText(itemName);
-        holder.itemQuantity.setText(itemQuantity);
+        if(holder.itemQuantity != null)
+            holder.itemQuantity.setText(itemQuantity);
+
         if(holder.itemPrice != null) {
-            String itemPrice = "Price: " + currentItem.getQuantity() + "$";
+            String itemPrice = "Price: " + currentItem.getPrice() + "$";
             holder.itemPrice.setText(itemPrice);
         }
     }
@@ -78,6 +83,7 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
             if((itemView.findViewById(R.id.consume) != null ) &&  itemView.findViewById(R.id.add) != null) {
 
                 itemView.findViewById(R.id.consume).setOnClickListener(v -> {
+
 
                 });
 

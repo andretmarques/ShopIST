@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_pantry"
+        android:id="@+id/toolbar_allItems"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/darkGrey"
@@ -15,10 +15,10 @@
         app:titleTextColor="@color/white" >
 
         <TextView
-            android:id="@+id/toolbar_pantry_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+            android:text="All items"
             android:layout_gravity="center"
             android:textColor="@color/white"/>
 
@@ -32,20 +32,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar_pantry"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar_allItems"
         app:layout_constraintVertical_bias="0.0" />
 
-
     <Button
+        android:id="@+id/create_product"
         android:layout_width="143dp"
         android:layout_height="65dp"
-        android:layout_marginBottom="52dp"
+        android:layout_marginBottom="40dp"
         android:background="@drawable/button_background"
-        android:text="Manage items"
-        android:onClick="manageItems"
+        android:text="Create new product"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.835"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <Button
+        android:layout_width="92dp"
+        android:layout_height="66dp"
+        android:layout_marginBottom="36dp"
+        android:background="@drawable/button_background"
+        android:text="Back"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/create_product"
+        app:layout_constraintHorizontal_bias="0.462"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

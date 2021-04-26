@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ public class PantryInside extends AppCompatActivity {
             actionTitle = b.getString("pantryListName");
             actionTitle = "Pantry: " + actionTitle;
             toolbarTitle.setText(actionTitle);
+            assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
         }
         setItemsRecycler(itemsPantry);
@@ -45,11 +47,9 @@ public class PantryInside extends AppCompatActivity {
         productsMainRecycler.setAdapter(itemRecyclerAdapter);
     }
 
-    private void consumeItems(){
-
-
+    public void manageItems(View view) {
+        Intent i = new Intent(this, ManageItemsActivity.class);
+        i.putExtra("pantryItems", itemsPantry);
+        startActivity(i);
     }
-
-
-
 }

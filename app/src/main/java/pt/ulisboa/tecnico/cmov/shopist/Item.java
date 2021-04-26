@@ -3,12 +3,17 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+import java.util.UUID;
+
 public class Item implements Parcelable {
     private String name;
     //private int id;
     //private int photoId;
     private int quantity = 0;
     private int price;
+    private String id;
+    private final ArrayList<String> shops = new ArrayList<>();
 
     protected Item(Parcel in) {
         name = in.readString();
@@ -28,6 +33,23 @@ public class Item implements Parcelable {
         }
     };
 
+    public String getId() {
+        return id;
+    }
+
+    public void generateId(){
+        this.id = UUID.randomUUID().toString();
+
+    }
+
+    public ArrayList<String> getShops() {
+        return shops;
+    }
+
+    public void addShops(String id){
+        shops.add(id);
+    }
+
     public String getName() {
         return name;
     }
@@ -44,6 +66,10 @@ public class Item implements Parcelable {
         this.quantity = quantity;
     }
 
+    public void addQuantity(int q){
+        this.quantity += q;
+    }
+
     public int getPrice() {
         return price;
     }
@@ -52,9 +78,8 @@ public class Item implements Parcelable {
         this.price = price;
     }
 
-    public Item(String name, int quantity, int price) {
+    public Item(String name, int price) {
         this.name = name;
-        this.quantity += quantity;
         this.price = price;
     }
 
