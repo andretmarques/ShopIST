@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -26,10 +27,11 @@ import com.google.android.material.snackbar.Snackbar;
 import java.util.ArrayList;
 
 public class ManageItemsActivity extends AppCompatActivity{
-    private ArrayList<Item> itemsPantry = new ArrayList<>();
+    private ArrayList<Item> itemsPantry;
     private final ArrayList<Item> allItems = new ArrayList<>();
-    RecyclerView productsMainRecycler;
+    private RecyclerView productsMainRecycler;
     private final String quantity = "1";
+    private ItemRecyclerAdapter itemRecyclerAdapter;
 
 
 
@@ -42,7 +44,6 @@ public class ManageItemsActivity extends AppCompatActivity{
         Item pao3 = new Item("Pregos", 10);
         pao3.generateId();
         allItems.add(pao3);
-        //allItems.add(itemsPantry.get(0));
         Bundle b = getIntent().getExtras();
         if(b != null){
             itemsPantry = b.getParcelableArrayList("pantryItems");
@@ -57,7 +58,7 @@ public class ManageItemsActivity extends AppCompatActivity{
         productsMainRecycler = findViewById(R.id.items_recycler);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         productsMainRecycler.setLayoutManager(layoutManager);
-        ItemRecyclerAdapter itemRecyclerAdapter = new ItemRecyclerAdapter(this, products, "ALL");
+        itemRecyclerAdapter = new ItemRecyclerAdapter(this, products, "ALL");
         productsMainRecycler.setAdapter(itemRecyclerAdapter);
     }
 
@@ -77,15 +78,15 @@ public class ManageItemsActivity extends AppCompatActivity{
 
                     if(itemsPantry.contains(swipedItem)){
                         int index = itemsPantry.indexOf(swipedItem);
-                        Item toChange = itemsPantry.get(index);
-                        toChange.addQuantity(Integer.parseInt(quantity));
+                        itemsPantry.get(index).addQuantity(Integer.parseInt(quantity));
                     }else {
                         swipedItem.setQuantity(Integer.parseInt(quantity));
                         itemsPantry.add(swipedItem);
                     }
 
-                    Snackbar snackbar = Snackbar.make(productsMainRecycler, "List " + swipedItem.getName() + " Added", Snackbar.LENGTH_SHORT);
+                    Snackbar snackbar = Snackbar.make(productsMainRecycler, "One " + swipedItem.getName() + " Added", Snackbar.LENGTH_SHORT);
                     snackbar.show();
+                    itemRecyclerAdapter.notifyItemChanged(position);
                     }
             }
 
@@ -109,13 +110,19 @@ public class ManageItemsActivity extends AppCompatActivity{
                 drawable.setBounds(iconLeft, iconTop, iconRight, iconBottom);
                 background.draw(c);
                 drawable.draw(c);
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
+                super.onChildDraw(c, recyclerView, viewHolder, dX/2, dY, actionState, isCurrentlyActive);
             }
 
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(productsMainRecycler);
+    }
+
+    public void confirmAdd(View view){
+        Intent intent = new Intent();
+        intent.putParcelableArrayListExtra("returnedList", itemsPantry);
+        setResult(PantryInside.RESULT_OK, intent);
+        finish();
     }
 
 }

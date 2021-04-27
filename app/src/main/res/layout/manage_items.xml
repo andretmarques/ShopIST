@@ -36,6 +36,18 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <Button
+        android:layout_width="120dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="36dp"
+        android:background="@drawable/button_background"
+        android:text="Confirm"
+        android:onClick="confirmAdd"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/create_product"
+        app:layout_constraintHorizontal_bias="0.462"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
         android:id="@+id/create_product"
         android:layout_width="143dp"
         android:layout_height="65dp"
@@ -45,17 +57,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.835"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:layout_width="92dp"
-        android:layout_height="66dp"
-        android:layout_marginBottom="36dp"
-        android:background="@drawable/button_background"
-        android:text="Back"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/create_product"
-        app:layout_constraintHorizontal_bias="0.462"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

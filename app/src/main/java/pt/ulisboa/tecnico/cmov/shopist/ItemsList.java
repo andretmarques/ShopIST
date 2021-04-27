@@ -2,7 +2,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.UUID;
 

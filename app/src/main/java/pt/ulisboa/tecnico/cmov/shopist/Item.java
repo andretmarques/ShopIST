@@ -4,17 +4,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Item implements Parcelable {
-    private String name;
-    //private int id;
-    //private int photoId;
-    private int quantity = 0;
-    private int price;
-    private String id;
-    private final ArrayList<String> shops = new ArrayList<>();
-
     protected Item(Parcel in) {
         name = in.readString();
         quantity = in.readInt();
@@ -33,6 +26,26 @@ public class Item implements Parcelable {
         }
     };
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeInt(quantity);
+        dest.writeInt(price);
+    }
+
+    private String name;
+    //private int id;
+    //private int photoId;
+    private int quantity = 0;
+    private int price;
+    private String id;
+    private final ArrayList<String> shops = new ArrayList<>();
+
     public String getId() {
         return id;
     }
@@ -40,6 +53,21 @@ public class Item implements Parcelable {
     public void generateId(){
         this.id = UUID.randomUUID().toString();
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Item item = (Item) o;
+
+        return Objects.equals(id, item.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 
     public ArrayList<String> getShops() {
@@ -84,17 +112,5 @@ public class Item implements Parcelable {
     }
 
     public Item() {
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeInt(quantity);
-        dest.writeInt(price);
     }
 }
