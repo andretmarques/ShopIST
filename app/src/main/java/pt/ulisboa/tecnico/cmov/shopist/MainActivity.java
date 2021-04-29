@@ -150,6 +150,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                     GenericTypeIndicator<ItemsList> t = new GenericTypeIndicator<ItemsList>() {};
                     for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
                         ItemsList itemsList = singleSnapshot.getValue(t);
+                        assert itemsList != null;
                         itemsList.getItemList().remove(null);
                         pantryLists.add(itemsList);
                     }
