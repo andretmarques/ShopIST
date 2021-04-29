@@ -44,6 +44,12 @@
         </activity>
 
         <activity
+            android:name=".CreateProductActivity"
+            android:hardwareAccelerated="false">
+
+        </activity>
+
+        <activity
             android:name=".PantryInside"
             android:hardwareAccelerated="false">
 

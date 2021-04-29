@@ -26,9 +26,9 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/items_recycler"
-        android:layout_width="405dp"
-        android:layout_height="672dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="504dp"
+        app:layout_constraintBottom_toTopOf="@+id/button2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -36,12 +36,13 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <Button
+        android:id="@+id/button2"
         android:layout_width="120dp"
         android:layout_height="70dp"
         android:layout_marginBottom="36dp"
         android:background="@drawable/button_background"
-        android:text="Confirm"
         android:onClick="confirmAdd"
+        android:text="Confirm"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/create_product"
         app:layout_constraintHorizontal_bias="0.462"
@@ -54,6 +55,7 @@
         android:layout_marginBottom="40dp"
         android:background="@drawable/button_background"
         android:text="Create new product"
+        android:onClick="createItem"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.835"

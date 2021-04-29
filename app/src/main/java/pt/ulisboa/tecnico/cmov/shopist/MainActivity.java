@@ -365,15 +365,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
-                Item pao = new Item("Pão", 7);
-                Item pao2 = new Item("Maça", 7);
-                Item pao3 = new Item("alface", 7);
-                pao.generateId();
-                pao2.generateId();
-                pao3.generateId();
-                pantryList.getItemList().add(pao);
-                pantryList.getItemList().add(pao2);
-                pantryList.getItemList().add(pao3);
                 pantryLists.add(pantryList);
                 pantryList.generateId();
                 myRef.child("Pantries").child(pantryList.getId()).setValue(pantryList);
@@ -387,10 +378,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
-                Item pao = new Item("Pão", 7);
-                Item pao2 = new Item("Maça", 7);
-                shoppingList.getItemList().add(pao);
-                shoppingList.getItemList().add(pao2);
                 shoppingLists.add(shoppingList);
                 shoppingList.generateId();
                 myRef.child("Stores").child(shoppingList.getId()).setValue(shoppingList);
@@ -517,6 +504,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             Intent i = new Intent(this, PantryInside.class);
             i.putExtra("pantryProductsList", pantryLists.get(position).itemList);
             i.putExtra("pantryListName", pantryLists.get(position).getName());
+            i.putExtra("pantryListId", pantryLists.get(position).getId());
             startActivity(i);
         }else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
             Intent i = new Intent(this, ShoppingInside.class);

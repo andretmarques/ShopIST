@@ -1,17 +1,18 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.app.Dialog;
+import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +24,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -32,6 +39,7 @@ public class ManageItemsActivity extends AppCompatActivity{
     private RecyclerView productsMainRecycler;
     private final String quantity = "1";
     private ItemRecyclerAdapter itemRecyclerAdapter;
+    private DatabaseReference myRef;
 
 
 
@@ -41,18 +49,60 @@ public class ManageItemsActivity extends AppCompatActivity{
         setContentView(R.layout.manage_items);
         setSupportActionBar(findViewById(R.id.toolbar_allItems));
         ActionBar actionBar = getSupportActionBar();
-        Item pao3 = new Item("Pregos", 10);
-        pao3.generateId();
-        allItems.add(pao3);
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        myRef = database.getReference();
+        boolean net = isNetworkAvailable(this.getApplication());
+
         Bundle b = getIntent().getExtras();
         if(b != null){
             itemsPantry = b.getParcelableArrayList("pantryItems");
             assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
         }
-        setItemsRecycler(allItems);
+
+        if (net){
+            updateData();
+        }else {
+            setItemsRecycler(allItems);
+        }
         enableSwipeProduct();
     }
+
+    private void updateData() {
+        myRef.child("Products").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() != null) {
+                    GenericTypeIndicator<Item> t = new GenericTypeIndicator<Item>() {
+                    };
+                    for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
+                        Item item = singleSnapshot.getValue(t);
+                        allItems.add(item);
+                    }
+                }
+                setItemsRecycler(allItems);
+                enableSwipeProduct();
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.i("TAG", "onCancelled", databaseError.toException());
+            }
+        });
+    }
+
+    private Boolean isNetworkAvailable(Application application) {
+        ConnectivityManager connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
+        Network nw = connectivityManager.getActiveNetwork();
+        if (nw == null) return false;
+        NetworkCapabilities actNw = connectivityManager.getNetworkCapabilities(nw);
+        return actNw != null && (actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH));
+    }
+
 
     private void setItemsRecycler(ArrayList<Item> products) {
         productsMainRecycler = findViewById(R.id.items_recycler);
@@ -123,6 +173,25 @@ public class ManageItemsActivity extends AppCompatActivity{
         intent.putParcelableArrayListExtra("returnedList", itemsPantry);
         setResult(PantryInside.RESULT_OK, intent);
         finish();
+    }
+
+    public void createItem(View view){
+        Intent intent = new Intent(this, CreateProductActivity.class);
+        startActivityForResult(intent, 10015);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        enableSwipeProduct();
+        if (requestCode == 10015) {
+            if (resultCode == RESULT_OK) {
+                Item newItem = data.getParcelableExtra("returnedProduct");
+                allItems.add(newItem);
+                myRef.child("Products").child(newItem.getId()).setValue(newItem);
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
 }

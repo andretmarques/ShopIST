@@ -36,6 +36,7 @@ public class ShoppingInside extends AppCompatActivity {
             actionTitle = b.getString("shoppingListName");
             actionTitle = "Store: " + actionTitle;
             toolbarTitle.setText(actionTitle);
+            assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
         }
         setItemsRecycler(itemsShop);

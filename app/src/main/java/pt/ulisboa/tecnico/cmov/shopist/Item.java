@@ -12,6 +12,7 @@ public class Item implements Parcelable {
         name = in.readString();
         quantity = in.readInt();
         price = in.readInt();
+        id = in.readString();
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -36,6 +37,7 @@ public class Item implements Parcelable {
         dest.writeString(name);
         dest.writeInt(quantity);
         dest.writeInt(price);
+        dest.writeString(id);
     }
 
     private String name;
@@ -44,6 +46,7 @@ public class Item implements Parcelable {
     private int quantity = 0;
     private int price;
     private String id;
+    private String shop;
     private final ArrayList<String> shops = new ArrayList<>();
 
     public String getId() {
@@ -106,9 +109,18 @@ public class Item implements Parcelable {
         this.price = price;
     }
 
-    public Item(String name, int price) {
+    public String getShop() {
+        return shop;
+    }
+
+    public void setShop(String shop) {
+        this.shop = shop;
+    }
+
+    public Item(String name, int price, String shop) {
         this.name = name;
         this.price = price;
+        this.shop = shop;
     }
 
     public Item() {
