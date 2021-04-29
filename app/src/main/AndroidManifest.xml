@@ -43,6 +43,30 @@
 
         </activity>
 
+        <activity
+            android:name=".CreateProductActivity"
+            android:hardwareAccelerated="false">
+
+        </activity>
+
+        <activity
+            android:name=".PantryInside"
+            android:hardwareAccelerated="false">
+
+        </activity>
+
+        <activity
+            android:name=".ShoppingInside"
+            android:hardwareAccelerated="false">
+
+        </activity>
+
+        <activity
+            android:name=".ManageItemsActivity"
+            android:hardwareAccelerated="false">
+
+        </activity>
+
         <service
             android:name="MainActivity"
             android:foregroundServiceType="location" />

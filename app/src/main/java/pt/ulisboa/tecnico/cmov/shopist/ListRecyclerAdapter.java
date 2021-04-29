@@ -9,28 +9,35 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapter.MainViewHolder> {
 
     private final Context context;
-    private final List<ItemsList> allLists;
+    private final ArrayList<ItemsList> allLists;
+    private final OnListListener mOnListListener;
     private final String type;
 
-    public ListRecyclerAdapter(Context context, List<ItemsList> allLists, String type) {
+    public ListRecyclerAdapter(Context context, ArrayList<ItemsList> allLists, String type, OnListListener onListListener) {
         this.context = context;
         this.allLists = allLists;
         this.type = type;
+        this.mOnListListener = onListListener;
     }
 
     @NonNull
     @Override
     public MainViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (type.equals("SHOP")){
-            return new MainViewHolder(LayoutInflater.from(context).inflate(R.layout.pantry_recycler_row, parent, false));
+        View v;
+        if (type.equals("PANTRY")){
+            v = LayoutInflater.from(context).inflate(R.layout.pantry_recycler_row, parent, false);
+            return new MainViewHolder(v, mOnListListener);
         }
-        else
-            return new MainViewHolder(LayoutInflater.from(context).inflate(R.layout.shop_recycler_row, parent, false));
+        else if (type.equals("SHOP")) {
+            v = LayoutInflater.from(context).inflate(R.layout.shop_recycler_row, parent, false);
+            return new MainViewHolder(v, mOnListListener);
+        }
+        return null;
     }
 
     @Override
@@ -41,7 +48,6 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
             holder.itemCount.setText(numberItemsString);
             holder.listLocation.setText(allLists.get(position).getLocation());
         }
-//        setItemRecycler(holder.itemRecycler, allLists.get(position).getItemList());
 
     }
     public void removeItem(int position){
@@ -62,20 +68,34 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
         return allLists.size();
     }
 
-    public static final class MainViewHolder extends RecyclerView.ViewHolder{
+    public static final class MainViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView listTitle;
         TextView itemCount;
         TextView listLocation;
+        OnListListener onListListener;
 
-        public MainViewHolder(@NonNull View itemView) {
+
+        public MainViewHolder(@NonNull View itemView, OnListListener onListListener) {
             super(itemView);
 
             listTitle = itemView.findViewById(R.id.list_title);
             itemCount = itemView.findViewById(R.id.item_numbers);
             listLocation = itemView.findViewById(R.id.list_location);
+            this.onListListener = onListListener;
+            itemView.setOnClickListener(this);
 
         }
+
+        @Override
+        public void onClick(View v) {
+            onListListener.onItemClick(getAdapterPosition());
+
+        }
+    }
+
+    public interface OnListListener {
+        void onItemClick(int position);
     }
 
 }
