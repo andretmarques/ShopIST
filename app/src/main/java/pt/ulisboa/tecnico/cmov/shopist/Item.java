@@ -117,9 +117,8 @@ public class Item implements Parcelable {
         this.shop = shop;
     }
 
-    public Item(String name, int price, String shop) {
+    public Item(String name, String shop) {
         this.name = name;
-        this.price = price;
         this.shop = shop;
     }
 

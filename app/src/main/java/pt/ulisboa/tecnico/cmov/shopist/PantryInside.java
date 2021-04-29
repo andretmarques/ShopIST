@@ -1,28 +1,19 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.app.Application;
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -42,8 +33,6 @@ public class PantryInside extends AppCompatActivity {
         TextView toolbarTitle = findViewById(R.id.toolbar_pantry_title);
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
-        boolean net = isNetworkAvailable(this.getApplication());
-
 
         Bundle b = getIntent().getExtras();
         if(b != null){
@@ -55,45 +44,20 @@ public class PantryInside extends AppCompatActivity {
             assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
         }
-        if (net){
-            //updateData();
-            setItemsRecycler(itemsPantry);
-        }else {
-            setItemsRecycler(itemsPantry);
-        }
-    }
 
-    private void updateData() {
-        myRef.child("Pantries").child(String.valueOf(pantryId)).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
+        setItemsRecycler(itemsPantry);
+
+        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() != null) {
-                    GenericTypeIndicator<Item> t = new GenericTypeIndicator<Item>() {
-                    };
-                    for (DataSnapshot singleSnapshot : dataSnapshot.getChildren()) {
-                        Item item = singleSnapshot.getValue(t);
-                        itemsPantry.add(item);
-                    }
-                }
-                setItemsRecycler(itemsPantry);
+            public void handleOnBackPressed() {
+                Intent intent = new Intent();
+                intent.putParcelableArrayListExtra("returnedItemList", itemsPantry);
+                setResult(PantryInside.RESULT_OK, intent);
+                finish();
             }
+        };
+        this.getOnBackPressedDispatcher().addCallback(this, callback);
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.i("TAG", "onCancelled", databaseError.toException());
-            }
-        });
-    }
-
-    private Boolean isNetworkAvailable(Application application) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
-        Network nw = connectivityManager.getActiveNetwork();
-        if (nw == null) return false;
-        NetworkCapabilities actNw = connectivityManager.getNetworkCapabilities(nw);
-        return actNw != null && (actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH));
     }
 
     private void setItemsRecycler(ArrayList<Item> products) {
@@ -104,26 +68,25 @@ public class PantryInside extends AppCompatActivity {
         productsMainRecycler.setAdapter(itemRecyclerAdapter);
     }
 
-    public void manageItems(View view) {
-        Intent i = new Intent(this, ManageItemsActivity.class);
-        i.putParcelableArrayListExtra("pantryItems", itemsPantry);
-        startActivityForResult(i, 10011);
+    public void createItem(View view){
+        Intent intent = new Intent(this, CreateProductActivity.class);
+        startActivityForResult(intent, 10015);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 10011) {
+        if (requestCode == 10015) {
             if (resultCode == RESULT_OK) {
-                itemsPantry = data.getParcelableArrayListExtra("returnedList");
-                Log.d("TAG", "onActivityResult: " + pantryId);
-                myRef.child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
+                Item newItem = data.getParcelableExtra("returnedProduct");
+                itemsPantry.add(newItem);
+                myRef.child("Pantries").child(pantryId).child("itemList").child(newItem.getId()).setValue(newItem);
                 setItemsRecycler(itemsPantry);
-
             }
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
 
 
 }
