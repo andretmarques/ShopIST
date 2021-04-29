@@ -61,12 +61,6 @@
 
         </activity>
 
-        <activity
-            android:name=".ManageItemsActivity"
-            android:hardwareAccelerated="false">
-
-        </activity>
-
         <service
             android:name="MainActivity"
             android:foregroundServiceType="location" />

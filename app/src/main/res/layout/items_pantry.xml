@@ -27,25 +27,26 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/items_recycler"
         android:layout_width="match_parent"
-        android:layout_height="540dp"
+        android:layout_height="554dp"
         android:paddingBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        app:layout_constraintBottom_toTopOf="@+id/create_product"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_pantry"
         app:layout_constraintVertical_bias="0.0" />
 
     <Button
-        android:id="@+id/button"
-        android:layout_width="103dp"
-        android:layout_height="66dp"
-        android:layout_marginBottom="16dp"
+        android:id="@+id/create_product"
+        android:layout_width="118dp"
+        android:layout_height="73dp"
+        android:layout_marginBottom="32dp"
         android:background="@drawable/button_background"
-        android:onClick="manageItems"
-        android:text="Manage items"
+        android:onClick="createItem"
+        android:text="Create new product"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent" />
 
 

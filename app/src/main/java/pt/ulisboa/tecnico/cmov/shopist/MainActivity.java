@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private double actualLongitude;
     private double actualLatitude;
     private DatabaseReference myRef;
+    private int listPosition;
 
 
 
@@ -128,7 +129,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         eneableSwipePantry();
         enableSwipeStore();
 
-
     }
 
     private Boolean isNetworkAvailable(Application application) {
@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                         ItemsList itemsList = singleSnapshot.getValue(t);
                         pantryLists.add(itemsList);
                     }
+
                 }
                 setPantryRecycler(pantryLists);
             }
@@ -384,6 +385,18 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             }
             return;
         }
+        if (requestCode == 10030) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // get the list of strings here
+                ArrayList<Item> itemsPantry = data.getParcelableArrayListExtra("returnedItemList");
+                ItemsList pantry = pantryLists.get(listPosition);
+                pantry.setItemList(itemsPantry);
+                pantryListRecyclerAdapter.notifyItemChanged(listPosition);
+
+            }
+            return;
+        }
         super.onActivityResult(requestCode, resultCode, data);
 
     }
@@ -505,7 +518,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             i.putExtra("pantryProductsList", pantryLists.get(position).itemList);
             i.putExtra("pantryListName", pantryLists.get(position).getName());
             i.putExtra("pantryListId", pantryLists.get(position).getId());
-            startActivity(i);
+            listPosition = position;
+            startActivityForResult(i, 10030);
         }else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
             Intent i = new Intent(this, ShoppingInside.class);
             i.putExtra("shoppingProductsList", shoppingLists.get(position).itemList);
