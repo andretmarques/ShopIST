@@ -45,6 +45,7 @@ public class PantryInside extends AppCompatActivity {
             actionBar.setDisplayShowTitleEnabled(false);
         }
 
+
         setItemsRecycler(itemsPantry);
 
         OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
@@ -79,7 +80,7 @@ public class PantryInside extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 Item newItem = data.getParcelableExtra("returnedProduct");
                 itemsPantry.add(newItem);
-                myRef.child("Pantries").child(pantryId).child("itemList").child(newItem.getId()).setValue(newItem);
+                myRef.child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
                 setItemsRecycler(itemsPantry);
             }
             return;
