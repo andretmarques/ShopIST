@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
@@ -9,12 +10,14 @@ import android.graphics.Rect;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +25,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraXConfig;
 import androidx.camera.core.ImageAnalysis;
@@ -51,10 +55,12 @@ import java.util.List;
 
 public class PantryInside extends AppCompatActivity {
     private ArrayList<Item> itemsPantry = new ArrayList<>();
+    private ArrayList<PublicItem> listPublic = new ArrayList<>();
     private DatabaseReference myRef;
     private String pantryId;
     Button scanBarcodeBtn;
-    String intentData = "";
+    String price = "";
+    String shop = "";
 
 
     @Override
@@ -96,11 +102,9 @@ public class PantryInside extends AppCompatActivity {
         scanBarcodeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(PantryInside.this, ScanBarcodeActivity.class));
+                startActivityForResult(new Intent(PantryInside.this, ScanBarcodeActivity.class), 10025);
             }
         });
-
-
     }
 
     private void setItemsRecycler(ArrayList<Item> products) {
@@ -116,57 +120,6 @@ public class PantryInside extends AppCompatActivity {
         startActivityForResult(intent, 10015);
     }
 
-    public void launchCamera(View view) {
-
-
-    }
-
-   /* public void barcode(InputImage image) {
-        BarcodeScannerOptions options =
-                new BarcodeScannerOptions.Builder().setBarcodeFormats(
-                                Barcode.FORMAT_CODE_128,
-                                Barcode.FORMAT_CODE_39,
-                                Barcode.FORMAT_CODE_93,
-                                Barcode.FORMAT_CODABAR,
-                                Barcode.FORMAT_EAN_13,
-                                Barcode.FORMAT_EAN_8,
-                                Barcode.FORMAT_ITF,
-                                Barcode.FORMAT_UPC_A,
-                                Barcode.FORMAT_UPC_E)
-                        .build();
-
-        BarcodeScanner scanner = BarcodeScanning.getClient();
-        // Or, to specify the formats to recognize:
-        // BarcodeScanner scanner = BarcodeScanning.getClient(options);
-        // [END get_detector]
-
-        // [START run_detector]
-        Task<List<Barcode>> result = scanner.process(image)
-                .addOnSuccessListener(new OnSuccessListener<List<Barcode>>() {
-                    @Override
-                    public void onSuccess(List<Barcode> barcodes) {
-                        // Task completed successfully
-                        // [START_EXCLUDE]
-                        // [START get_barcodes]
-                        for (Barcode barcode: barcodes) {
-                            Rect bounds = barcode.getBoundingBox();
-                            Point[] corners = barcode.getCornerPoints();
-
-                            String rawValue = barcode.getRawValue();
-
-                        }
-                        // [END get_barcodes]
-                        // [END_EXCLUDE]
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Task failed with an exception
-                    }
-                });
-        // [END run_detector]
-    }*/
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -179,7 +132,15 @@ public class PantryInside extends AppCompatActivity {
             }
             return;
         }
+        else if (requestCode == 10025) {
+            if (resultCode == RESULT_OK) {
+                String barcode = data.getStringExtra("Barcode");
+                Log.d("price", "onActivityResult: ");
+            }
+            return;
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
 
 }

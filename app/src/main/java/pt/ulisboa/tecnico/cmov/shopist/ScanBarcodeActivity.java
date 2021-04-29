@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,7 +27,6 @@ import java.io.IOException;
 
 public class ScanBarcodeActivity extends AppCompatActivity {
     SurfaceView surfaceView;
-    TextView txtBarcodeValue;
     private BarcodeDetector barcodeDetector;
     private CameraSource cameraSource;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
@@ -40,12 +40,12 @@ public class ScanBarcodeActivity extends AppCompatActivity {
 
 
         surfaceView = findViewById(R.id.surfaceView);
-        txtBarcodeValue = findViewById(R.id.txtBarcodeValue);
         initialiseDetectorsAndSources();
     }
 
 
     private void initialiseDetectorsAndSources() {
+        Toast.makeText(getApplicationContext(), "Barcode scanner started", Toast.LENGTH_SHORT).show();
         barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.ALL_FORMATS)
                 .build();
@@ -66,24 +66,19 @@ public class ScanBarcodeActivity extends AppCompatActivity {
                         ActivityCompat.requestPermissions(ScanBarcodeActivity.this, new
                                 String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
                     }
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
             }
 
             @Override
             public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
             }
-
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
                 cameraSource.stop();
             }
         });
-
 
         barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
             @Override
@@ -94,33 +89,16 @@ public class ScanBarcodeActivity extends AppCompatActivity {
             @Override
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                if (barcodes.size() != 0) {
+                while (barcodes.size() != 0) {
                     Log.d("meu", "meu");
-
-                    txtBarcodeValue.post(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            String data = barcodes.valueAt(0).displayValue;
-                            Log.d("what", "run: " + data);
-                            txtBarcodeValue.setText(data);
-                        }
-                    });
-
+                    String data = barcodes.valueAt(0).displayValue;
+                    Intent i = new Intent();
+                    i.putExtra("Barcode", data);
+                    setResult(ScanBarcodeActivity.RESULT_OK, i);
+                    finish();
+                    break;
                 }
             }
         });
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        cameraSource.release();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        initialiseDetectorsAndSources();
     }
 }

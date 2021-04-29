@@ -59,6 +59,10 @@
             android:name=".ScanBarcodeActivity" >
         </activity>
 
+        <activity
+            android:name=".PriceShopActivity" >
+        </activity>
+
         <service
             android:name="MainActivity"
             android:foregroundServiceType="location" />
