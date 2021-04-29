@@ -59,8 +59,6 @@ public class PantryInside extends AppCompatActivity {
     private DatabaseReference myRef;
     private String pantryId;
     Button scanBarcodeBtn;
-    String price = "";
-    String shop = "";
 
 
     @Override
@@ -135,9 +133,14 @@ public class PantryInside extends AppCompatActivity {
         else if (requestCode == 10025) {
             if (resultCode == RESULT_OK) {
                 String barcode = data.getStringExtra("Barcode");
-                Log.d("price", "onActivityResult: ");
+                Intent i = new Intent(PantryInside.this, PriceShopActivity.class);
+                i.putExtra("barcode", barcode);
+                startActivityForResult(i, 20221);
             }
             return;
+        }
+        else if (requestCode == 20221) {
+
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

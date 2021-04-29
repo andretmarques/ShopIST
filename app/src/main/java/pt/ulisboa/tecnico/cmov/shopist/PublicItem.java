@@ -5,9 +5,9 @@ import android.os.Parcelable;
 
 public class PublicItem implements Parcelable {
     String barcode;
-    Integer price;
+    Double price;
 
-    public PublicItem(String barcode, Integer price) {
+    public PublicItem(String barcode, Double price) {
         this.barcode = barcode;
         this.price = price;
     }
@@ -17,7 +17,7 @@ public class PublicItem implements Parcelable {
         if (in.readByte() == 0) {
             price = null;
         } else {
-            price = in.readInt();
+            price = in.readDouble();
         }
     }
 
@@ -41,11 +41,11 @@ public class PublicItem implements Parcelable {
         this.barcode = barcode;
     }
 
-    public Integer getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(Integer price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -61,7 +61,7 @@ public class PublicItem implements Parcelable {
             parcel.writeByte((byte) 0);
         } else {
             parcel.writeByte((byte) 1);
-            parcel.writeInt(price);
+            parcel.writeDouble(price);
         }
     }
 }
