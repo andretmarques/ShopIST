@@ -153,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                     GenericTypeIndicator<ItemsList> t = new GenericTypeIndicator<ItemsList>() {};
                     for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
                         ItemsList itemsList = singleSnapshot.getValue(t);
+                        assert itemsList != null;
                         itemsList.getItemList().remove(null);
                         pantryLists.add(itemsList);
                     }
@@ -535,17 +536,13 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             i.putExtra("shoppingListName", shoppingLists.get(position).getName());
             startActivity(i);
         }
-
     }
 
-
-   /* public void onClickShareLove() {
+    /* public void onClickShareLove() {
         @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)
                 .getLayoutInflater().inflate(R.layout.share_your_love, null);
-
         ImageView image = (ImageView) contentView.findViewById(R.id.heart);
         final AnimatedVectorDrawable animation = (AnimatedVectorDrawable) image.getDrawable();
-
         final KonfettiView konfettiView = findViewById(R.id.viewKonfetti);
         konfettiView.build()
                 .addColors(Color.RED, Color.GREEN, Color.YELLOW, 16753920, 15631086)
@@ -557,14 +554,11 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 .addSizes(new Size(12, 5f))
                 .setPosition(-50f, konfettiView.getWidth() + 50f, -50f, -50f)
                 .streamFor(600, 1200L);
-
-
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(contentView)
                 .setNegativeButton(R.string.close_button_love, null)
                 .setMessage("We appreciate your love!")
                 .setTitle("Thanks");
-
         final AlertDialog alertDialog = builder.create();
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
