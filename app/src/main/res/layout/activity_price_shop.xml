@@ -2,7 +2,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -40,10 +39,10 @@
         app:layout_constraintVertical_bias="0.394" />
 
     <TextView
-        android:id="@+id/textViewPrice"
+        android:id="@+id/textViewShop"
         android:layout_width="150dp"
         android:layout_height="50dp"
-        android:text="Price"
+        android:text="Shop"
         android:textAlignment="center"
         android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -54,7 +53,7 @@
         app:layout_constraintVertical_bias="0.499" />
 
     <EditText
-        android:id="@+id/editTextPrice"
+        android:id="@+id/editTextShop"
         android:layout_width="150dp"
         android:layout_height="50dp"
         android:autofillHints="Price of item"
@@ -66,10 +65,10 @@
         app:layout_constraintVertical_bias="0.0"/>
 
     <TextView
-        android:id="@+id/textViewShop"
+        android:id="@+id/textViewPrice"
         android:layout_width="150dp"
         android:layout_height="50dp"
-        android:text="Shop"
+        android:text="Price"
         android:textAlignment="center"
         android:textSize="30sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -80,7 +79,7 @@
         app:layout_constraintVertical_bias="0.499" />
 
     <EditText
-        android:id="@+id/editTextShop"
+        android:id="@+id/editTextPrice"
         android:layout_width="150dp"
         android:layout_height="50dp"
         android:autofillHints="Name of shop"

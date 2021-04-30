@@ -121,19 +121,15 @@ public class PantryInside extends AppCompatActivity {
                         }
                         else {
                             if (listPublic.size() > 1) {
-                                int j = 0;
+                                messageAll = "";
                                 for (DataSnapshot singleSnapshot : snapshot.child("PublicItems").child(barcode).getChildren()) {
-                                    shopList.add(snapshot.child("PublicItems").child(barcode).child(String.valueOf(j)).child("shop").getValue().toString());
-                                    priceList.add(snapshot.child("PublicItems").child(barcode).child(String.valueOf(j)).child("price").getValue().toString());
-                                    j++;
-                                }
-                                int i = 0;
-                                while (i < listPublic.size()) {
+                                    Log.d("olaaa", singleSnapshot.toString());
+                                    messageAll = messageAll + "Shop: " +
+                                            singleSnapshot.child("shop").getValue().toString()
+                                            + "\n" + "Price: " +
+                                            singleSnapshot.child("price").getValue().toString() + "€"
+                                            + "\n\n";
 
-                                    messageAll = messageAll + "Shop: " + shopList.get(i)
-                                            + "\n" + "Price: " + priceList.get(i) + "€" + "\n\n";
-                                    Log.d("debug", "onDataChange: " + messageAll);
-                                    i++;
                                 }
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(PantryInside.this)
                                         .setTitle("Product " + barcode)
@@ -191,6 +187,7 @@ public class PantryInside extends AppCompatActivity {
                         }
                         if (!exists) {
                             PublicItem newPublicItem = new PublicItem(barcode, price, shop);
+                            Log.d("Achando", shop);
                             listPublic.add(newPublicItem);
                             myRef.child("PublicItems").child(barcode).setValue(listPublic);
                         }
