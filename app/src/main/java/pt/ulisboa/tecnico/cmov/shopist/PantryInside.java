@@ -25,6 +25,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class PantryInside extends AppCompatActivity {
     private ArrayList<Item> itemsPantry = new ArrayList<>();
@@ -179,7 +180,7 @@ public class PantryInside extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean exists = false;
                         for (DataSnapshot singleSnapshot : snapshot.child("PublicItems").child(barcode).getChildren()) {
-                            if (singleSnapshot.child("shop").getValue().toString().equals(shop)) {
+                            if (Objects.equals(singleSnapshot.child("shop").getValue(), shop)) {
                                 Toast.makeText(getApplicationContext(), "This shop already has this item and price for it", Toast.LENGTH_LONG).show();
                                 exists = true;
                                 break;
