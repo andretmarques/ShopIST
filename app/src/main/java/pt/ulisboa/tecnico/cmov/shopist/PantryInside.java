@@ -77,7 +77,6 @@ public class PantryInside extends AppCompatActivity {
 
         Bundle b = getIntent().getExtras();
         if(b != null){
-            itemsPantry = b.getParcelableArrayList("pantryProductsList");
             actionTitle = b.getString("pantryListName");
             actionTitle = "Pantry: " + actionTitle;
             toolbarTitle.setText(actionTitle);
