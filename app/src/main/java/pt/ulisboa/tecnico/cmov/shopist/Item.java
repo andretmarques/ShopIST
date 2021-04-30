@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -47,7 +48,7 @@ public class Item implements Parcelable {
     private int price;
     private String id;
     private String shop;
-    private final ArrayList<String> shops = new ArrayList<>();
+    private HashMap<String, String> shops = new HashMap<>();
 
     public String getId() {
         return id;
@@ -56,6 +57,14 @@ public class Item implements Parcelable {
     public void generateId(){
         this.id = UUID.randomUUID().toString();
 
+    }
+
+    public HashMap<String, String> getShops() {
+        return shops;
+    }
+
+    public void setShops(HashMap<String, String> shops) {
+        this.shops = shops;
     }
 
     @Override
@@ -71,14 +80,6 @@ public class Item implements Parcelable {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
-    }
-
-    public ArrayList<String> getShops() {
-        return shops;
-    }
-
-    public void addShops(String id){
-        shops.add(id);
     }
 
     public String getName() {

@@ -1,20 +1,28 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
@@ -24,8 +32,12 @@ public class PantryInside extends AppCompatActivity {
     private DatabaseReference myRef;
     private String pantryId;
     Button scanBarcodeBtn;
-    String barcode;
-
+    String barcode = "";
+    Double price;
+    String shop;
+    ArrayList<String> shopList = new ArrayList<>();
+    ArrayList<String> priceList = new ArrayList<>();
+    String messageAll = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -99,23 +111,106 @@ public class PantryInside extends AppCompatActivity {
         else if (requestCode == 10025) {
             if (resultCode == RESULT_OK) {
                 barcode = data.getStringExtra("Barcode");
-                Intent i = new Intent(PantryInside.this, PriceShopActivity.class);
-                i.putExtra("barcode", barcode);
-                startActivityForResult(i, 20221);
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        listPublic = (ArrayList<PublicItem>) snapshot.child("PublicItems").child(barcode).getValue();
+
+                        if (!snapshot.child("PublicItems").child(barcode).exists()) {
+                            ScanBarcodeAssist();
+                        }
+                        else {
+                            if (listPublic.size() > 1) {
+                                int j = 0;
+                                for (DataSnapshot singleSnapshot : snapshot.child("PublicItems").child(barcode).getChildren()) {
+                                    shopList.add(snapshot.child("PublicItems").child(barcode).child(String.valueOf(j)).child("shop").getValue().toString());
+                                    priceList.add(snapshot.child("PublicItems").child(barcode).child(String.valueOf(j)).child("price").getValue().toString());
+                                    j++;
+                                }
+                                int i = 0;
+                                while (i < listPublic.size()) {
+
+                                    messageAll = messageAll + "Shop: " + shopList.get(i)
+                                            + "\n" + "Price: " + priceList.get(i) + "€" + "\n\n";
+                                    Log.d("debug", "onDataChange: " + messageAll);
+                                    i++;
+                                }
+                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(PantryInside.this)
+                                        .setTitle("Product " + barcode)
+                                        .setMessage(messageAll)
+                                        .setNegativeButton("Thank you", null)
+                                        .setPositiveButton("Add new shop", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                ScanBarcodeAssist();
+                                            }
+                                        });
+                                alertDialogBuilder.show();
+                                messageAll = "";
+                            }
+                            else {
+                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(PantryInside.this)
+                                        .setTitle("Product " + barcode)
+                                        .setMessage("Shop: " + snapshot.child("PublicItems").child(barcode).child("0").child("shop").getValue()
+                                                + "\n" + "Price: " + snapshot.child("PublicItems").child(barcode).child("0").child("price").getValue() + "€")
+                                        .setNegativeButton("Thank you", null)
+                                        .setPositiveButton("Add new shop", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialogInterface, int i) {
+                                                ScanBarcodeAssist();
+                                            }
+                                        });
+                                alertDialogBuilder.show();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
             }
             return;
         }
         if (requestCode == 20221) {
             if (resultCode == RESULT_OK) {
-                Double price = data.getDoubleExtra("price", 0);
-                String shop = data.getStringExtra("shop");
-                PublicItem newPublicItem = new PublicItem(barcode, price, shop);
-                listPublic.add(newPublicItem);
-                myRef.child("PublicItems").setValue(listPublic);
+                price = data.getDoubleExtra("price", 0);
+                shop = data.getStringExtra("shop");
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        boolean exists = false;
+                        for (DataSnapshot singleSnapshot : snapshot.child("PublicItems").child(barcode).getChildren()) {
+                            if (singleSnapshot.child("shop").getValue().toString().equals(shop)) {
+                                Toast.makeText(getApplicationContext(), "This shop already has this item and price for it", Toast.LENGTH_LONG).show();
+                                exists = true;
+                                break;
+                            }
+                        }
+                        if (!exists) {
+                            PublicItem newPublicItem = new PublicItem(barcode, price, shop);
+                            listPublic.add(newPublicItem);
+                            myRef.child("PublicItems").child(barcode).setValue(listPublic);
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+
             }
 
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void ScanBarcodeAssist() {
+        Intent i = new Intent(PantryInside.this, PriceShopActivity.class);
+        i.putExtra("barcode", barcode);
+        startActivityForResult(i, 20221);
     }
 
 
