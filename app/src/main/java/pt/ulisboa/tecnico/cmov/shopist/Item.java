@@ -3,11 +3,23 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
 public class Item implements Parcelable {
+
+
+    private String name;
+    //private int id;
+    //private int photoId;
+    private int quantity = 0;
+    private int price;
+    private String id;
+    private HashMap<String, String> shops = new HashMap<>();
+
     protected Item(Parcel in) {
         name = in.readString();
         quantity = in.readInt();
@@ -26,28 +38,6 @@ public class Item implements Parcelable {
             return new Item[size];
         }
     };
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeInt(quantity);
-        dest.writeInt(price);
-        dest.writeString(id);
-    }
-
-    private String name;
-    //private int id;
-    //private int photoId;
-    private int quantity = 0;
-    private int price;
-    private String id;
-    private String shop;
-    private final ArrayList<String> shops = new ArrayList<>();
 
     public String getId() {
         return id;
@@ -73,12 +63,16 @@ public class Item implements Parcelable {
         return id != null ? id.hashCode() : 0;
     }
 
-    public ArrayList<String> getShops() {
+    public HashMap<String, String> getShops() {
         return shops;
     }
 
-    public void addShops(String id){
-        shops.add(id);
+    public void setShops(HashMap<String, String> shops) {
+        this.shops = shops;
+    }
+
+    public void addShops(String id, String name){
+        shops.put(id, name);
     }
 
     public String getName() {
@@ -109,19 +103,35 @@ public class Item implements Parcelable {
         this.price = price;
     }
 
-    public String getShop() {
-        return shop;
-    }
-
-    public void setShop(String shop) {
-        this.shop = shop;
-    }
-
-    public Item(String name, String shop) {
+    public Item(String name) {
         this.name = name;
-        this.shop = shop;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Item() {
+    }
+
+    public Item(int quantity, int price, String id, HashMap<String, String> shops){
+        this.quantity = quantity;
+        this.price = price;
+        this.id = id;
+        this.shops = shops;
+
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeInt(quantity);
+        dest.writeInt(price);
+        dest.writeString(id);
     }
 }
