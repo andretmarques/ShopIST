@@ -59,6 +59,7 @@ public class PantryInside extends AppCompatActivity {
     private DatabaseReference myRef;
     private String pantryId;
     Button scanBarcodeBtn;
+    String barcode;
 
 
     @Override
@@ -132,14 +133,21 @@ public class PantryInside extends AppCompatActivity {
         }
         else if (requestCode == 10025) {
             if (resultCode == RESULT_OK) {
-                String barcode = data.getStringExtra("Barcode");
+                barcode = data.getStringExtra("Barcode");
                 Intent i = new Intent(PantryInside.this, PriceShopActivity.class);
                 i.putExtra("barcode", barcode);
                 startActivityForResult(i, 20221);
             }
             return;
         }
-        else if (requestCode == 20221) {
+        if (requestCode == 20221) {
+            if (resultCode == RESULT_OK) {
+                Double price = data.getDoubleExtra("price", 0);
+                String shop = data.getStringExtra("shop");
+                PublicItem newPublicItem = new PublicItem(barcode, price, shop);
+                listPublic.add(newPublicItem);
+                myRef.child("PublicItems").setValue(listPublic);
+            }
 
         }
         super.onActivityResult(requestCode, resultCode, data);

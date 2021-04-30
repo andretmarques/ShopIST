@@ -6,10 +6,12 @@ import android.os.Parcelable;
 public class PublicItem implements Parcelable {
     String barcode;
     Double price;
+    String shop;
 
-    public PublicItem(String barcode, Double price) {
+    public PublicItem(String barcode, Double price, String shop) {
         this.barcode = barcode;
         this.price = price;
+        this.shop = shop;
     }
 
     protected PublicItem(Parcel in) {
@@ -19,6 +21,7 @@ public class PublicItem implements Parcelable {
         } else {
             price = in.readDouble();
         }
+        shop = in.readString();
     }
 
     public static final Creator<PublicItem> CREATOR = new Creator<PublicItem>() {
@@ -49,6 +52,14 @@ public class PublicItem implements Parcelable {
         this.price = price;
     }
 
+    public String getShop() {
+        return shop;
+    }
+
+    public void setShop(String shop) {
+        this.shop = shop;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -63,5 +74,6 @@ public class PublicItem implements Parcelable {
             parcel.writeByte((byte) 1);
             parcel.writeDouble(price);
         }
+        parcel.writeString(shop);
     }
 }

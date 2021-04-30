@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -56,6 +57,11 @@ public class PriceShopActivity extends AppCompatActivity {
             itemPrice = Double.parseDouble(priceText.getText().toString());
             itemPrice = Math.floor(itemPrice * 100) / 100;
             itemShop = shopText.getText().toString();
+            Intent i = new Intent();
+            i.putExtra("price", itemPrice);
+            i.putExtra("shop", itemShop);
+            setResult(PriceShopActivity.RESULT_OK, i);
+            finish();
         }
         else if (priceText.getText().toString().equals("") && !shopText.getText().toString().equals("")) {
             priceText.setError("Price must not be empty");
