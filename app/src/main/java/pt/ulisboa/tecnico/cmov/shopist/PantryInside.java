@@ -190,6 +190,7 @@ public class PantryInside extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         listPublic = (ArrayList<PublicItem>) snapshot.child("PublicItems").child(barcode).getValue();
+                        if (listPublic == null) { listPublic = new ArrayList<>(); }
 
                         if (!snapshot.child("PublicItems").child(barcode).exists()) {
                             ScanBarcodeAssist();
@@ -252,7 +253,7 @@ public class PantryInside extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                         boolean exists = false;
                         for (DataSnapshot singleSnapshot : snapshot.child("PublicItems").child(barcode).getChildren()) {
-                            if (Objects.equals(singleSnapshot.child("shop").getValue(), shop)) {
+                            if (singleSnapshot.child("shop").getValue().toString().equals(shop)) {
                                 Toast.makeText(getApplicationContext(), "This shop already has this item and price for it", Toast.LENGTH_LONG).show();
                                 exists = true;
                                 break;
@@ -261,8 +262,10 @@ public class PantryInside extends AppCompatActivity {
                         if (!exists) {
                             PublicItem newPublicItem = new PublicItem(barcode, price, shop);
                             Log.d("Achando", shop);
-                            listPublic.add(newPublicItem);
-                            myRef.child("PublicItems").child(barcode).setValue(listPublic);
+                            if (listPublic != null) {
+                                listPublic.add(newPublicItem);
+                                myRef.child("PublicItems").child(barcode).setValue(listPublic);
+                            }
                         }
                     }
                     @Override
@@ -272,7 +275,7 @@ public class PantryInside extends AppCompatActivity {
                 });
 
             }
-
+            return;
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
