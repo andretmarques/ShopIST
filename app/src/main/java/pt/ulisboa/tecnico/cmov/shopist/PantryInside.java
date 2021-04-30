@@ -130,7 +130,6 @@ public class PantryInside extends AppCompatActivity {
                                             + "\n" + "Price: " +
                                             singleSnapshot.child("price").getValue() + "€"
                                             + "\n\n";
-
                                 }
                                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(PantryInside.this)
                                         .setTitle("Product " + barcode)
