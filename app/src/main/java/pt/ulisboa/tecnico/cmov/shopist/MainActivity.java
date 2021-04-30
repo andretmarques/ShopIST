@@ -528,6 +528,37 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             i.putExtra("shoppingListName", shoppingLists.get(position).getName());
             startActivity(i);
         }
-
     }
+
+    /* public void onClickShareLove() {
+        @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)
+                .getLayoutInflater().inflate(R.layout.share_your_love, null);
+        ImageView image = (ImageView) contentView.findViewById(R.id.heart);
+        final AnimatedVectorDrawable animation = (AnimatedVectorDrawable) image.getDrawable();
+        final KonfettiView konfettiView = findViewById(R.id.viewKonfetti);
+        konfettiView.build()
+                .addColors(Color.RED, Color.GREEN, Color.YELLOW, 16753920, 15631086)
+                .setDirection(0.0, 359.0)
+                .setSpeed(1f, 10f)
+                .setFadeOutEnabled(true)
+                .setTimeToLive(1200L)
+                .addShapes(Shape.Square.INSTANCE, Shape.Circle.INSTANCE)
+                .addSizes(new Size(12, 5f))
+                .setPosition(-50f, konfettiView.getWidth() + 50f, -50f, -50f)
+                .streamFor(600, 1200L);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setView(contentView)
+                .setNegativeButton(R.string.close_button_love, null)
+                .setMessage("We appreciate your love!")
+                .setTitle("Thanks");
+        final AlertDialog alertDialog = builder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                    animation.start();
+            }
+        });
+        alertDialog.show();
+    }
+    */
 }
