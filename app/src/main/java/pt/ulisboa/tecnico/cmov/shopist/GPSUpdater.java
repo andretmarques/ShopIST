@@ -29,13 +29,12 @@ public class GPSUpdater extends AppCompatActivity implements LocationListener{
 
     @Override
         public void onLocationChanged(Location location) {
-            Log.d("OLA", "onLocationChanged: "+location);
             String address = getRoad(location.getLatitude(), location.getLongitude());
             GPStxt.setText(address);
         }
         @Override
         public void onProviderDisabled(String provider) {
-            Log.d("Latitude","disable");
+             Log.d("Latitude","disable");
         }
 
         @Override
@@ -46,13 +45,10 @@ public class GPSUpdater extends AppCompatActivity implements LocationListener{
     public String getRoad(double latitude, double longitude) {
         String address = "";
         Geocoder geocoder = new Geocoder(mcontext, Locale.getDefault());
-        Log.d("INFO", "road: latitude " + latitude);
-        Log.d("INFO", "road: longitude " + longitude);
 
         try {
             List<Address> addresses = geocoder.getFromLocation(latitude, longitude,1);
             address = addresses.get(0).getAddressLine(0);
-            Log.d("TAG", "Address: " + address);
 
         } catch (IOException e) {
             e.printStackTrace();

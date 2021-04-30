@@ -63,21 +63,22 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private Animation rotateOpen;
     private Animation rotateClose;
     private boolean clicked = false;
-    ExtendedFloatingActionButton joinButton;
-    ExtendedFloatingActionButton createPantryButton;
-    ExtendedFloatingActionButton createShopButton;
-    FloatingActionButton addButton;
+    private ExtendedFloatingActionButton joinButton;
+    private ExtendedFloatingActionButton createPantryButton;
+    private ExtendedFloatingActionButton createShopButton;
+    private FloatingActionButton addButton;
     private final ArrayList<ItemsList> pantryLists = new ArrayList<>();
     private final ArrayList<ItemsList> shoppingLists = new ArrayList<>();
-    RecyclerView pantryListMainRecycler;
-    RecyclerView shoppingListMainRecycler;
-    ListRecyclerAdapter pantryListRecyclerAdapter;
-    ListRecyclerAdapter shoppingListRecyclerAdapter;
+    private RecyclerView pantryListMainRecycler;
+    private RecyclerView shoppingListMainRecycler;
+    private ListRecyclerAdapter pantryListRecyclerAdapter;
+    private ListRecyclerAdapter shoppingListRecyclerAdapter;
     private double actualLongitude;
     private double actualLatitude;
     private DatabaseReference myRef;
     private int listPosition;
     private final HashMap<String, String> storeNames = new HashMap<>();
+    private final ArrayList<Item> productsToBuy = new ArrayList<>();
 
 
 
@@ -184,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
+
     }
 
 

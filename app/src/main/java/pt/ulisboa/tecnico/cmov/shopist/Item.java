@@ -18,6 +18,7 @@ public class Item implements Parcelable {
     private int quantity = 0;
     private int price;
     private String id;
+    private int toPurchase = 0;
     private HashMap<String, String> shops = new HashMap<>();
 
     protected Item(Parcel in) {
@@ -25,6 +26,7 @@ public class Item implements Parcelable {
         quantity = in.readInt();
         price = in.readInt();
         id = in.readString();
+        toPurchase = in.readInt();
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -111,14 +113,23 @@ public class Item implements Parcelable {
         this.id = id;
     }
 
+    public int getToPurchase() {
+        return toPurchase;
+    }
+
+    public void setToPurchase(int toPurchase) {
+        this.toPurchase = toPurchase;
+    }
+
     public Item() {
     }
 
-    public Item(int quantity, int price, String id, HashMap<String, String> shops){
+    public Item(int quantity, int price, String id, HashMap<String, String> shops, int toPurchase){
         this.quantity = quantity;
         this.price = price;
         this.id = id;
         this.shops = shops;
+        this.toPurchase = toPurchase;
 
     }
 

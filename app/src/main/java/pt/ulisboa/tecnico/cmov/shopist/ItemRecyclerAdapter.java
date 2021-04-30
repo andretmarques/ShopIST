@@ -80,11 +80,13 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
 
     public void consumeQuantity(Item i, int p){
         itemsList.get(p).setQuantity(i.getQuantity()-1);
+        itemsList.get(p).setToPurchase(i.getToPurchase()+1);
         notifyItemChanged(p);
     }
 
     public void addQuantity(Item i, int p){
         itemsList.get(p).setQuantity(i.getQuantity()+1);
+        itemsList.get(p).setToPurchase(i.getToPurchase()-1);
         notifyItemChanged(p);
     }
 
@@ -93,12 +95,6 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         itemsList.remove(p);
         notifyItemRemoved(p);
         notifyItemRangeChanged(p, itemsList.size());
-    }
-
-    public void restoreItemQuantity(Item i, int p){
-        itemsList.get(p).setQuantity(i.getQuantity()+1);
-        itemsList.add(p, i);
-        notifyItemInserted(p);
     }
 
     public int getItem(int p){
