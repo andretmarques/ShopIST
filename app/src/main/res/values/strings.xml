@@ -16,4 +16,7 @@
     <string name="choose_your_home_s_location">Choose your home\'s location</string>
     <string name="set_your_actual_location">Set your actual location</string>
     <string name="enter_the_list_name">Enter the list name</string>
+    <string name="new_product">New product</string>
+    <string name="quantity">Quantity</string>
+    <string name="choose_shops">Choose shops</string>
 </resources>
