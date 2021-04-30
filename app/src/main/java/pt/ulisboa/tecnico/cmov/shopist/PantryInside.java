@@ -125,9 +125,9 @@ public class PantryInside extends AppCompatActivity {
                                 for (DataSnapshot singleSnapshot : snapshot.child("PublicItems").child(barcode).getChildren()) {
                                     Log.d("olaaa", singleSnapshot.toString());
                                     messageAll = messageAll + "Shop: " +
-                                            singleSnapshot.child("shop").getValue().toString()
+                                            singleSnapshot.child("shop").getValue()
                                             + "\n" + "Price: " +
-                                            singleSnapshot.child("price").getValue().toString() + "€"
+                                            singleSnapshot.child("price").getValue() + "€"
                                             + "\n\n";
 
                                 }
