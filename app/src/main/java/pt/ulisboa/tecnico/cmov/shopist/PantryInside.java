@@ -190,7 +190,12 @@ public class PantryInside extends AppCompatActivity {
                     Snackbar snackbar = Snackbar.make(productsMainRecycler, "One " + swipedItem.getName() + " Consumed", 1000);
 
                     itemRecyclerAdapter.consumeQuantity(swipedItem, position);
-                    myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).child("quantity").setValue(swipedItem.getQuantity());
+                    if(swipedItem.getShops().isEmpty() && swipedItem.getQuantity() == 0) {
+                        itemRecyclerAdapter.removeItem(position);
+                        myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).removeValue();
+                    }else {
+                        myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).child("quantity").setValue(swipedItem.getQuantity());
+                    }
 
                     snackbar.show();
                     snackbar.addCallback(new Snackbar.Callback() {

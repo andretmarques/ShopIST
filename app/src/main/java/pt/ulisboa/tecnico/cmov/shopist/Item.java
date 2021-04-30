@@ -124,14 +124,6 @@ public class Item implements Parcelable {
     public Item() {
     }
 
-    public Item(int quantity, int price, String id, HashMap<String, String> shops, int toPurchase){
-        this.quantity = quantity;
-        this.price = price;
-        this.id = id;
-        this.shops = shops;
-        this.toPurchase = toPurchase;
-
-    }
 
     @Override
     public int describeContents() {
@@ -144,5 +136,6 @@ public class Item implements Parcelable {
         dest.writeInt(quantity);
         dest.writeInt(price);
         dest.writeString(id);
+        dest.writeInt(toPurchase);
     }
 }
