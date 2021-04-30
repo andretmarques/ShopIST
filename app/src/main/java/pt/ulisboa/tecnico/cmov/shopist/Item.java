@@ -3,17 +3,30 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
 public class Item implements Parcelable {
+
+
+    private String name;
+    //private int id;
+    //private int photoId;
+    private int quantity = 0;
+    private int price;
+    private String id;
+    private int toPurchase = 0;
+    private HashMap<String, String> shops = new HashMap<>();
+
     protected Item(Parcel in) {
         name = in.readString();
         quantity = in.readInt();
         price = in.readInt();
         id = in.readString();
+        toPurchase = in.readInt();
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -28,28 +41,6 @@ public class Item implements Parcelable {
         }
     };
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeInt(quantity);
-        dest.writeInt(price);
-        dest.writeString(id);
-    }
-
-    private String name;
-    //private int id;
-    //private int photoId;
-    private int quantity = 0;
-    private int price;
-    private String id;
-    private String shop;
-    private HashMap<String, String> shops = new HashMap<>();
-
     public String getId() {
         return id;
     }
@@ -57,14 +48,6 @@ public class Item implements Parcelable {
     public void generateId(){
         this.id = UUID.randomUUID().toString();
 
-    }
-
-    public HashMap<String, String> getShops() {
-        return shops;
-    }
-
-    public void setShops(HashMap<String, String> shops) {
-        this.shops = shops;
     }
 
     @Override
@@ -80,6 +63,18 @@ public class Item implements Parcelable {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
+    }
+
+    public HashMap<String, String> getShops() {
+        return shops;
+    }
+
+    public void setShops(HashMap<String, String> shops) {
+        this.shops = shops;
+    }
+
+    public void addShops(String id, String name){
+        shops.put(id, name);
     }
 
     public String getName() {
@@ -110,19 +105,37 @@ public class Item implements Parcelable {
         this.price = price;
     }
 
-    public String getShop() {
-        return shop;
-    }
-
-    public void setShop(String shop) {
-        this.shop = shop;
-    }
-
-    public Item(String name, String shop) {
+    public Item(String name) {
         this.name = name;
-        this.shop = shop;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public int getToPurchase() {
+        return toPurchase;
+    }
+
+    public void setToPurchase(int toPurchase) {
+        this.toPurchase = toPurchase;
     }
 
     public Item() {
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(name);
+        dest.writeInt(quantity);
+        dest.writeInt(price);
+        dest.writeString(id);
+        dest.writeInt(toPurchase);
     }
 }

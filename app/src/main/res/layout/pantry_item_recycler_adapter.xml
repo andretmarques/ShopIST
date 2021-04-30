@@ -41,28 +41,4 @@
         app:layout_constraintTop_toBottomOf="@+id/item_name"
         app:layout_constraintVertical_bias="1.0" />
 
-    <Button
-        android:id="@+id/consume"
-        android:layout_width="36dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="28dp"
-        android:background="@drawable/button_background"
-        android:drawableBottom="@drawable/ic_baseline_minimize_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.197" />
-
-    <Button
-        android:id="@+id/add_more"
-        android:layout_width="35dp"
-        android:layout_height="36dp"
-        android:layout_marginEnd="28dp"
-        android:background="@drawable/button_background"
-        android:drawableBottom="@drawable/ic_baseline_add_24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.786" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

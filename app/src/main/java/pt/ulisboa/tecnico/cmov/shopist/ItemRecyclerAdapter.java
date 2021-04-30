@@ -63,6 +63,44 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         }
     }
 
+    public void removeItem(int position){
+        itemsList.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, itemsList.size());
+    }
+
+    public void restoreItem(Item deleted, int position){
+        itemsList.add(position, deleted);
+        notifyItemInserted(position);
+    }
+
+    public boolean haveItem(Item i){
+        return itemsList.contains(i);
+    }
+
+    public void consumeQuantity(Item i, int p){
+        itemsList.get(p).setQuantity(i.getQuantity()-1);
+        itemsList.get(p).setToPurchase(i.getToPurchase()+1);
+        notifyItemChanged(p);
+    }
+
+    public void addQuantity(Item i, int p){
+        itemsList.get(p).setQuantity(i.getQuantity()+1);
+        itemsList.get(p).setToPurchase(i.getToPurchase()-1);
+        notifyItemChanged(p);
+    }
+
+    public void removeItemQuantity(Item i, int p){
+        itemsList.get(p).setQuantity(i.getQuantity()-1);
+        itemsList.remove(p);
+        notifyItemRemoved(p);
+        notifyItemRangeChanged(p, itemsList.size());
+    }
+
+    public int getItem(int p){
+        return itemsList.get(p).getQuantity();
+    }
+
     @Override
     public int getItemCount() {
         return itemsList.size();
@@ -80,17 +118,6 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
             itemQuantity = itemView.findViewById(R.id.item_quantity);
             itemPrice = itemView.findViewById(R.id.item_price);
 
-            if((itemView.findViewById(R.id.consume) != null ) &&  itemView.findViewById(R.id.add) != null) {
-
-                itemView.findViewById(R.id.consume).setOnClickListener(v -> {
-
-
-                });
-
-                itemView.findViewById(R.id.add_more).setOnClickListener(v -> {
-
-                });
-            }
 
         }
 

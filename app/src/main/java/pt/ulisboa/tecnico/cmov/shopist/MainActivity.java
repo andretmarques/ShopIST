@@ -51,6 +51,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,20 +63,22 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private Animation rotateOpen;
     private Animation rotateClose;
     private boolean clicked = false;
-    ExtendedFloatingActionButton joinButton;
-    ExtendedFloatingActionButton createPantryButton;
-    ExtendedFloatingActionButton createShopButton;
-    FloatingActionButton addButton;
+    private ExtendedFloatingActionButton joinButton;
+    private ExtendedFloatingActionButton createPantryButton;
+    private ExtendedFloatingActionButton createShopButton;
+    private FloatingActionButton addButton;
     private final ArrayList<ItemsList> pantryLists = new ArrayList<>();
     private final ArrayList<ItemsList> shoppingLists = new ArrayList<>();
-    RecyclerView pantryListMainRecycler;
-    RecyclerView shoppingListMainRecycler;
-    ListRecyclerAdapter pantryListRecyclerAdapter;
-    ListRecyclerAdapter shoppingListRecyclerAdapter;
+    private RecyclerView pantryListMainRecycler;
+    private RecyclerView shoppingListMainRecycler;
+    private ListRecyclerAdapter pantryListRecyclerAdapter;
+    private ListRecyclerAdapter shoppingListRecyclerAdapter;
     private double actualLongitude;
     private double actualLatitude;
     private DatabaseReference myRef;
     private int listPosition;
+    private final HashMap<String, String> storeNames = new HashMap<>();
+    private final ArrayList<Item> productsToBuy = new ArrayList<>();
 
 
 
@@ -183,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
+
     }
 
 
@@ -279,6 +283,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
                             myRef.child("Stores").child(deletedModel.getId()).removeValue();
+                            myRef.child("StoreNames").child(deletedModel.getId()).removeValue();
+                            storeNames.remove(deletedModel.getId());
                         }
 
                     });
@@ -381,9 +387,12 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
+
                 shoppingLists.add(shoppingList);
                 shoppingList.generateId();
                 myRef.child("Stores").child(shoppingList.getId()).setValue(shoppingList);
+                storeNames.put(shoppingList.getId(), shoppingList.getName());
+                myRef.child("StoreNames").setValue(storeNames);
             }
             return;
         }
@@ -517,7 +526,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void onItemClick(int position) {
         if ((pantryListMainRecycler.getVisibility() == View.VISIBLE) && (shoppingListMainRecycler.getVisibility() == View.GONE)) {
             Intent i = new Intent(this, PantryInside.class);
-            i.putExtra("pantryProductsList", pantryLists.get(position).itemList);
             i.putExtra("pantryListName", pantryLists.get(position).getName());
             i.putExtra("pantryListId", pantryLists.get(position).getId());
             listPosition = position;
