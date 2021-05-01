@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -33,16 +32,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.HashMap;
 
 public class PantryInside extends AppCompatActivity {
@@ -85,7 +82,7 @@ public class PantryInside extends AppCompatActivity {
             actionBar.setDisplayShowTitleEnabled(false);
         }
         if (net){
-            updateData();
+            populateLists();
         }else {
             setItemsRecycler(itemsPantry);
         }
@@ -103,12 +100,7 @@ public class PantryInside extends AppCompatActivity {
         this.getOnBackPressedDispatcher().addCallback(this, callback);
 
         scanBarcodeBtn = findViewById(R.id.scan_barcode);
-        scanBarcodeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivityForResult(new Intent(PantryInside.this, ScanBarcodeActivity.class), 10025);
-            }
-        });
+        scanBarcodeBtn.setOnClickListener(view -> startActivityForResult(new Intent(PantryInside.this, ScanBarcodeActivity.class), 10025));
     }
 
     private Boolean isNetworkAvailable(Application application) {
@@ -122,15 +114,16 @@ public class PantryInside extends AppCompatActivity {
                 || actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH));
     }
 
-    private void updateData(){
+    private void populateLists(){
         myRef.child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
                     GenericTypeIndicator<Item> t = new GenericTypeIndicator<Item>() {};
                     for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
                         Item item = singleSnapshot.getValue(t);
                         itemsPantry.add(item);
+                        assert item != null;
                         if(!positionsMap.containsKey(item.getId()))
                             positionsMap.put(item.getId(), String.valueOf(itemsPantry.indexOf(item)));
                     }
@@ -140,7 +133,7 @@ public class PantryInside extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NotNull DatabaseError databaseError) {
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
@@ -168,16 +161,37 @@ public class PantryInside extends AppCompatActivity {
         startActivityForResult(intent, 10015);
     }
 
+    private void showAlert(Item product){
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(PantryInside.this)
+                .setTitle("ERROR")
+                .setMessage("You already have " + product.getName() + " in your pantry with another store")
+                .setPositiveButton("OK", null);
+        AlertDialog dialog = alertDialogBuilder.create();
+        dialog.show();
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 10015) {
             if (resultCode == RESULT_OK) {
                 Item newItem = data.getParcelableExtra("returnedProduct");
-                HashMap<String, String> productShops = (HashMap<String, String>) data.getSerializableExtra("hashName");
-                newItem.setShops(productShops);
-                itemsPantry.add(newItem);
-                myRef.child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
+                Item inList = null;
+
+                if(itemsPantry.contains(newItem)) {
+                    inList = itemsPantry.get(itemsPantry.indexOf(newItem));
+                }
+
+                if(inList != null && !newItem.getShops().keySet().equals(inList.getShops().keySet())){
+                  showAlert(inList);
+                }else if(inList != null && newItem.getShops().keySet().equals(inList.getShops().keySet())) {
+                    inList.setQuantity(inList.getQuantity() + newItem.getQuantity());
+                    myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(inList.getId())).child("quantity").setValue(inList.getQuantity());
+                }else if(inList == null || !newItem.getShops().keySet().equals(inList.getShops().keySet())) {
+                    itemsPantry.add(newItem);
+                    myRef.child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
+                }
+
                 setItemsRecycler(itemsPantry);
                 populatePositionMap();
             }
@@ -209,12 +223,7 @@ public class PantryInside extends AppCompatActivity {
                                         .setTitle("Product " + barcode)
                                         .setMessage(messageAll)
                                         .setNegativeButton("Thank you", null)
-                                        .setPositiveButton("Add new shop", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                ScanBarcodeAssist();
-                                            }
-                                        });
+                                        .setPositiveButton("Add new shop", (dialogInterface, i) -> ScanBarcodeAssist());
                                 alertDialogBuilder.show();
                                 messageAll = "";
                             }
@@ -224,12 +233,7 @@ public class PantryInside extends AppCompatActivity {
                                         .setMessage("Shop: " + snapshot.child("PublicItems").child(barcode).child("0").child("shop").getValue()
                                                 + "\n" + "Price: " + snapshot.child("PublicItems").child(barcode).child("0").child("price").getValue() + "€")
                                         .setNegativeButton("Thank you", null)
-                                        .setPositiveButton("Add new shop", new DialogInterface.OnClickListener() {
-                                            @Override
-                                            public void onClick(DialogInterface dialogInterface, int i) {
-                                                ScanBarcodeAssist();
-                                            }
-                                        });
+                                        .setPositiveButton("Add new shop", (dialogInterface, i) -> ScanBarcodeAssist());
                                 alertDialogBuilder.show();
                             }
                         }
@@ -261,7 +265,6 @@ public class PantryInside extends AppCompatActivity {
                         }
                         if (!exists) {
                             PublicItem newPublicItem = new PublicItem(barcode, price, shop);
-                            Log.d("Achando", shop);
                             if (listPublic != null) {
                                 listPublic.add(newPublicItem);
                                 myRef.child("PublicItems").child(barcode).setValue(listPublic);
@@ -279,7 +282,6 @@ public class PantryInside extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
-
     public void ScanBarcodeAssist() {
         Intent i = new Intent(PantryInside.this, PriceShopActivity.class);
         i.putExtra("barcode", barcode);
@@ -429,19 +431,20 @@ public class PantryInside extends AppCompatActivity {
                 .setTitle("Product " + product.getName())
                 .setMessage("Do you want to buy " + product.getName() + " in the future?")
                 .setNegativeButton("NO", null)
-                .setPositiveButton("YES", (dialogInterface, i) -> updateData(product));
+                .setPositiveButton("YES", (dialogInterface, i) -> populateLists(product));
         AlertDialog dialog = alertDialogBuilder.create();
         dialog.show();
     }
 
-    private void updateData(Item toBuy) {
+    private void populateLists(Item toBuy) {
         myRef.child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 Item i = null;
                 if (dataSnapshot.getValue() != null) {
                     GenericTypeIndicator<Item> t = new GenericTypeIndicator<Item>() {};
                     i =  dataSnapshot.child(positionsMap.get(toBuy.getId())).getValue(t);
+                    assert i != null;
                     }
                 if(i != null) {
                     if (i.getId().equals(toBuy.getId())) {
@@ -451,7 +454,7 @@ public class PantryInside extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NotNull DatabaseError databaseError) {
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });

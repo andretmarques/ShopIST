@@ -9,6 +9,7 @@ public class ItemsList implements Parcelable {
     protected ItemsList(Parcel in) {
         name = in.readString();
         location = in.readString();
+        itemList = in.readArrayList(Item.class.getClassLoader());
     }
 
     public static final Creator<ItemsList> CREATOR = new Creator<ItemsList>() {
@@ -32,6 +33,7 @@ public class ItemsList implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeString(location);
+        dest.writeList(itemList);
     }
 
     public enum ListType {
@@ -94,7 +96,9 @@ public class ItemsList implements Parcelable {
         this.name = name;
     }
 
-    public String getNumberItems(){
+
+
+    public String listSizeString(){
         return "" + itemList.size();
     }
 

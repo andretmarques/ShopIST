@@ -1,7 +1,12 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.app.Application;
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -10,10 +15,21 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.ValueEventListener;
+
 import java.util.ArrayList;
 
 public class ShoppingInside extends AppCompatActivity {
-    private ArrayList<Item> itemsShop = new ArrayList<>();
+    private final ArrayList<Item> itemsShop = new ArrayList<>();
+    private ArrayList<ItemsList> allPantries = new ArrayList<>();
+    private ArrayList<String> allProducts = new ArrayList<>();
+    private String shopId;
+
 
 
     @Override
@@ -22,24 +38,21 @@ public class ShoppingInside extends AppCompatActivity {
         setContentView(R.layout.items_shop);
         setSupportActionBar(findViewById(R.id.toolbar_shop));
         ActionBar actionBar = getSupportActionBar();
-        String actionTitle;
+
         TextView toolbarTitle = findViewById(R.id.toolbar_shop_title);
-
-
-
-
 
 
         Bundle b = getIntent().getExtras();
         if(b != null){
-            itemsShop = b.getParcelableArrayList("shoppingProductsList");
-            actionTitle = b.getString("shoppingListName");
+            allPantries = b.getParcelableArrayList("userPantryLists");
+            String actionTitle = b.getString("shoppingListName");
+            shopId = b.getString("shoppingListId");
             actionTitle = "Store: " + actionTitle;
             toolbarTitle.setText(actionTitle);
             assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
         }
-        setItemsRecycler(itemsShop);
+        updateDataLocal();
     }
 
     private void setItemsRecycler(ArrayList<Item> products) {
@@ -50,6 +63,20 @@ public class ShoppingInside extends AppCompatActivity {
         productsMainRecycler.setAdapter(itemRecyclerAdapter);
     }
 
+    private void updateDataLocal(){
+        for (ItemsList pantry : allPantries){
+            for(Item i : pantry.getItemList()){
+                if(i.getToPurchase() > 0 && i.getShops().containsKey(shopId)){
+                    if (itemsShop.contains(i)) {
+                        Item inList = itemsShop.get(itemsShop.indexOf(i));
+                        inList.setToPurchase(inList.getToPurchase() + i.getToPurchase());
 
-
+                    }else {
+                        itemsShop.add(i);
+                    }
+                }
+            }
+        }
+        setItemsRecycler(itemsShop);
+    }
 }

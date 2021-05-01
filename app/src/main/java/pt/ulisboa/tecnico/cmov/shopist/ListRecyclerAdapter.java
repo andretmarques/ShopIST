@@ -43,7 +43,7 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
     @Override
     public void onBindViewHolder(@NonNull MainViewHolder holder, int position) {
         if(allLists.get(position)!=null) {
-            String numberItemsString = "Number of items: " + allLists.get(position).getNumberItems();
+            String numberItemsString = "Number of items: " + allLists.get(position).listSizeString();
             holder.listTitle.setText(allLists.get(position).getName());
             holder.itemCount.setText(numberItemsString);
             holder.listLocation.setText(allLists.get(position).getLocation());

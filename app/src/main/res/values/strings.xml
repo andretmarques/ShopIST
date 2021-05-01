@@ -19,4 +19,5 @@
     <string name="new_product">New product</string>
     <string name="quantity">Quantity</string>
     <string name="choose_shops">Choose shops</string>
+    <string name="enter_product_name">Enter product name</string>
 </resources>

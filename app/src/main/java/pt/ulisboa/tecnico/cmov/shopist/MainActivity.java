@@ -49,6 +49,8 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -78,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private DatabaseReference myRef;
     private int listPosition;
     private final HashMap<String, String> storeNames = new HashMap<>();
-    private final ArrayList<Item> productsToBuy = new ArrayList<>();
 
 
 
@@ -148,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private void updateData(){
         myRef.child("Pantries").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
                     GenericTypeIndicator<ItemsList> t = new GenericTypeIndicator<ItemsList>() {};
                     for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
@@ -163,14 +164,14 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NotNull DatabaseError databaseError) {
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
 
         myRef.child("Stores").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
                     GenericTypeIndicator<ItemsList> t = new GenericTypeIndicator<ItemsList>() {};
                     for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
@@ -182,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NotNull DatabaseError databaseError) {
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
@@ -532,8 +533,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             startActivityForResult(i, 10030);
         }else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
             Intent i = new Intent(this, ShoppingInside.class);
-            i.putExtra("shoppingProductsList", shoppingLists.get(position).itemList);
+            i.putExtra("userPantryLists", pantryLists);
             i.putExtra("shoppingListName", shoppingLists.get(position).getName());
+            i.putExtra("shoppingListId", shoppingLists.get(position).getId());
             startActivity(i);
         }
     }
