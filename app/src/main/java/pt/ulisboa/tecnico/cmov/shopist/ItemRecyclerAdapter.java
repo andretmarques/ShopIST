@@ -32,8 +32,6 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
                 return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.pantry_item_recycler_adapter, parent, false));
             case "S":
                 return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.shopping_item_recycler_adapter, parent, false));
-            case "ALL":
-                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.all_item_recycler_adapter, parent, false));
         }
         return null;
     }
@@ -49,7 +47,7 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
             itemQuantity = "Quantity available: " + currentItem.getQuantity();
         }
         else if(type.equals("S")){
-            itemQuantity = "Quantity to buy: " + currentItem.getQuantity();
+            itemQuantity = "Quantity to buy: " + currentItem.getToPurchase();
         }
 
 

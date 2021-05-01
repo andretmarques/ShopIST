@@ -20,6 +20,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -76,10 +78,11 @@ public class CreateProductActivity extends AppCompatActivity {
     private void updateData() {
         myRef.child("StoreNames").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
                     GenericTypeIndicator<HashMap<String, String>> t = new GenericTypeIndicator<HashMap<String, String>>() {};
                     hashStoreNames = dataSnapshot.getValue(t);
+                    assert hashStoreNames != null;
                     ArrayList<String> storeNamesArray = new ArrayList<>(hashStoreNames.values());
                     storeKey = new ArrayList<>(hashStoreNames.keySet());
                     storeNames = storeNamesArray.toArray(new String[0]);
@@ -88,7 +91,7 @@ public class CreateProductActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NotNull DatabaseError databaseError) {
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
@@ -99,7 +102,6 @@ public class CreateProductActivity extends AppCompatActivity {
     }
 
     public void createProductButton(View v) {
-        View shop = findViewById(R.id.product_shop);
         if (productName.getText().toString().equals("")) {
             productName.setError("Name should not be empty");
         } else if (productQuantity.getText().toString().equals("") || productQuantity.getText().toString().trim().equals("0")) {
@@ -111,9 +113,9 @@ public class CreateProductActivity extends AppCompatActivity {
             //newProduct.setShops(shopsSelected);
             newProduct.setQuantity(quantity);
             newProduct.generateId();
+            newProduct.setShops(shopsSelected);
             Intent intent = new Intent();
             intent.putExtra("returnedProduct", newProduct);
-            intent.putExtra("hashName", shopsSelected);
             setResult(CreateProductActivity.RESULT_OK, intent);
             finish();
         }

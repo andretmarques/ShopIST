@@ -95,7 +95,7 @@
         android:layout_marginTop="80dp"
         android:background="@drawable/intup_text"
         android:ems="10"
-        android:hint="@string/enter_the_list_name"
+        android:hint="@string/enter_product_name"
         android:importantForAutofill="no"
         android:inputType="textShortMessage"
         android:maxLength="25"

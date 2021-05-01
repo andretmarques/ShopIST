@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -13,7 +14,6 @@ public class Item implements Parcelable {
 
 
     private String name;
-    //private int id;
     //private int photoId;
     private int quantity = 0;
     private int price;
@@ -27,6 +27,7 @@ public class Item implements Parcelable {
         price = in.readInt();
         id = in.readString();
         toPurchase = in.readInt();
+        shops = in.readHashMap(String.class.getClassLoader());
     }
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
@@ -57,12 +58,12 @@ public class Item implements Parcelable {
 
         Item item = (Item) o;
 
-        return Objects.equals(id, item.id);
+        return Objects.equals(name.toLowerCase().trim(), item.name.toLowerCase().trim());
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return name != null ? name.hashCode() : 0;
     }
 
     public HashMap<String, String> getShops() {
@@ -137,5 +138,6 @@ public class Item implements Parcelable {
         dest.writeInt(price);
         dest.writeString(id);
         dest.writeInt(toPurchase);
+        dest.writeMap(shops);
     }
 }

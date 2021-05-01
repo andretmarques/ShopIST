@@ -90,7 +90,6 @@ public class ScanBarcodeActivity extends AppCompatActivity {
             public void receiveDetections(Detector.Detections<Barcode> detections) {
                 final SparseArray<Barcode> barcodes = detections.getDetectedItems();
                 while (barcodes.size() != 0) {
-                    Log.d("meu", "meu");
                     String data = barcodes.valueAt(0).displayValue;
                     Intent i = new Intent();
                     i.putExtra("Barcode", data);
