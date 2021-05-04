@@ -7,7 +7,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -26,6 +25,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText emailEditText;
     EditText passwordEditText;
     TextView register;
+    TextView forgotPassword;
     Button loginButton;
     ProgressBar loadingProgressBar;
 
@@ -52,7 +52,6 @@ public class LoginActivity extends AppCompatActivity {
         cachedPassword = prefs.getString("password", null);
         if (cachedUsername != null && cachedPassword != null) {
             cachedLogin();
-
         }
 
         emailEditText = findViewById(R.id.email_login);
@@ -60,14 +59,18 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.sign_in);
         loadingProgressBar = findViewById(R.id.loading);
         register = findViewById(R.id.register);
+        forgotPassword = findViewById(R.id.forgotPassword);
 
         register.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, RegisterUser.class)));
+        forgotPassword.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, ForgotPassword.class)));
         loginButton.setOnClickListener(view -> userLogin());
 
         emailRegistered = getIntent().getStringExtra("email");
         passwordRegistered = getIntent().getStringExtra("password");
-        if (emailRegistered != null && passwordRegistered != null) {
+        if (emailRegistered != null) {
             emailEditText.setText(emailRegistered);
+        }
+        if (passwordRegistered != null) {
             passwordEditText.setText(passwordRegistered);
         }
     }

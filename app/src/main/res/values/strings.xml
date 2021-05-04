@@ -37,4 +37,6 @@
     <string name="login_failed">"Login failed"</string>
     <string name="register_account">Register Account</string>
     <string name="logout">Logout</string>
+    <string name="enter_your_email">Enter your Email</string>
+    <string name="reset_password">Reset Password</string>
 </resources>
