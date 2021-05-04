@@ -1,7 +1,9 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -11,12 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.app.Application;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -36,6 +40,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -59,6 +64,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import nl.dionsegijn.konfetti.KonfettiView;
+import nl.dionsegijn.konfetti.models.Shape;
+import nl.dionsegijn.konfetti.models.Size;
 
 
 public class MainActivity extends AppCompatActivity implements ListRecyclerAdapter.OnListListener {
@@ -92,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -439,7 +447,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 return true;
 
             case R.id.rate:
-                //onClickShareLove();
+                onClickShareLove();
                 Log.d("TAG", "onOptionsItemSelected: Rate");
                 return true;
 
@@ -557,10 +565,10 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         }
     }
 
-    /* public void onClickShareLove() {
+    public void onClickShareLove() {
         @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)
                 .getLayoutInflater().inflate(R.layout.share_your_love, null);
-        ImageView image = (ImageView) contentView.findViewById(R.id.heart);
+        ImageView image = contentView.findViewById(R.id.heart);
         final AnimatedVectorDrawable animation = (AnimatedVectorDrawable) image.getDrawable();
         final KonfettiView konfettiView = findViewById(R.id.viewKonfetti);
         konfettiView.build()
@@ -587,5 +595,4 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         });
         alertDialog.show();
     }
-    */
 }
