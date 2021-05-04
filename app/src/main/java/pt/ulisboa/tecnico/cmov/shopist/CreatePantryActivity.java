@@ -27,6 +27,8 @@ public class CreatePantryActivity extends AppCompatActivity {
     private TextView listLocation;
     private Intent i;
 
+    String emailuser;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +40,7 @@ public class CreatePantryActivity extends AppCompatActivity {
 
         textView = findViewById(R.id.list_name);
         listLocation = findViewById(R.id.list_location);
+        emailuser = getIntent().getStringExtra("EmailUser");
 
 
     }

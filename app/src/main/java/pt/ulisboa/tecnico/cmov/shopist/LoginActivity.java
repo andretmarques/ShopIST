@@ -42,7 +42,7 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        register.setOnClickListener(view -> startActivityForResult(new Intent(LoginActivity.this, RegisterUser.class), 12119));
+        register.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, RegisterUser.class)));
         loginButton.setOnClickListener(view -> userLogin());
     }
 
@@ -77,6 +77,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                    i.putExtra("UserEmail", FirebaseAuth.getInstance().getCurrentUser().getUid());
                     startActivity(i);
                 } else {
                     Toast.makeText(LoginActivity.this, "Failed to Login. Check your credentials", Toast.LENGTH_LONG).show();
