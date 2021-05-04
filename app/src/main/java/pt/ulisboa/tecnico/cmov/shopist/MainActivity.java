@@ -113,7 +113,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         usermail = getIntent().getStringExtra("UserEmail");
         boolean net = isNetworkAvailable(this.getApplication());
 
-
         mGPS = new GPSUpdater(this.getApplicationContext());
 
         GPStext = findViewById(R.id.GPSRoad);
@@ -128,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         }else{
             setPantryRecycler(pantryLists);
             setShoppingRecycler(shoppingLists);
-
         }
         eneableSwipePantry();
         enableSwipeStore();
