@@ -34,6 +34,7 @@ public class CreateProductActivity extends AppCompatActivity {
     private ArrayList<String> storeKey;
     private String[] storeNames;
     private DatabaseReference myRef;
+    String usermail;
 
 
     @Override
@@ -43,6 +44,7 @@ public class CreateProductActivity extends AppCompatActivity {
         setSupportActionBar(findViewById(R.id.toolbar_main));
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
+        usermail = getIntent().getStringExtra("EmailUser");
 
         productName = findViewById(R.id.product_name);
         productQuantity = findViewById(R.id.product_quantity);
@@ -76,7 +78,7 @@ public class CreateProductActivity extends AppCompatActivity {
     }
 
     private void updateData() {
-        myRef.child("StoreNames").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(usermail).child("StoreNames").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {

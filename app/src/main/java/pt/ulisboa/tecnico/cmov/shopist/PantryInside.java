@@ -57,6 +57,7 @@ public class PantryInside extends AppCompatActivity {
     private RecyclerView productsMainRecycler;
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private HashMap<String, String> positionsMap = new HashMap<>();
+    String usermail;
 
 
     @Override
@@ -70,6 +71,7 @@ public class PantryInside extends AppCompatActivity {
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
         boolean net = isNetworkAvailable(this.getApplication());
+        usermail = getIntent().getStringExtra("EmailUser");
 
 
         Bundle b = getIntent().getExtras();
@@ -115,7 +117,7 @@ public class PantryInside extends AppCompatActivity {
     }
 
     private void populateLists(){
-        myRef.child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
@@ -158,6 +160,7 @@ public class PantryInside extends AppCompatActivity {
 
     public void createItem(View view) {
         Intent intent = new Intent(this, CreateProductActivity.class);
+        intent.putExtra("EmailUser", usermail);
         startActivityForResult(intent, 10015);
     }
 
@@ -186,10 +189,10 @@ public class PantryInside extends AppCompatActivity {
                   showAlert(inList);
                 }else if(inList != null && newItem.getShops().keySet().equals(inList.getShops().keySet())) {
                     inList.setQuantity(inList.getQuantity() + newItem.getQuantity());
-                    myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(inList.getId())).child("quantity").setValue(inList.getQuantity());
+                    myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(inList.getId())).child("quantity").setValue(inList.getQuantity());
                 }else if(inList == null || !newItem.getShops().keySet().equals(inList.getShops().keySet())) {
                     itemsPantry.add(newItem);
-                    myRef.child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
+                    myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
                 }
 
                 setItemsRecycler(itemsPantry);
@@ -317,9 +320,9 @@ public class PantryInside extends AppCompatActivity {
                     itemRecyclerAdapter.consumeQuantity(swipedItem, position);
                     if(swipedItem.getShops().isEmpty() && swipedItem.getQuantity() == 0) {
                         itemRecyclerAdapter.removeItem(position);
-                        myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).removeValue();
+                        myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).removeValue();
                     }else {
-                        myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).child("quantity").setValue(swipedItem.getQuantity());
+                        myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).child("quantity").setValue(swipedItem.getQuantity());
                     }
 
                     snackbar.show();
@@ -386,7 +389,8 @@ public class PantryInside extends AppCompatActivity {
                     snackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
-                            myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).child("quantity").setValue(swipedItem.getQuantity());
+                            myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId()))
+                                    .child("quantity").setValue(swipedItem.getQuantity());
                         }
                     });
                 }
@@ -437,7 +441,7 @@ public class PantryInside extends AppCompatActivity {
     }
 
     private void populateLists(Item toBuy) {
-        myRef.child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 Item i = null;
@@ -448,7 +452,7 @@ public class PantryInside extends AppCompatActivity {
                     }
                 if(i != null) {
                     if (i.getId().equals(toBuy.getId())) {
-                        myRef.child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(toBuy.getId())).child("toPurchase").setValue(i.getToPurchase() + 1);
+                        myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(toBuy.getId())).child("toPurchase").setValue(i.getToPurchase() + 1);
                     }
                 }
             }

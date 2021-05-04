@@ -5,79 +5,57 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature android:name="android.hardware.camera.any" />
 
     <application
+        android:allowBackup="true"
+        android:fullBackupContent="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/shopist_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopIST"
-        android:allowBackup="true"
-        tools:remove="android:appComponentFactory"
-        android:fullBackupContent="true">
-        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
-        <activity
-            android:name=".MainActivity">
-
+        tools:remove="android:appComponentFactory">
+        <activity android:name=".ForgotPassword" />
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
+        <activity android:name=".RegisterUser" />
 
-        <activity
-            android:name=".CreatePantryActivity">
-        </activity>
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
 
-        <activity
-            android:name=".CreateShopActivity">
-        </activity>
-
-        <activity
-            android:name=".CreateProductActivity">
-        </activity>
-
-        <activity
-            android:name=".PantryInside" >
-
-        </activity>
-
-        <activity
-            android:name=".ShoppingInside">
-        </activity>
-
-        <activity
-            android:name=".ScanBarcodeActivity" >
-        </activity>
-
-        <activity
-            android:name=".PriceShopActivity" >
-        </activity>
+        <activity android:name=".MainActivity" />
+        <activity android:name=".CreatePantryActivity" />
+        <activity android:name=".CreateShopActivity" />
+        <activity android:name=".CreateProductActivity" />
+        <activity android:name=".PantryInside" />
+        <activity android:name=".ShoppingInside" />
+        <activity android:name=".ScanBarcodeActivity" />
+        <activity android:name=".PriceShopActivity" />
 
         <service
-            android:name="MainActivity"
+            android:name=".MainActivity"
             android:foregroundServiceType="location" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/key_google_apis_android"/>
-
+            android:value="@string/key_google_apis_android" />
         <meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="barcode" />
-
     </application>
-
-
 
 </manifest>

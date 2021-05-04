@@ -1,7 +1,9 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
@@ -11,11 +13,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.Manifest;
 import android.app.Application;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -35,12 +40,15 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -56,6 +64,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import nl.dionsegijn.konfetti.KonfettiView;
+import nl.dionsegijn.konfetti.models.Shape;
+import nl.dionsegijn.konfetti.models.Size;
 
 
 public class MainActivity extends AppCompatActivity implements ListRecyclerAdapter.OnListListener {
@@ -81,13 +93,14 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private int listPosition;
     private final HashMap<String, String> storeNames = new HashMap<>();
 
-
-
+    String usermail;
 
     protected LocationManager locationManager;
     GPSUpdater mGPS;
     TextView GPStext;
 
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +108,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar_main));
+
+        prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        editor = prefs.edit();
 
         addButton = findViewById(R.id.add_btn);
         joinButton = findViewById(R.id.join_btn);
@@ -111,8 +127,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         pantryListMainRecycler.setVisibility(View.VISIBLE);
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
+        usermail = getIntent().getStringExtra("UserEmail");
         boolean net = isNetworkAvailable(this.getApplication());
-
 
         mGPS = new GPSUpdater(this.getApplicationContext());
 
@@ -128,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         }else{
             setPantryRecycler(pantryLists);
             setShoppingRecycler(shoppingLists);
-
         }
         eneableSwipePantry();
         enableSwipeStore();
@@ -147,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     }
 
     private void updateData(){
-        myRef.child("Pantries").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(usermail).child("Pantries").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
@@ -169,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             }
         });
 
-        myRef.child("Stores").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(usermail).child("Stores").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
@@ -229,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                     snackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
-                            myRef.child("Pantries").child(deletedModel.getId()).removeValue();
+                            myRef.child("Users").child(usermail).child("Pantries").child(deletedModel.getId()).removeValue();
                         }
 
                     });
@@ -283,8 +298,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                     snackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
-                            myRef.child("Stores").child(deletedModel.getId()).removeValue();
-                            myRef.child("StoreNames").child(deletedModel.getId()).removeValue();
+                            myRef.child("Users").child(usermail).child("Stores").child(deletedModel.getId()).removeValue();
+                            myRef.child("Users").child(usermail).child("StoreNames").child(deletedModel.getId()).removeValue();
                             storeNames.remove(deletedModel.getId());
                         }
 
@@ -353,6 +368,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void showCreatePantryPopUp(View v) {
         Intent i = new Intent(this, CreatePantryActivity.class);
         if (actualLatitude != 0.0 && actualLongitude != 0.0 ){
+            i.putExtra("EmailUser", usermail);
             i.putExtra("ActualLatitude", actualLatitude);
             i.putExtra("ActualLongitude", actualLongitude);
         }
@@ -362,6 +378,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
     public void showCreateShopPopUp(View v) {
         Intent i = new Intent(this, CreateShopActivity.class);
+        i.putExtra("EmailUser", usermail);
 
         handleAddMenu();
         startActivityForResult(i, 10002);
@@ -377,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
                 pantryLists.add(pantryList);
                 pantryList.generateId();
-                myRef.child("Pantries").child(pantryList.getId()).setValue(pantryList);
+                myRef.child("Users").child(usermail).child("Pantries").child(pantryList.getId()).setValue(pantryList);
 
 
             }
@@ -391,9 +408,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
                 shoppingLists.add(shoppingList);
                 shoppingList.generateId();
-                myRef.child("Stores").child(shoppingList.getId()).setValue(shoppingList);
+                myRef.child("Users").child(usermail).child("Stores").child(shoppingList.getId()).setValue(shoppingList);
                 storeNames.put(shoppingList.getId(), shoppingList.getName());
-                myRef.child("StoreNames").setValue(storeNames);
+                myRef.child("Users").child(usermail).child("StoreNames").setValue(storeNames);
             }
             return;
         }
@@ -430,9 +447,15 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 return true;
 
             case R.id.rate:
-                //onClickShareLove();
+                onClickShareLove();
                 Log.d("TAG", "onOptionsItemSelected: Rate");
                 return true;
+
+            case R.id.logout:
+                prefs.edit().clear().apply();
+                FirebaseAuth.getInstance().signOut();
+                Toast.makeText(this, "Logged Out", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
 
             default:
                 // If we got here, the user's action was not recognized.
@@ -529,6 +552,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             Intent i = new Intent(this, PantryInside.class);
             i.putExtra("pantryListName", pantryLists.get(position).getName());
             i.putExtra("pantryListId", pantryLists.get(position).getId());
+            i.putExtra("EmailUser", usermail);
             listPosition = position;
             startActivityForResult(i, 10030);
         }else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
@@ -536,14 +560,15 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             i.putExtra("userPantryLists", pantryLists);
             i.putExtra("shoppingListName", shoppingLists.get(position).getName());
             i.putExtra("shoppingListId", shoppingLists.get(position).getId());
+            i.putExtra("EmailUser", usermail);
             startActivity(i);
         }
     }
 
-    /* public void onClickShareLove() {
+    public void onClickShareLove() {
         @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)
                 .getLayoutInflater().inflate(R.layout.share_your_love, null);
-        ImageView image = (ImageView) contentView.findViewById(R.id.heart);
+        ImageView image = contentView.findViewById(R.id.heart);
         final AnimatedVectorDrawable animation = (AnimatedVectorDrawable) image.getDrawable();
         final KonfettiView konfettiView = findViewById(R.id.viewKonfetti);
         konfettiView.build()
@@ -570,5 +595,4 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         });
         alertDialog.show();
     }
-    */
 }
