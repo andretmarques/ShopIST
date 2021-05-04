@@ -23,6 +23,12 @@
                 android:iconTint="@color/black"
                 android:title="@string/rate"
                 />
+            <item
+                android:id="@+id/logout"
+                android:icon="@drawable/ic_baseline_login_24"
+                android:iconTint="@color/black"
+                android:title="@string/logout"
+                />
         </menu>
     </item>
 </menu>

@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
@@ -101,6 +102,10 @@ public class RegisterUser extends AppCompatActivity {
                         public void onComplete(@NonNull Task<Void> task) {
                             if (task.isSuccessful()) {
                                 Toast.makeText(RegisterUser.this, "User successfully registered", Toast.LENGTH_LONG).show();
+                                Intent i = new Intent(RegisterUser.this, LoginActivity.class);
+                                i.putExtra("email", email);
+                                i.putExtra("password", password);
+                                startActivity(i);
                             } else {
                                 Toast.makeText(RegisterUser.this, "Failed to register. Try again", Toast.LENGTH_LONG).show();
                             }
