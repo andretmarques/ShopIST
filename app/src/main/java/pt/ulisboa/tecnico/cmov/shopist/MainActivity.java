@@ -12,6 +12,7 @@ import android.Manifest;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -89,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     GPSUpdater mGPS;
     TextView GPStext;
 
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +100,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar(findViewById(R.id.toolbar_main));
+
+        prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        editor = prefs.edit();
 
         addButton = findViewById(R.id.add_btn);
         joinButton = findViewById(R.id.join_btn);
@@ -437,6 +444,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 return true;
 
             case R.id.logout:
+                prefs.edit().clear().apply();
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "Logged Out", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));

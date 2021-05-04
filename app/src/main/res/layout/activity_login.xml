@@ -27,7 +27,7 @@
         app:layout_constraintTop_toBottomOf="@+id/banner"
         android:layout_marginTop="60dp"
         android:ems="10"
-        android:hint="@string/email_adrress"
+        android:hint="@string/email_address"
         android:textSize="24sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

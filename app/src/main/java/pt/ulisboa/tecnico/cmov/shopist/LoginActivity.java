@@ -1,11 +1,13 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -18,7 +20,6 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.FirebaseDatabase;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -33,18 +34,32 @@ public class LoginActivity extends AppCompatActivity {
 
     FirebaseAuth mAuth;
 
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
+    String cachedUsername;
+    String cachedPassword;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        mAuth = FirebaseAuth.getInstance();
+
+        prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        editor = prefs.edit();
+        cachedUsername = prefs.getString("username", null);
+        cachedPassword = prefs.getString("password", null);
+        if (cachedUsername != null && cachedPassword != null) {
+            cachedLogin();
+
+        }
 
         emailEditText = findViewById(R.id.email_login);
         passwordEditText = findViewById(R.id.password_login);
         loginButton = findViewById(R.id.sign_in);
         loadingProgressBar = findViewById(R.id.loading);
         register = findViewById(R.id.register);
-
-        mAuth = FirebaseAuth.getInstance();
 
         register.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, RegisterUser.class)));
         loginButton.setOnClickListener(view -> userLogin());
@@ -60,6 +75,9 @@ public class LoginActivity extends AppCompatActivity {
     private void userLogin() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
+        editor.putString("username", email);
+        editor.putString("password", password);
+        editor.apply();
 
         if (password.length() < 6) {
             if (password.isEmpty()) {
@@ -87,6 +105,26 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
+                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                    i.putExtra("UserEmail", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    startActivity(i);
+                } else {
+                    Toast.makeText(LoginActivity.this, "Failed to Login. Check your credentials", Toast.LENGTH_LONG).show();
+                    emailEditText.setText(null);
+                    passwordEditText.setText(null);
+
+                }
+                loadingProgressBar.setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+
+    public void cachedLogin() {
+        mAuth.signInWithEmailAndPassword(cachedUsername, cachedPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull Task<AuthResult> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(LoginActivity.this, "Welcome back", Toast.LENGTH_LONG).show();
                     Intent i = new Intent(LoginActivity.this, MainActivity.class);
                     i.putExtra("UserEmail", FirebaseAuth.getInstance().getCurrentUser().getUid());
                     startActivity(i);
