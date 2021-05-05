@@ -2,6 +2,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -24,7 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class ShoppingInside extends AppCompatActivity {
+public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
     private final ArrayList<Item> itemsShop = new ArrayList<>();
     private ArrayList<ItemsList> allPantries = new ArrayList<>();
     private ArrayList<String> allProducts = new ArrayList<>();
@@ -59,7 +60,7 @@ public class ShoppingInside extends AppCompatActivity {
         RecyclerView productsMainRecycler = findViewById(R.id.items_recycler);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         productsMainRecycler.setLayoutManager(layoutManager);
-        ItemRecyclerAdapter itemRecyclerAdapter = new ItemRecyclerAdapter(this, products, "S");
+        ItemRecyclerAdapter itemRecyclerAdapter = new ItemRecyclerAdapter(this, products, "S", this);
         productsMainRecycler.setAdapter(itemRecyclerAdapter);
     }
 
@@ -78,5 +79,8 @@ public class ShoppingInside extends AppCompatActivity {
             }
         }
         setItemsRecycler(itemsShop);
+    }
+    @Override
+    public void onItemClick(int position) {
     }
 }

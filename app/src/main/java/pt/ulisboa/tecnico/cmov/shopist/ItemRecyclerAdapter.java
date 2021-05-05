@@ -16,12 +16,15 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
 
     private final Context context;
     private final List<Item> itemsList;
+    private final OnItemListener monItemListener;
     private final String type;
 
-    public ItemRecyclerAdapter(Context context, List<Item> itemsList, String type) {
+    public ItemRecyclerAdapter(Context context, List<Item> itemsList, String type, OnItemListener onItemListener) {
         this.context = context;
         this.itemsList = itemsList;
         this.type = type;
+        this.monItemListener = onItemListener;
+
     }
 
     @NonNull
@@ -29,9 +32,9 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
     public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         switch (type) {
             case "P":
-                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.pantry_item_recycler_adapter, parent, false));
+                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.pantry_item_recycler_adapter, parent, false), monItemListener);
             case "S":
-                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.shopping_item_recycler_adapter, parent, false));
+                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.shopping_item_recycler_adapter, parent, false), monItemListener);
         }
         return null;
     }
@@ -104,22 +107,35 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         return itemsList.size();
     }
 
-    public static final class ItemViewHolder extends RecyclerView.ViewHolder{
+    public static final class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView itemName;
         TextView itemQuantity;
         TextView itemPrice;
+        OnItemListener onItemListener;
 
-        public ItemViewHolder(@NonNull View itemView) {
+        public ItemViewHolder(@NonNull View itemView, OnItemListener onItemListener) {
             super(itemView);
             itemName = itemView.findViewById(R.id.item_name);
             itemQuantity = itemView.findViewById(R.id.item_quantity);
             itemPrice = itemView.findViewById(R.id.item_price);
-
+            this.onItemListener = onItemListener;
+            itemView.setOnClickListener(this);
 
         }
 
+        @Override
+        public void onClick(View v) {
+            onItemListener.onItemClick(getAdapterPosition());
 
+        }
     }
+
+    public interface OnItemListener {
+        void onItemClick(int position);
+    }
+
+
 }
+
 
