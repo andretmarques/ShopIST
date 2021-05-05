@@ -55,11 +55,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -81,8 +84,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private ExtendedFloatingActionButton createPantryButton;
     private ExtendedFloatingActionButton createShopButton;
     private FloatingActionButton addButton;
-    private final ArrayList<ItemsList> pantryLists = new ArrayList<>();
-    private final ArrayList<ItemsList> shoppingLists = new ArrayList<>();
+    private ArrayList<ItemsList> pantryLists = new ArrayList<>();
+    private ArrayList<ItemsList> shoppingLists = new ArrayList<>();
     private RecyclerView pantryListMainRecycler;
     private RecyclerView shoppingListMainRecycler;
     private ListRecyclerAdapter pantryListRecyclerAdapter;
@@ -141,13 +144,14 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         }
         if (net){
             updateData();
-        }else{
-            setPantryRecycler(pantryLists);
-            setShoppingRecycler(shoppingLists);
+            Log.d("cacheya", "Lists loaded from Firebase because there's internet access");
+        }else {
+            loadDataCache();
         }
+        setPantryRecycler(pantryLists);
+        setShoppingRecycler(shoppingLists);
         eneableSwipePantry();
         enableSwipeStore();
-
     }
 
     private Boolean isNetworkAvailable(Application application) {
@@ -157,8 +161,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         NetworkCapabilities actNw = connectivityManager.getNetworkCapabilities(nw);
         return actNw != null && (actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
                 || actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH));
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
     }
 
     private void updateData(){
@@ -173,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                         itemsList.getItemList().remove(null);
                         pantryLists.add(itemsList);
                     }
-
+                    savePantryListToCache();
                 }
                 setPantryRecycler(pantryLists);
             }
@@ -193,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                         ItemsList itemsList = singleSnapshot.getValue(t);
                         shoppingLists.add(itemsList);
                     }
+                    saveShoppingListToCache();
                 }
                 setShoppingRecycler(shoppingLists);
             }
@@ -202,6 +206,36 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
+    }
+
+    public void savePantryListToCache() {
+        Gson gson = new Gson();
+        String jsonPantry = gson.toJson(pantryLists);
+        Log.d("cacheya", "savePantryListToCache: " + jsonPantry);
+        editor.putString("cachedPantries", jsonPantry);
+        editor.apply();
+    }
+
+    public void saveShoppingListToCache() {
+        Gson gson = new Gson();
+        String jsonShopping = gson.toJson(shoppingLists);
+        editor.putString("cachedShopping", jsonShopping);
+        editor.apply();
+    }
+
+    private void loadDataCache() {
+        prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        Gson gson = new Gson();
+        String jsonPantry = prefs.getString("cachedPantries", null);
+        String jsonShopping = prefs.getString("cachedShopping", null);
+        Type type = new TypeToken<ArrayList<ItemsList>>() {}.getType();
+        pantryLists = gson.fromJson(jsonPantry, type);
+        shoppingLists = gson.fromJson(jsonShopping, type);
+        if (pantryLists == null && shoppingLists == null) {
+            Log.d("cacheya", "Listas de cache vazias ");
+        } else {
+            Log.d("cacheya", "Cache loaded successfully");
+        }
 
     }
 
@@ -394,9 +428,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 ItemsList pantryList = data.getParcelableExtra("returnedPantryList");
                 pantryLists.add(pantryList);
                 pantryList.generateId();
+                savePantryListToCache();
                 myRef.child("Users").child(usermail).child("Pantries").child(pantryList.getId()).setValue(pantryList);
-
-
             }
             return;
         }
@@ -408,6 +441,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
                 shoppingLists.add(shoppingList);
                 shoppingList.generateId();
+                saveShoppingListToCache();
                 myRef.child("Users").child(usermail).child("Stores").child(shoppingList.getId()).setValue(shoppingList);
                 storeNames.put(shoppingList.getId(), shoppingList.getName());
                 myRef.child("Users").child(usermail).child("StoreNames").setValue(storeNames);
