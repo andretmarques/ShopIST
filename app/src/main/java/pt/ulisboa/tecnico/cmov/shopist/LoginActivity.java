@@ -39,8 +39,6 @@ public class LoginActivity extends AppCompatActivity {
     String cachedUsername;
     String cachedPassword;
 
-
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

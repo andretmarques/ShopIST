@@ -51,8 +51,6 @@ public class PantryInside extends AppCompatActivity {
     String barcode = "";
     Double price;
     String shop;
-    ArrayList<String> shopList = new ArrayList<>();
-    ArrayList<String> priceList = new ArrayList<>();
     String messageAll = "";
     private RecyclerView productsMainRecycler;
     private ItemRecyclerAdapter itemRecyclerAdapter;
@@ -80,14 +78,11 @@ public class PantryInside extends AppCompatActivity {
             actionTitle = "Pantry: " + actionTitle;
             toolbarTitle.setText(actionTitle);
             pantryId = b.getString("pantryListId");
+            itemsPantry = b.getParcelableArrayList("pantryList");
             assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
         }
-        if (net){
-            populateLists();
-        }else {
-            setItemsRecycler(itemsPantry);
-        }
+        setItemsRecycler(itemsPantry);
 
 
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
@@ -112,8 +107,7 @@ public class PantryInside extends AppCompatActivity {
         NetworkCapabilities actNw = connectivityManager.getNetworkCapabilities(nw);
         return actNw != null && (actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
                 || actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
-                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH));
+                || actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
     }
 
     private void populateLists(){
