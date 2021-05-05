@@ -42,37 +42,38 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-
-        mAuth = FirebaseAuth.getInstance();
-
         prefs = getSharedPreferences("UserData", MODE_PRIVATE);
         editor = prefs.edit();
         cachedUsername = prefs.getString("username", null);
         cachedPassword = prefs.getString("password", null);
+
         if (cachedUsername != null && cachedPassword != null) {
             cachedLogin();
+        } else {
+            setContentView(R.layout.activity_login);
+            mAuth = FirebaseAuth.getInstance();
+
+            emailEditText = findViewById(R.id.email_login);
+            passwordEditText = findViewById(R.id.password_login);
+            loginButton = findViewById(R.id.sign_in);
+            loadingProgressBar = findViewById(R.id.loading);
+            register = findViewById(R.id.register);
+            forgotPassword = findViewById(R.id.forgotPassword);
+
+            register.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, RegisterUser.class)));
+            forgotPassword.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, ForgotPassword.class)));
+            loginButton.setOnClickListener(view -> userLogin());
+
+            emailRegistered = getIntent().getStringExtra("email");
+            passwordRegistered = getIntent().getStringExtra("password");
+            if (emailRegistered != null) {
+                emailEditText.setText(emailRegistered);
+            }
+            if (passwordRegistered != null) {
+                passwordEditText.setText(passwordRegistered);
+            }
         }
 
-        emailEditText = findViewById(R.id.email_login);
-        passwordEditText = findViewById(R.id.password_login);
-        loginButton = findViewById(R.id.sign_in);
-        loadingProgressBar = findViewById(R.id.loading);
-        register = findViewById(R.id.register);
-        forgotPassword = findViewById(R.id.forgotPassword);
-
-        register.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, RegisterUser.class)));
-        forgotPassword.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, ForgotPassword.class)));
-        loginButton.setOnClickListener(view -> userLogin());
-
-        emailRegistered = getIntent().getStringExtra("email");
-        passwordRegistered = getIntent().getStringExtra("password");
-        if (emailRegistered != null) {
-            emailEditText.setText(emailRegistered);
-        }
-        if (passwordRegistered != null) {
-            passwordEditText.setText(passwordRegistered);
-        }
     }
 
     private void userLogin() {
@@ -123,23 +124,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void cachedLogin() {
-        mAuth.signInWithEmailAndPassword(cachedUsername, cachedPassword).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(LoginActivity.this, "Welcome back", Toast.LENGTH_LONG).show();
-                    Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                    i.putExtra("UserEmail", FirebaseAuth.getInstance().getCurrentUser().getUid());
-                    startActivity(i);
-                } else {
-                    Toast.makeText(LoginActivity.this, "Failed to Login. Check your credentials", Toast.LENGTH_LONG).show();
-                    emailEditText.setText(null);
-                    passwordEditText.setText(null);
-
-                }
-                loadingProgressBar.setVisibility(View.INVISIBLE);
-            }
-        });
+        Toast.makeText(LoginActivity.this, "Welcome back", Toast.LENGTH_LONG).show();
+        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        i.putExtra("UserEmail", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        startActivity(i);
     }
 
 }
