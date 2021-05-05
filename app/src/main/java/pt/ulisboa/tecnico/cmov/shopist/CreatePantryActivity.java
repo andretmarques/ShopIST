@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -14,7 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.libraries.places.api.Places;
-import com.google.gson.Gson;
 import com.sucho.placepicker.AddressData;
 import com.sucho.placepicker.MapType;
 import com.sucho.placepicker.PlacePicker;
@@ -28,7 +26,6 @@ public class CreatePantryActivity extends AppCompatActivity {
     private TextView textView;
     private TextView listLocation;
     private Intent i;
-
 
     String emailuser;
 
