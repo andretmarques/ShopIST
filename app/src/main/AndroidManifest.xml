@@ -45,6 +45,7 @@
         <activity android:name=".ShoppingInside" />
         <activity android:name=".ScanBarcodeActivity" />
         <activity android:name=".PriceShopActivity" />
+        <activity android:name=".EditProductActivity" />
 
         <service
             android:name=".MainActivity"

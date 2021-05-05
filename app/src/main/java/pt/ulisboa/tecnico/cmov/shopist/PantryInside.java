@@ -36,13 +36,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PantryInside extends AppCompatActivity {
+public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
     private ArrayList<Item> itemsPantry = new ArrayList<>();
     private ArrayList<PublicItem> listPublic = new ArrayList<>();
     private DatabaseReference myRef;
@@ -54,6 +55,7 @@ public class PantryInside extends AppCompatActivity {
     ArrayList<String> shopList = new ArrayList<>();
     ArrayList<String> priceList = new ArrayList<>();
     String messageAll = "";
+    private int listPosition;
     private RecyclerView productsMainRecycler;
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private HashMap<String, String> positionsMap = new HashMap<>();
@@ -152,7 +154,7 @@ public class PantryInside extends AppCompatActivity {
         productsMainRecycler = findViewById(R.id.items_recycler);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         productsMainRecycler.setLayoutManager(layoutManager);
-        itemRecyclerAdapter = new ItemRecyclerAdapter(this, products, "P");
+        itemRecyclerAdapter = new ItemRecyclerAdapter(this, products, "P", this);
         productsMainRecycler.setAdapter(itemRecyclerAdapter);
         enableSwipeLeft();
         enableSwipeRight();
@@ -176,7 +178,18 @@ public class PantryInside extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 10015) {
+
+        if(requestCode == 10057){
+            if (resultCode == RESULT_OK) {
+                Item newItem = data.getParcelableExtra("returnedItem");
+                myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(newItem.getId())).setValue(newItem);
+                itemsPantry.set(listPosition, newItem);
+                itemRecyclerAdapter.notifyItemChanged(listPosition);
+                Snackbar snackbar = Snackbar.make(productsMainRecycler, "Product " + newItem.getName() + " updated", 1000);
+                snackbar.show();
+            }
+        }
+        else if (requestCode == 10015) {
             if (resultCode == RESULT_OK) {
                 Item newItem = data.getParcelableExtra("returnedProduct");
                 Item inList = null;
@@ -292,7 +305,7 @@ public class PantryInside extends AppCompatActivity {
     }
 
     private void enableSwipeRight(){
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
@@ -307,34 +320,28 @@ public class PantryInside extends AppCompatActivity {
             }
 
 
-
             @Override
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getAdapterPosition();
                 final Item swipedItem = itemsPantry.get(position);
 
 
-                if (direction == ItemTouchHelper.RIGHT) {
-                    Snackbar snackbar = Snackbar.make(productsMainRecycler, "One " + swipedItem.getName() + " Consumed", 1000);
-
-                    itemRecyclerAdapter.consumeQuantity(swipedItem, position);
-                    if(swipedItem.getShops().isEmpty() && swipedItem.getQuantity() == 0) {
-                        itemRecyclerAdapter.removeItem(position);
-                        myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).removeValue();
-                    }else {
-                        myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).child("quantity").setValue(swipedItem.getQuantity());
-                    }
-
+                if (direction == ItemTouchHelper.LEFT) {
+                    final Item deletedModel = itemsPantry.get(position);
+                    final int deletedPosition = position;
+                    itemRecyclerAdapter.removeItem(position);
+                    Snackbar snackbar = Snackbar.make(productsMainRecycler, "" + deletedModel.getName() + " Removed", 1250);
+                    snackbar.setAction("UNDO", (view) -> itemRecyclerAdapter.restoreItem(deletedModel, deletedPosition));
+                    snackbar.setActionTextColor(Color.YELLOW);
                     snackbar.show();
                     snackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
-                            if(!swipedItem.getShops().isEmpty())
-                                showCustomDialog(swipedItem);
+                            myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).removeValue();
                         }
+
                     });
                 }
-                itemRecyclerAdapter.notifyItemChanged(position);
             }
 
             @Override
@@ -346,23 +353,28 @@ public class PantryInside extends AppCompatActivity {
                 final ColorDrawable background;
                 assert drawableRight != null;
                 assert drawableLeft != null;
-                int intrinsicWidthAdd = drawableRight.getIntrinsicWidth();
-                int intrinsicHeightAdd = drawableRight.getIntrinsicHeight();
-                if (dX > 0) {
-                    background = new ColorDrawable(Color.parseColor("#cc0000"));
+                int intrinsicWidthCon = drawableLeft.getIntrinsicWidth();
+                int intrinsicHeightCon = drawableLeft.getIntrinsicHeight();
+                background = new ColorDrawable(Color.parseColor("#cc0000"));
 
-                    background.setBounds(itemView.getLeft(), itemView.getTop(),
-                            itemView.getLeft() + ((int) dX) + 20, itemView.getBottom());
+                background.setBounds(itemView.getLeft(), itemView.getTop(),
+                        itemView.getLeft() + ((int) dX) + 20, itemView.getBottom());
 
-                    int iconTop = itemView.getTop() + (itemHeight - intrinsicHeightAdd) / 2;
-                    int iconLeft = (itemHeight - intrinsicHeightAdd) / 2;
-                    int iconRight = iconLeft + intrinsicWidthAdd;
-                    int iconBottom = iconTop + intrinsicHeightAdd;
-                    drawableRight.setBounds(iconLeft, iconTop, iconRight, iconBottom);
-                    background.draw(c);
-                    drawableRight.draw(c);
-                    super.onChildDraw(c, recyclerView, viewHolder, dX / 2, dY, actionState, isCurrentlyActive);
-                }
+                background.setBounds(itemView.getRight() + ((int) dX), itemView.getTop(),
+                        itemView.getRight(), itemView.getBottom());
+
+                int iconTop = itemView.getTop() + (itemHeight - intrinsicHeightCon) / 2;
+                int IconMargin = (itemHeight - intrinsicHeightCon) / 2;
+                int iconLeft = itemView.getRight() - IconMargin - intrinsicWidthCon;
+                int iconRight = itemView.getRight() - IconMargin;
+                int iconBottom = iconTop + intrinsicHeightCon;
+
+                drawableLeft.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                background.draw(c);
+                drawableLeft.draw(c);
+                super.onChildDraw(c, recyclerView, viewHolder, dX / 2, dY, actionState, isCurrentlyActive);
+
+
             }
 
         };
@@ -371,7 +383,7 @@ public class PantryInside extends AppCompatActivity {
     }
 
     private void enableSwipeLeft() {
-        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
@@ -382,7 +394,7 @@ public class PantryInside extends AppCompatActivity {
                 int position = viewHolder.getAdapterPosition();
                 final Item swipedItem = itemsPantry.get(position);
 
-                if (direction == ItemTouchHelper.LEFT) {
+                if (direction == ItemTouchHelper.RIGHT) {
                     Snackbar snackbar = Snackbar.make(productsMainRecycler, "One " + swipedItem.getName() + " Added", 1000);
                     itemRecyclerAdapter.addQuantity(swipedItem, position);
                     snackbar.show();
@@ -406,22 +418,20 @@ public class PantryInside extends AppCompatActivity {
                 final ColorDrawable background;
                 assert drawableRight != null;
                 assert drawableLeft != null;
-                int intrinsicWidthCon = drawableLeft.getIntrinsicWidth();
-                int intrinsicHeightCon = drawableLeft.getIntrinsicHeight();
+                int intrinsicWidthAdd = drawableRight.getIntrinsicWidth();
+                int intrinsicHeightAdd = drawableRight.getIntrinsicHeight();
                 background = new ColorDrawable(Color.parseColor("#12752c"));
 
-                background.setBounds(itemView.getRight() + ((int) dX), itemView.getTop(),
-                        itemView.getRight(), itemView.getBottom());
+                background.setBounds(itemView.getLeft(), itemView.getTop(),
+                        itemView.getLeft() + ((int) dX) + 20, itemView.getBottom());
 
-                int iconTop = itemView.getTop() + (itemHeight - intrinsicHeightCon) / 2;
-                int IconMargin = (itemHeight - intrinsicHeightCon) / 2;
-                int iconLeft = itemView.getRight() - IconMargin - intrinsicWidthCon;
-                int iconRight = itemView.getRight() - IconMargin;
-                int iconBottom = iconTop + intrinsicHeightCon;
-
-                drawableLeft.setBounds(iconLeft, iconTop, iconRight, iconBottom);
+                int iconTop = itemView.getTop() + (itemHeight - intrinsicHeightAdd) / 2;
+                int iconLeft = (itemHeight - intrinsicHeightAdd) / 2;
+                int iconRight = iconLeft + intrinsicWidthAdd;
+                int iconBottom = iconTop + intrinsicHeightAdd;
+                drawableRight.setBounds(iconLeft, iconTop, iconRight, iconBottom);
                 background.draw(c);
-                drawableLeft.draw(c);
+                drawableRight.draw(c);
                 super.onChildDraw(c, recyclerView, viewHolder, dX / 2, dY, actionState, isCurrentlyActive);
 
                 }
@@ -462,5 +472,14 @@ public class PantryInside extends AppCompatActivity {
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent i = new Intent(this, EditProductActivity.class);
+        i.putExtra("product", itemsPantry.get(position));
+        listPosition = position;
+        startActivityForResult(i, 10057);
+
     }
 }

@@ -17,7 +17,8 @@
     <string name="set_your_actual_location">Set your actual location</string>
     <string name="enter_the_list_name">Enter the list name</string>
     <string name="new_product">New product</string>
-    <string name="quantity">Quantity</string>
+    <string name="quantity_to_buy">Quantity to buy</string>
+    <string name="quantity">Quantity available</string>
     <string name="choose_shops">Choose shops</string>
     <string name="enter_product_name">Enter product name</string>
     <string name="email_address">Email Address</string>
@@ -39,4 +40,9 @@
     <string name="logout">Logout</string>
     <string name="enter_your_email">Enter your Email</string>
     <string name="reset_password">Reset Password</string>
+    <string name="scan_barcode">Scan Barcode</string>
+    <string name="create_new_product">Create new product</string>
+    <string name="click_to_add_a_barcode">Click to add a barcode</string>
+    <string name="woriduuu">WORIDUUU</string>
+    <string name="confirm">Confirm</string>
 </resources>

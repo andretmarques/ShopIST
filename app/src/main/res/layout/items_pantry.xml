@@ -12,6 +12,7 @@
         android:background="@color/darkGrey"
         android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:titleTextColor="@color/white">
 
         <TextView
@@ -46,7 +47,7 @@
         android:layout_marginBottom="32dp"
         android:background="@drawable/button_background"
         android:onClick="createItem"
-        android:text="Create new product"
+        android:text="@string/create_new_product"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -57,7 +58,7 @@
         android:layout_marginEnd="56dp"
         android:layout_marginBottom="32dp"
         android:background="@drawable/button_background"
-        android:text="Scan Barcode"
+        android:text="@string/scan_barcode"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
