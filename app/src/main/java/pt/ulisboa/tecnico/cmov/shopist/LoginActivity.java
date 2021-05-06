@@ -124,10 +124,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void cachedLogin() {
-        Toast.makeText(LoginActivity.this, "Welcome back", Toast.LENGTH_LONG).show();
+        Toast.makeText(LoginActivity.this, "Welcome back", Toast.LENGTH_SHORT).show();
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         i.putExtra("UserEmail", FirebaseAuth.getInstance().getCurrentUser().getUid());
         startActivity(i);
+        finish();
     }
 
 }
