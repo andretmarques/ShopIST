@@ -207,7 +207,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                 populatePositionMap();
             }
             return;
-        }
+        }/*
         else if (requestCode == 10025) {
             if (resultCode == RESULT_OK) {
                 barcode = data.getStringExtra("Barcode");
@@ -290,7 +290,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
             }
             return;
-        }
+        }*/
         super.onActivityResult(requestCode, resultCode, data);
     }
     public void ScanBarcodeAssist() {
