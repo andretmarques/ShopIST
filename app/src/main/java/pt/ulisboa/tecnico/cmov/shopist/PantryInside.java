@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -204,7 +205,29 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                 populatePositionMap();
             }
             return;
-        }/*
+        } else if (requestCode == 10025) {
+            if (resultCode == RESULT_OK) {
+                barcode = data.getStringExtra("Barcode");
+                boolean in = false;
+                for (Item item : itemsPantry) {
+                    if (item.getProductBarcode().equals(barcode)) {
+                        Intent i = new Intent(this, EditProductActivity.class);
+                        i.putExtra("product", item);
+                        i.putExtra("UserId", userId);
+                        i.putExtra("PantryId", pantryId);
+                        startActivityForResult(i, 10057);
+                        in = true;
+                        break;
+                    }
+                }
+                if (!in) {
+                    Toast.makeText(PantryInside.this, "You don't have a product with this barcode. Please create one", Toast.LENGTH_LONG).show();
+                }
+            }
+
+        }
+
+        /*
         else if (requestCode == 10025) {
             if (resultCode == RESULT_OK) {
                 barcode = data.getStringExtra("Barcode");
