@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -13,8 +14,14 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Patterns;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +35,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.android.material.snackbar.Snackbar;
@@ -35,6 +43,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.GenericTypeIndicator;
+import com.google.firebase.database.core.UserWriteRecord;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -56,6 +65,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private HashMap<String, String> positionsMap = new HashMap<>();
     String userId;
+    FirebaseAuth mAuth;
 
 
     @Override
@@ -68,6 +78,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         TextView toolbarTitle = findViewById(R.id.toolbar_pantry_title);
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
+        mAuth = FirebaseAuth.getInstance();
         boolean net = isNetworkAvailable(this.getApplication());
         userId = getIntent().getStringExtra("EmailUser");
 
@@ -97,6 +108,73 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
         scanBarcodeBtn = findViewById(R.id.scan_barcode);
         scanBarcodeBtn.setOnClickListener(view -> startActivityForResult(new Intent(PantryInside.this, ScanBarcodeActivity.class), 10025));
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.pantry_menu_share, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(PantryInside.this);
+        alertDialog.setTitle("Share this pantry");
+        alertDialog.setMessage("Enter your friend's email");
+        final EditText input = new EditText(PantryInside.this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+
+        alertDialog.setPositiveButton("Confirm",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        String email = input.getText().toString();
+                        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                            Toast.makeText(getApplicationContext(), "Wrong email format", Toast.LENGTH_SHORT).show();
+                            onOptionsItemSelected(item);
+
+                        }
+                        Toast.makeText(getApplicationContext(), "Your friend has now access to the pantry", Toast.LENGTH_SHORT).show();
+                        sharePantry(email);
+                    }
+                });
+
+        alertDialog.setNegativeButton("Back",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+        alertDialog.show();
+        return true;
+    }
+
+    public void sharePantry(String email){
+        SharedPantry newSharedPantry = new SharedPantry(pantryId, mAuth.getCurrentUser().getUid());
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot singleSnapshot : snapshot.child("Users").getChildren()) {
+                    if (singleSnapshot.child("email").getValue().toString().equals(email)) {
+                        Log.d("olaolaola", String.valueOf(singleSnapshot.getValue()));
+
+                        myRef.child("Users").child(singleSnapshot.getKey()).child("Pantries").child("Shared").child("Pantry").child(pantryId).setValue(newSharedPantry);
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
     }
 
     private Boolean isNetworkAvailable(Application application) {

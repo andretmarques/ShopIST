@@ -53,7 +53,6 @@ public class ItemsList implements Parcelable {
 
     public void generateId(){
         this.id = UUID.randomUUID().toString();
-
     }
 
     public String getLocation() {
