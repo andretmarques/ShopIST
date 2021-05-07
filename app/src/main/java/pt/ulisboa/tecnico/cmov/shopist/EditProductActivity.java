@@ -31,6 +31,9 @@ public class EditProductActivity  extends AppCompatActivity {
     String barcode;
     private DatabaseReference myRef;
     private ArrayList<PublicItem> listPublic = new ArrayList<>();
+    String userId;
+    String pantryId;
+    boolean repeated = false;
 
 
     @Override
@@ -49,9 +52,8 @@ public class EditProductActivity  extends AppCompatActivity {
         quantityToBuy = findViewById(R.id.product_quantity_to_buy);
         price = findViewById(R.id.product_price);
         barcodeView = findViewById(R.id.product_barcode_text);
-
-
-
+        userId = getIntent().getStringExtra("UserId");
+        pantryId = getIntent().getStringExtra("PantryId");
 
         Intent i = getIntent();
         if(i != null){
@@ -119,6 +121,33 @@ public class EditProductActivity  extends AppCompatActivity {
         finish();
     }
 
+    private void userHasRepeatedBarcode() {
+        myRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Log.d("scan", pantryId);
+                for (DataSnapshot singleSnapshot : snapshot.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").getChildren()) {
+                    if (singleSnapshot.child("productBarcode").getValue().toString().equals(barcode)) {
+                        Log.d("repeated", singleSnapshot.child("productBarcode").getValue().toString());
+                        Toast.makeText(EditProductActivity.this, "You already have an item with this barcode", Toast.LENGTH_LONG).show();
+                        repeated = true;
+                        finish();
+                        break;
+                    }
+                }
+                if (!repeated) {
+                    scanCrowdSourceBarcode();
+                }
+        }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
     private void scanCrowdSourceBarcode() {
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -129,13 +158,12 @@ public class EditProductActivity  extends AppCompatActivity {
                     item.setPrice(varPrice);
                     price.setText(String.valueOf(varPrice));
                     price.setFocusable(true);
-                    price.setError("Automatic input from the most recent price. If you want to edit it just write a new price and press confirm");
                     price.requestFocus();
+                    barcodeView.setText(barcode);
                 } else {
                     Toast.makeText(EditProductActivity.this, "Write a Price and press confirm to share product info", Toast.LENGTH_LONG).show();
                 }
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
@@ -149,13 +177,14 @@ public class EditProductActivity  extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 barcode = data.getStringExtra("Barcode");
                 Log.d("barcode", barcode);
-                barcodeView.setText(barcode);
-                scanCrowdSourceBarcode();
+                userHasRepeatedBarcode();
+
             }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
+
 
 
 

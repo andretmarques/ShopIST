@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -17,7 +16,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -36,7 +34,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.google.gson.Gson;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -57,7 +54,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     private RecyclerView productsMainRecycler;
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private HashMap<String, String> positionsMap = new HashMap<>();
-    String usermail;
+    String userId;
 
 
     @Override
@@ -71,7 +68,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
         boolean net = isNetworkAvailable(this.getApplication());
-        usermail = getIntent().getStringExtra("EmailUser");
+        userId = getIntent().getStringExtra("EmailUser");
 
         Bundle b = getIntent().getExtras();
         if(b != null){
@@ -112,7 +109,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     }
 
     private void populateLists(){
-        myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
@@ -157,7 +154,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
     public void createItem(View view) {
         Intent intent = new Intent(this, CreateProductActivity.class);
-        intent.putExtra("EmailUser", usermail);
+        intent.putExtra("EmailUser", userId);
         startActivityForResult(intent, 10015);
     }
 
@@ -177,7 +174,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         if(requestCode == 10057){
             if (resultCode == RESULT_OK) {
                 Item newItem = data.getParcelableExtra("returnedItem");
-                myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(newItem.getId())).setValue(newItem);
+                myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(newItem.getId())).setValue(newItem);
                 itemsPantry.set(listPosition, newItem);
                 itemRecyclerAdapter.notifyItemChanged(listPosition);
                 Snackbar snackbar = Snackbar.make(productsMainRecycler, "Product " + newItem.getName() + " updated", 1000);
@@ -197,10 +194,10 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                   showAlert(inList);
                 }else if(inList != null && newItem.getShops().keySet().equals(inList.getShops().keySet())) {
                     inList.setQuantity(inList.getQuantity() + newItem.getQuantity());
-                    myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(inList.getId())).child("quantity").setValue(inList.getQuantity());
+                    myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(inList.getId())).child("quantity").setValue(inList.getQuantity());
                 }else if(inList == null || !newItem.getShops().keySet().equals(inList.getShops().keySet())) {
                     itemsPantry.add(newItem);
-                    myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
+                    myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
                 }
 
                 setItemsRecycler(itemsPantry);
@@ -331,8 +328,8 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                     snackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
-                            //myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).removeValue();
-                            myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
+                            //myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(swipedItem.getId())).removeValue();
+                            myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
                             populatePositionMap();
                         }
 
@@ -395,7 +392,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                     snackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
-                            myRef.child("Users").child(usermail).child("Pantries").child(pantryId).child("itemList").child(String.valueOf(position))
+                            myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").child(String.valueOf(position))
                                     .child("quantity").setValue(swipedItem.getQuantity());
                         }
                     });
@@ -436,6 +433,8 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     public void onItemClick(int position) {
         Intent i = new Intent(this, EditProductActivity.class);
         i.putExtra("product", itemsPantry.get(position));
+        i.putExtra("UserId", userId);
+        i.putExtra("PantryId", pantryId);
         listPosition = position;
         startActivityForResult(i, 10057);
 
