@@ -29,22 +29,20 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/items_recycler"
         android:layout_width="match_parent"
-        android:layout_height="554dp"
+        android:layout_height="522dp"
         android:paddingBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/create_product"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_pantry"
         app:layout_constraintVertical_bias="0.0" />
-
 
     <Button
         android:id="@+id/create_product"
         android:layout_width="118dp"
         android:layout_height="73dp"
         android:layout_marginStart="56dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="28dp"
         android:background="@drawable/button_background"
         android:onClick="createItem"
         android:text="@string/create_new_product"
@@ -56,20 +54,11 @@
         android:layout_width="118dp"
         android:layout_height="73dp"
         android:layout_marginEnd="56dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginBottom="28dp"
         android:background="@drawable/button_background"
         android:text="@string/scan_barcode"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <SurfaceView
-        android:id="@+id/cameraPreviewView"
-        android:visibility="invisible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/toolbar_pantry"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

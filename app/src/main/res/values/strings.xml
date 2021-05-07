@@ -40,7 +40,7 @@
     <string name="logout">Logout</string>
     <string name="enter_your_email">Enter your Email</string>
     <string name="reset_password">Reset Password</string>
-    <string name="scan_barcode">Scan Barcode</string>
+    <string name="scan_barcode">Scan Product</string>
     <string name="create_new_product">Create new product</string>
     <string name="click_to_add_a_barcode">Click to add a barcode</string>
     <string name="woriduuu">WORIDUUU</string>
