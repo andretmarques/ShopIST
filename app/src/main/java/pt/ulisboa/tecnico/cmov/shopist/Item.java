@@ -16,19 +16,24 @@ public class Item implements Parcelable {
     private String name;
     //private int photoId;
     private int quantity = 0;
-    private int price;
+    private Double price = 0.0;
     private String id;
     private int toPurchase = 0;
+    private String productBarcode = "No Barcode";
     private HashMap<String, String> shops = new HashMap<>();
+
+
 
     protected Item(Parcel in) {
         name = in.readString();
         quantity = in.readInt();
-        price = in.readInt();
+        price = in.readDouble();
         id = in.readString();
         toPurchase = in.readInt();
+        productBarcode = in.readString();
         shops = in.readHashMap(String.class.getClassLoader());
     }
+
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
         @Override
@@ -98,11 +103,11 @@ public class Item implements Parcelable {
         this.quantity += q;
     }
 
-    public int getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(int price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 
@@ -122,6 +127,14 @@ public class Item implements Parcelable {
         this.toPurchase = toPurchase;
     }
 
+    public String getProductBarcode() {
+        return productBarcode;
+    }
+
+    public void setProductBarcode(String productBarcode) {
+        this.productBarcode = productBarcode;
+    }
+
     public Item() {
     }
 
@@ -135,9 +148,11 @@ public class Item implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(name);
         dest.writeInt(quantity);
-        dest.writeInt(price);
+        dest.writeDouble(price);
         dest.writeString(id);
         dest.writeInt(toPurchase);
+        dest.writeString(productBarcode);
         dest.writeMap(shops);
+
     }
 }

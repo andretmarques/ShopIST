@@ -26,6 +26,19 @@
 
     </androidx.appcompat.widget.Toolbar>
 
+    <TextView
+        android:id="@+id/textViewPrice"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Price: "
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/product_barcode_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/product_name"
+        app:layout_constraintVertical_bias="0.787" />
 
     <TextView
         android:id="@+id/textView"
@@ -41,6 +54,21 @@
         app:layout_constraintTop_toBottomOf="@+id/product_name"
         app:layout_constraintVertical_bias="1.0" />
 
+    <EditText
+        android:id="@+id/product_price"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:hint="@string/click_to_add_a_price"
+        android:importantForAutofill="no"
+        android:inputType="numberDecimal"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.681" />
+
     <TextView
         android:id="@+id/product_barcode_text"
         android:layout_width="match_parent"
@@ -51,13 +79,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.768" />
+        app:layout_constraintVertical_bias="0.806" />
 
     <EditText
         android:id="@+id/product_name"
         android:layout_width="271dp"
         android:layout_height="45dp"
-        android:layout_marginTop="31dp"
+        android:layout_marginTop="25dp"
         android:background="@drawable/intup_text"
         android:ems="10"
         android:hint="@string/enter_product_name"
@@ -70,13 +98,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_product"
-        app:layout_constraintVertical_bias="0.034" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <ImageView
         android:id="@+id/item_image"
         android:layout_width="210dp"
-        android:layout_height="156dp"
-        android:layout_marginTop="64dp"
+        android:layout_height="210dp"
+        android:layout_marginTop="10dp"
         android:contentDescription="@string/woriduuu"
         android:scaleType="fitXY"
         app:layout_constraintEnd_toEndOf="parent"
@@ -89,15 +117,17 @@
         android:id="@+id/product_quantity"
         android:layout_width="154dp"
         android:layout_height="49dp"
-        android:layout_marginTop="252dp"
+        android:layout_marginTop="230dp"
         android:hint="@string/quantity"
         android:importantForAutofill="no"
         android:inputType="number"
+        android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintEnd_toStartOf="@+id/product_quantity_to_buy"
-        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintHorizontal_bias="0.2"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/product_name">
+        app:layout_constraintTop_toBottomOf="@+id/product_name"
+        app:layout_constraintVertical_bias="0.0">
 
         <requestFocus />
     </EditText>
@@ -106,14 +136,16 @@
         android:id="@+id/product_quantity_to_buy"
         android:layout_width="154dp"
         android:layout_height="49dp"
-        android:layout_marginTop="252dp"
-        android:layout_marginEnd="28dp"
+        android:layout_marginTop="230dp"
+        android:layout_marginEnd="16dp"
         android:hint="@string/quantity_to_buy"
         android:importantForAutofill="no"
         android:inputType="number"
+        android:textAlignment="center"
         app:layout_constraintBottom_toTopOf="@+id/textView"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/product_name">
+        app:layout_constraintTop_toBottomOf="@+id/product_name"
+        app:layout_constraintVertical_bias="0.0">
 
         <requestFocus />
     </EditText>

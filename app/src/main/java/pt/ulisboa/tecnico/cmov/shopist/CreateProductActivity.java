@@ -1,18 +1,15 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,7 +31,7 @@ public class CreateProductActivity extends AppCompatActivity {
     private ArrayList<String> storeKey;
     private String[] storeNames;
     private DatabaseReference myRef;
-    String usermail;
+    String userId;
 
 
     @Override
@@ -44,7 +41,7 @@ public class CreateProductActivity extends AppCompatActivity {
         setSupportActionBar(findViewById(R.id.toolbar_main));
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
-        usermail = getIntent().getStringExtra("EmailUser");
+        userId = getIntent().getStringExtra("EmailUser");
 
         productName = findViewById(R.id.product_name);
         productQuantity = findViewById(R.id.product_quantity);
@@ -78,7 +75,7 @@ public class CreateProductActivity extends AppCompatActivity {
     }
 
     private void updateData() {
-        myRef.child("Users").child(usermail).child("StoreNames").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(userId).child("StoreNames").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {

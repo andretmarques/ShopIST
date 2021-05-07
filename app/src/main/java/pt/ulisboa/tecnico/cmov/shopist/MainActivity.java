@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -98,7 +96,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private int listPosition;
     private final HashMap<String, String> storeNames = new HashMap<>();
 
-    String usermail;
+    String userId;
 
     protected LocationManager locationManager;
     GPSUpdater mGPS;
@@ -133,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         pantryListMainRecycler.setVisibility(View.VISIBLE);
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
-        usermail = getIntent().getStringExtra("UserEmail");
+        userId = getIntent().getStringExtra("UserEmail");
         boolean net = isNetworkAvailable(this.getApplication());
 
         mGPS = new GPSUpdater(this.getApplicationContext());
@@ -182,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     }
 
     private void updateData(){
-        myRef.child("Users").child(usermail).child("Pantries").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(userId).child("Pantries").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
@@ -204,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             }
         });
 
-        myRef.child("Users").child(usermail).child("Stores").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(userId).child("Stores").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
                 if(dataSnapshot.getValue() != null) {
@@ -295,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                     snackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
-                            myRef.child("Users").child(usermail).child("Pantries").child(deletedModel.getId()).removeValue();
+                            myRef.child("Users").child(userId).child("Pantries").child(deletedModel.getId()).removeValue();
                         }
 
                     });
@@ -349,8 +347,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                     snackbar.addCallback(new Snackbar.Callback() {
                         @Override
                         public void onDismissed(Snackbar snackbar, int event) {
-                            myRef.child("Users").child(usermail).child("Stores").child(deletedModel.getId()).removeValue();
-                            myRef.child("Users").child(usermail).child("StoreNames").child(deletedModel.getId()).removeValue();
+                            myRef.child("Users").child(userId).child("Stores").child(deletedModel.getId()).removeValue();
+                            myRef.child("Users").child(userId).child("StoreNames").child(deletedModel.getId()).removeValue();
                             storeNames.remove(deletedModel.getId());
                         }
 
@@ -419,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void showCreatePantryPopUp(View v) {
         Intent i = new Intent(this, CreatePantryActivity.class);
         if (actualLatitude != 0.0 && actualLongitude != 0.0 ){
-            i.putExtra("EmailUser", usermail);
+            i.putExtra("EmailUser", userId);
             i.putExtra("ActualLatitude", actualLatitude);
             i.putExtra("ActualLongitude", actualLongitude);
         }
@@ -429,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
     public void showCreateShopPopUp(View v) {
         Intent i = new Intent(this, CreateShopActivity.class);
-        i.putExtra("EmailUser", usermail);
+        i.putExtra("EmailUser", userId);
 
         handleAddMenu();
         startActivityForResult(i, 10002);
@@ -446,7 +444,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 pantryLists.add(pantryList);
                 pantryList.generateId();
                 savePantryListToCache();
-                myRef.child("Users").child(usermail).child("Pantries").child(pantryList.getId()).setValue(pantryList);
+                myRef.child("Users").child(userId).child("Pantries").child(pantryList.getId()).setValue(pantryList);
             }
             return;
         }
@@ -459,9 +457,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 shoppingLists.add(shoppingList);
                 shoppingList.generateId();
                 saveShoppingListToCache();
-                myRef.child("Users").child(usermail).child("Stores").child(shoppingList.getId()).setValue(shoppingList);
+                myRef.child("Users").child(userId).child("Stores").child(shoppingList.getId()).setValue(shoppingList);
                 storeNames.put(shoppingList.getId(), shoppingList.getName());
-                myRef.child("Users").child(usermail).child("StoreNames").setValue(storeNames);
+                myRef.child("Users").child(userId).child("StoreNames").setValue(storeNames);
             }
             return;
         }
@@ -603,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             Intent i = new Intent(this, PantryInside.class);
             i.putExtra("pantryListName", pantryLists.get(position).getName());
             i.putExtra("pantryListId", pantryLists.get(position).getId());
-            i.putExtra("EmailUser", usermail);
+            i.putExtra("EmailUser", userId);
             listPosition = position;
             i.putExtra("pantryList", pantryLists.get(position).getItemList());
             startActivityForResult(i, 10030);
@@ -612,7 +610,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             i.putExtra("userPantryLists", pantryLists);
             i.putExtra("shoppingListName", shoppingLists.get(position).getName());
             i.putExtra("shoppingListId", shoppingLists.get(position).getId());
-            i.putExtra("EmailUser", usermail);
+            i.putExtra("EmailUser", userId);
             startActivity(i);
         }
     }
