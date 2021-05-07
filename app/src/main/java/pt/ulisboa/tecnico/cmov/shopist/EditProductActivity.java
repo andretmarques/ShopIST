@@ -115,7 +115,6 @@ public class EditProductActivity  extends AppCompatActivity {
                 myRef.child("PublicItems").child(item.getProductBarcode()).setValue(new PublicItem(item.getProductBarcode(), doublePrice));
             }
 
-
         }
         if(newBarcode.equals(barcode)) {
             item.setProductBarcode(newBarcode);
