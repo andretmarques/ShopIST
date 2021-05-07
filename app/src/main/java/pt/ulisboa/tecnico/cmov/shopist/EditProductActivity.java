@@ -106,9 +106,14 @@ public class EditProductActivity  extends AppCompatActivity {
         if(!newPrice.equals("")) {
             doublePrice = Double.parseDouble(newPrice);
             doublePrice = Math.floor(doublePrice * 100) / 100;
-            item.setPrice(doublePrice);
-            PublicItem publicItem = new PublicItem(barcode, doublePrice);
-            myRef.child("PublicItems").child(barcode).setValue(publicItem);
+
+            if ((item.getProductBarcode().equals("No Barcode") || barcode != null) && !newPrice.equals(item.getPrice())) { // This warning is STUPID because it prevents from constant DB update when the price remains the same
+                myRef.child("PublicItems").child(barcode).setValue(new PublicItem(barcode, doublePrice));
+            } else {
+                item.setPrice(doublePrice);
+                myRef.child("PublicItems").child(item.getProductBarcode()).setValue(new PublicItem(item.getProductBarcode(), doublePrice));
+            }
+
 
         }
         if(newBarcode.equals(barcode)) {
@@ -160,8 +165,11 @@ public class EditProductActivity  extends AppCompatActivity {
                     price.setFocusable(true);
                     price.requestFocus();
                     barcodeView.setText(barcode);
+                    barcodeView.setTypeface(null, Typeface.BOLD);
                 } else {
                     Toast.makeText(EditProductActivity.this, "Write a Price and press confirm to share product info", Toast.LENGTH_LONG).show();
+                    barcodeView.setText(barcode);
+                    barcodeView.setTypeface(null, Typeface.BOLD);
                 }
             }
             @Override
