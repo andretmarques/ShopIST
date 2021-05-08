@@ -494,10 +494,10 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.settings:
+            /*case R.id.settings:
                 // User chose the "Settings" item, show the app settings UI...
                 Log.d("TAG", "onOptionsItemSelected: Settings");
-                return true;
+                return true;*/
 
             case R.id.rate:
                 onClickShareLove();

@@ -181,15 +181,25 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
         myRef.child("Users").child(userId).child("SharedPantries").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                sharedPantryLists.clear();
                 for (DataSnapshot singleSnapshot : snapshot.getChildren()) {
                     String pantryId = singleSnapshot.child("pantryId").getValue().toString();
                     String ownerId = singleSnapshot.child("ownerId").getValue().toString();
                     myRef.child("Users").child(ownerId).child("Pantries").child(pantryId).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            myRef.child("Users").child(ownerId).child("Pantries").child(pantryId).child("itemList").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot snapshot2) {
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError error) {
+
+                                }
+                            });
                             sharedPantryLists.add(snapshot.getValue(ItemsList.class));
                             setPantryRecycler(sharedPantryLists);
-                            Log.d("recycler", String.valueOf(sharedPantryLists.size()));
                             shoppingListMainRecycler.setVisibility(View.GONE);
                             pantryListMainRecycler.setVisibility(View.VISIBLE);
                         }
@@ -243,7 +253,6 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
         i.putExtra("pantryListId", sharedPantryLists.get(position).getId());
         i.putExtra("OwnerId", ownerId);
         listPosition = position;
-        i.putExtra("pantryList", sharedPantryLists.get(position).getItemList());
         startActivityForResult(i, 10030);
     }
 

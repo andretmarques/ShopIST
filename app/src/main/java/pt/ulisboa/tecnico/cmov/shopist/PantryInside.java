@@ -68,6 +68,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     private HashMap<String, String> positionsMap = new HashMap<>();
     String userId;
     FirebaseAuth mAuth;
+    boolean shared = false;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -90,27 +91,36 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
         boolean net = isNetworkAvailable(this.getApplication());
 
-        userId = getIntent().getStringExtra("EmailUser");
+
         ownerId = getIntent().getStringExtra("OwnerId");
         if (prefs.getString("ownerId", null) != null){
             ownerId = prefs.getString("ownerId", null);
         }
+
         if (ownerId != null) {
             userId = ownerId;
             editor.putString("ownerId", ownerId);
             editor.apply();
         }
+
         Bundle b = getIntent().getExtras();
         if(b != null){
             actionTitle = b.getString("pantryListName");
             actionTitle = "Pantry: " + actionTitle;
             toolbarTitle.setText(actionTitle);
             pantryId = b.getString("pantryListId");
-            itemsPantry = b.getParcelableArrayList("pantryList");
+            if (b.getParcelableArrayList("pantryList") != null) {
+                itemsPantry = b.getParcelableArrayList("pantryList");
+                userId = getIntent().getStringExtra("EmailUser");
+                setItemsRecycler(itemsPantry);
+            } else {
+                populateLists();
+                shared = true;
+                Log.d("populate", "ye");}
+
             assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
         }
-        setItemsRecycler(itemsPantry);
 
 
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
@@ -204,9 +214,10 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     }
 
     private void populateLists(){
-        myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
+        myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
+                itemsPantry.clear();
                 if(dataSnapshot.getValue() != null) {
                     GenericTypeIndicator<Item> t = new GenericTypeIndicator<Item>() {};
                     for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
@@ -295,8 +306,11 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                     myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").setValue(itemsPantry);
                 }
 
-                setItemsRecycler(itemsPantry);
-                populatePositionMap();
+                if (!shared) {
+                    Log.d("pop", "not shared");
+                    setItemsRecycler(itemsPantry);
+                    populatePositionMap();
+                }
             }
             return;
         } else if (requestCode == 10025) {
