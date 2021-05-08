@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -57,6 +58,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     private String pantryId;
     Button scanBarcodeBtn;
     String barcode = "";
+    String ownerId;
     Double price;
     String shop;
     String messageAll = "";
@@ -66,6 +68,9 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     private HashMap<String, String> positionsMap = new HashMap<>();
     String userId;
     FirebaseAuth mAuth;
+
+    SharedPreferences prefs;
+    SharedPreferences.Editor editor;
 
 
     @Override
@@ -79,9 +84,22 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
         mAuth = FirebaseAuth.getInstance();
-        boolean net = isNetworkAvailable(this.getApplication());
-        userId = getIntent().getStringExtra("EmailUser");
 
+        prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        editor = prefs.edit();
+
+        boolean net = isNetworkAvailable(this.getApplication());
+
+        userId = getIntent().getStringExtra("EmailUser");
+        ownerId = getIntent().getStringExtra("OwnerId");
+        if (prefs.getString("ownerId", null) != null){
+            ownerId = prefs.getString("ownerId", null);
+        }
+        if (ownerId != null) {
+            userId = ownerId;
+            editor.putString("ownerId", ownerId);
+            editor.apply();
+        }
         Bundle b = getIntent().getExtras();
         if(b != null){
             actionTitle = b.getString("pantryListName");

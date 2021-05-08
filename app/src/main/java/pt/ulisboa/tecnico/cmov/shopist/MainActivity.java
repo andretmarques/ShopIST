@@ -132,6 +132,14 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
         userId = getIntent().getStringExtra("UserEmail");
+        if (userId != null) {
+            editor.putString("userId", userId);
+            editor.apply();
+        }
+        if (prefs.getString("userId", null) != null){
+            userId = prefs.getString("userId", null);
+        }
+
         boolean net = isNetworkAvailable(this.getApplication());
 
         mGPS = new GPSUpdater(this.getApplicationContext());
@@ -151,7 +159,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         setShoppingRecycler(shoppingLists);
         eneableSwipePantry();
         enableSwipeStore();
-        getSharedPantries();
     }
 
     @Override
@@ -474,6 +481,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -501,18 +509,15 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "Logged Out", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                return true;
 
             case R.id.shared:
-                getSharedPantries();
                 Intent i = new Intent(MainActivity.this, SharedPantriesShopsActivity.class);
-                Log.d("shared", sharedPantryLists.get(0).getName());
-                i.putExtra("sharedPantries", sharedPantryLists);
                 i.putExtra("UserEmail", userId);
                 startActivity(i);
+                return true;
 
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
         }
@@ -619,34 +624,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         }
     }
 
-    public void getSharedPantries() {
-        myRef.child("Users").child(userId).child("SharedPantries").addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot singleSnapshot : snapshot.getChildren()) {
-                    String pantryId = singleSnapshot.child("pantryId").getValue().toString();
-                    String ownerId = singleSnapshot.child("ownerId").getValue().toString();
-                    myRef.child("Users").child(ownerId).child("Pantries").child(pantryId).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            sharedPantryLists.add(snapshot.getValue(ItemsList.class));
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
 
     public void onClickShareLove() {
         @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)

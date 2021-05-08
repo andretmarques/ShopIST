@@ -108,11 +108,10 @@ public class EditProductActivity  extends AppCompatActivity {
             doublePrice = Math.floor(doublePrice * 100) / 100;
 
             // This warning is STUPID because it prevents from constant DB update when the price remains the same
-            if ((item.getProductBarcode().equals("No Barcode") || barcode != null) && !newPrice.equals(item.getPrice())) {
+            if ((!item.getProductBarcode().equals("No Barcode") || barcode != null) && !newPrice.equals(item.getPrice())) {
                 myRef.child("PublicItems").child(barcode).setValue(new PublicItem(barcode, doublePrice));
             } else {
                 item.setPrice(doublePrice);
-                myRef.child("PublicItems").child(item.getProductBarcode()).setValue(new PublicItem(item.getProductBarcode(), doublePrice));
             }
 
         }
