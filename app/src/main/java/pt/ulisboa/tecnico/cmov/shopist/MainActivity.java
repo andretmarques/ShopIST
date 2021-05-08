@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private FloatingActionButton addButton;
     private ArrayList<ItemsList> pantryLists = new ArrayList<>();
     private ArrayList<ItemsList> shoppingLists = new ArrayList<>();
+    private ArrayList<ItemsList> sharedPantryLists = new ArrayList<>();
     private RecyclerView pantryListMainRecycler;
     private RecyclerView shoppingListMainRecycler;
     private ListRecyclerAdapter pantryListRecyclerAdapter;
@@ -100,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
     protected LocationManager locationManager;
     GPSUpdater mGPS;
-    TextView GPStext;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -136,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
         mGPS = new GPSUpdater(this.getApplicationContext());
 
-        GPStext = findViewById(R.id.GPSRoad);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -145,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         }
         if (net){
             updateData();
-            Log.d("cacheya", "Lists loaded from Firebase because there's internet access");
         }else {
             loadDataCache();
         }
@@ -153,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         setShoppingRecycler(shoppingLists);
         eneableSwipePantry();
         enableSwipeStore();
+        getSharedPantries();
     }
 
     @Override
@@ -226,7 +225,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void savePantryListToCache() {
         Gson gson = new Gson();
         String jsonPantry = gson.toJson(pantryLists);
-        Log.d("cacheya", "savePantryListToCache: " + jsonPantry);
         editor.putString("cachedPantries", jsonPantry);
         editor.apply();
     }
@@ -385,7 +383,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void showPantries(View v){
         shoppingListMainRecycler.setVisibility(View.GONE);
         pantryListMainRecycler.setVisibility(View.VISIBLE);
-
     }
 
     public void showStores(View v){
@@ -399,8 +396,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             String address = getRoad(location.getLatitude(), location.getLongitude());
             actualLatitude = location.getLatitude();
             actualLongitude = location.getLongitude();
-            GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
-            GPStext.setText(address);
         }
 
         @Override
@@ -482,6 +477,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.shared_pantries_shops, menu);
         inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -505,6 +501,14 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "Logged Out", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
+
+            case R.id.shared:
+                getSharedPantries();
+                Intent i = new Intent(MainActivity.this, SharedPantriesShopsActivity.class);
+                Log.d("shared", sharedPantryLists.get(0).getName());
+                i.putExtra("sharedPantries", sharedPantryLists);
+                i.putExtra("UserEmail", userId);
+                startActivity(i);
 
             default:
                 // If we got here, the user's action was not recognized.
@@ -613,6 +617,35 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             i.putExtra("EmailUser", userId);
             startActivity(i);
         }
+    }
+
+    public void getSharedPantries() {
+        myRef.child("Users").child(userId).child("SharedPantries").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot singleSnapshot : snapshot.getChildren()) {
+                    String pantryId = singleSnapshot.child("pantryId").getValue().toString();
+                    String ownerId = singleSnapshot.child("ownerId").getValue().toString();
+                    myRef.child("Users").child(ownerId).child("Pantries").child(pantryId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            sharedPantryLists.add(snapshot.getValue(ItemsList.class));
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     public void onClickShareLove() {

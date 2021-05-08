@@ -161,9 +161,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot singleSnapshot : snapshot.child("Users").getChildren()) {
                     if (singleSnapshot.child("email").getValue().toString().equals(email)) {
-                        Log.d("olaolaola", String.valueOf(singleSnapshot.getValue()));
-
-                        myRef.child("Users").child(singleSnapshot.getKey()).child("Pantries").child("Shared").child("Pantry").child(pantryId).setValue(newSharedPantry);
+                        myRef.child("Users").child(singleSnapshot.getKey()).child("SharedPantries").child(pantryId).setValue(newSharedPantry);
                         break;
                     }
                 }
