@@ -46,4 +46,6 @@
     <string name="woriduuu">WORIDUUU</string>
     <string name="confirm">Confirm</string>
     <string name="click_to_add_a_price">Click to add a price</string>
+    <string name="shared_stores">Shared Stores</string>
+    <string name="shared_pantries">Shared Pantries</string>
 </resources>

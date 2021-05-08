@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private FloatingActionButton addButton;
     private ArrayList<ItemsList> pantryLists = new ArrayList<>();
     private ArrayList<ItemsList> shoppingLists = new ArrayList<>();
+    private ArrayList<ItemsList> sharedPantryLists = new ArrayList<>();
     private RecyclerView pantryListMainRecycler;
     private RecyclerView shoppingListMainRecycler;
     private ListRecyclerAdapter pantryListRecyclerAdapter;
@@ -100,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
     protected LocationManager locationManager;
     GPSUpdater mGPS;
-    TextView GPStext;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
@@ -132,11 +132,18 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
         userId = getIntent().getStringExtra("UserEmail");
+        if (userId != null) {
+            editor.putString("userId", userId);
+            editor.apply();
+        }
+        if (prefs.getString("userId", null) != null){
+            userId = prefs.getString("userId", null);
+        }
+
         boolean net = isNetworkAvailable(this.getApplication());
 
         mGPS = new GPSUpdater(this.getApplicationContext());
 
-        GPStext = findViewById(R.id.GPSRoad);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
@@ -145,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         }
         if (net){
             updateData();
-            Log.d("cacheya", "Lists loaded from Firebase because there's internet access");
         }else {
             loadDataCache();
         }
@@ -226,7 +232,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void savePantryListToCache() {
         Gson gson = new Gson();
         String jsonPantry = gson.toJson(pantryLists);
-        Log.d("cacheya", "savePantryListToCache: " + jsonPantry);
         editor.putString("cachedPantries", jsonPantry);
         editor.apply();
     }
@@ -385,7 +390,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void showPantries(View v){
         shoppingListMainRecycler.setVisibility(View.GONE);
         pantryListMainRecycler.setVisibility(View.VISIBLE);
-
     }
 
     public void showStores(View v){
@@ -399,8 +403,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             String address = getRoad(location.getLatitude(), location.getLongitude());
             actualLatitude = location.getLatitude();
             actualLongitude = location.getLongitude();
-            GPStext.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
-            GPStext.setText(address);
         }
 
         @Override
@@ -479,9 +481,11 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.shared_pantries_shops, menu);
         inflater.inflate(R.menu.menu_main, menu);
         return true;
     }
@@ -490,10 +494,10 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.settings:
+            /*case R.id.settings:
                 // User chose the "Settings" item, show the app settings UI...
                 Log.d("TAG", "onOptionsItemSelected: Settings");
-                return true;
+                return true;*/
 
             case R.id.rate:
                 onClickShareLove();
@@ -505,10 +509,15 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 FirebaseAuth.getInstance().signOut();
                 Toast.makeText(this, "Logged Out", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                return true;
+
+            case R.id.shared:
+                Intent i = new Intent(MainActivity.this, SharedPantriesShopsActivity.class);
+                i.putExtra("UserEmail", userId);
+                startActivity(i);
+                return true;
 
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
         }
@@ -614,6 +623,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             startActivity(i);
         }
     }
+
 
     public void onClickShareLove() {
         @SuppressLint("InflateParams") ConstraintLayout contentView = (ConstraintLayout) (this)

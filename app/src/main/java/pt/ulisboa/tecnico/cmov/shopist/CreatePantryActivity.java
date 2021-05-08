@@ -18,6 +18,7 @@ import com.sucho.placepicker.MapType;
 import com.sucho.placepicker.PlacePicker;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -116,7 +117,6 @@ public class CreatePantryActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (requestCode == 100) {
             try {
-                assert data != null;
                 AddressData addressData = data.getParcelableExtra("ADDRESS_INTENT");
                 if(addressData != null)
                     locationPicked = getRoad(addressData.getLatitude(), addressData.getLongitude());
