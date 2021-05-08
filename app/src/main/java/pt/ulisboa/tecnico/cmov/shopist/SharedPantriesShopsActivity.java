@@ -70,7 +70,7 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
 
     @Override
     public void onBackPressed() {
-        startActivity(new Intent(SharedPantriesShopsActivity.this, MainActivity.class));
+        finish();
     }
 
 
