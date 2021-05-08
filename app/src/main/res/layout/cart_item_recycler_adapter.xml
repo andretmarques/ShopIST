@@ -4,25 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#E47C8AD6"
+    android:background="#dfa9a8"
     android:elevation="4dp"
     android:layout_marginTop="10dp"
     android:layout_marginBottom="10dp"
     android:layout_marginRight="10dp"
     android:layout_marginLeft="10dp">
-
-    <Button
-        android:id="@+id/add_to_cart"
-        android:layout_width="62dp"
-        android:layout_height="59dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/ic_baseline_add_shopping_cart_24"
-        app:layout_constraintBottom_toTopOf="@+id/item_price"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.636"
-        app:layout_constraintStart_toEndOf="@+id/item_name"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
 
     <ImageView
         android:id="@+id/item_image"

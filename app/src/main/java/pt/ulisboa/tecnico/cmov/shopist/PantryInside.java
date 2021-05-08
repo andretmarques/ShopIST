@@ -175,6 +175,10 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         if(requestCode == 10057){
             if (resultCode == RESULT_OK) {
                 Item newItem = data.getParcelableExtra("returnedItem");
+
+                if(newItem.getToPurchase() > 0 &&  !newItem.getPantries().contains(pantryId))
+                    newItem.getPantries().add(pantryId);
+
                 myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(newItem.getId())).setValue(newItem);
                 itemsPantry.set(listPosition, newItem);
                 itemRecyclerAdapter.notifyItemChanged(listPosition);

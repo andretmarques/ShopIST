@@ -1,9 +1,11 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,6 +20,18 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
     private final List<Item> itemsList;
     private final OnItemListener monItemListener;
     private final String type;
+    private View.OnClickListener clickListener;
+    private OnAddCartClick addCartListener;
+
+
+    public void setOnItemClickListener(View.OnClickListener clickListener) {
+        this.clickListener = clickListener;
+    }
+
+    public void setAddCartListener(OnAddCartClick  addCartListener) {
+        this.addCartListener= addCartListener;
+    }
+
 
     public ItemRecyclerAdapter(Context context, List<Item> itemsList, String type, OnItemListener onItemListener) {
         this.context = context;
@@ -35,6 +49,8 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
                 return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.pantry_item_recycler_adapter, parent, false), monItemListener);
             case "S":
                 return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.shopping_item_recycler_adapter, parent, false), monItemListener);
+            case "C":
+                return new ItemViewHolder(LayoutInflater.from(context).inflate(R.layout.cart_item_recycler_adapter, parent, false), monItemListener);
         }
         return null;
     }
@@ -46,11 +62,16 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         String itemName = "Name: " + currentItem.getName();
         String itemQuantity ="";
 
-        if(type.equals("P")) {
-            itemQuantity = "Quantity available: " + currentItem.getQuantity();
-        }
-        else if(type.equals("S")){
-            itemQuantity = "Quantity to buy: " + currentItem.getToPurchase();
+        switch (type) {
+            case "P":
+                itemQuantity = "Quantity available: " + currentItem.getQuantity();
+                break;
+            case "S":
+                itemQuantity = "Quantity to buy: " + currentItem.getToPurchase();
+                break;
+            case "C":
+                itemQuantity = "Quantity in cart: " + currentItem.getInCart();
+                break;
         }
 
 
@@ -61,6 +82,13 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         if(holder.itemPrice != null) {
             String itemPrice = "Price: " + currentItem.getPrice() + "$";
             holder.itemPrice.setText(itemPrice);
+        }
+        if (clickListener!= null) {
+            holder.itemView.setOnClickListener(clickListener);
+        }
+
+        if (addCartListener!= null) {
+            holder.getAddCartButton().setOnClickListener(v -> addCartListener.onAddCart(v, position));
         }
     }
 
@@ -107,11 +135,15 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         return itemsList.size();
     }
 
+    public void setAddCartListener() {
+    }
+
     public static final class ItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView itemName;
         TextView itemQuantity;
         TextView itemPrice;
+        Button addToCart;
         OnItemListener onItemListener;
 
         public ItemViewHolder(@NonNull View itemView, OnItemListener onItemListener) {
@@ -119,8 +151,15 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
             itemName = itemView.findViewById(R.id.item_name);
             itemQuantity = itemView.findViewById(R.id.item_quantity);
             itemPrice = itemView.findViewById(R.id.item_price);
+            addToCart = itemView.findViewById(R.id.add_to_cart);
             this.onItemListener = onItemListener;
             itemView.setOnClickListener(this);
+            if(addToCart != null)
+                addToCart.setOnClickListener(this);
+
+            }
+        public Button getAddCartButton() {
+            return addToCart;
 
         }
 
@@ -134,6 +173,11 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
     public interface OnItemListener {
         void onItemClick(int position);
     }
+
+    public interface OnAddCartClick{
+        void onAddCart(View view, int position);
+    }
+
 
 
 }

@@ -48,7 +48,6 @@ public class CreateProductActivity extends AppCompatActivity {
 
         updateData();
 
-
     }
 
     public void chooseShop(View view){

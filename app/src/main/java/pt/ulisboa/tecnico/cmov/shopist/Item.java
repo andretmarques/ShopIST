@@ -19,8 +19,10 @@ public class Item implements Parcelable {
     private Double price = 0.0;
     private String id;
     private int toPurchase = 0;
+    private int inCart;
     private String productBarcode = "No Barcode";
     private HashMap<String, String> shops = new HashMap<>();
+    private ArrayList<String> pantries = new ArrayList<>();
 
 
 
@@ -32,6 +34,8 @@ public class Item implements Parcelable {
         toPurchase = in.readInt();
         productBarcode = in.readString();
         shops = in.readHashMap(String.class.getClassLoader());
+        inCart = in.readInt();
+        pantries = in.readArrayList(String.class.getClassLoader());
     }
 
 
@@ -69,6 +73,14 @@ public class Item implements Parcelable {
     @Override
     public int hashCode() {
         return name != null ? name.hashCode() : 0;
+    }
+
+    public int getInCart() {
+        return inCart;
+    }
+
+    public void setInCart(int inCart) {
+        this.inCart = inCart;
     }
 
     public HashMap<String, String> getShops() {
@@ -135,7 +147,27 @@ public class Item implements Parcelable {
         this.productBarcode = productBarcode;
     }
 
+    public ArrayList<String> getPantries() {
+        return pantries;
+    }
+
+    public void setPantries(ArrayList<String> pantries) {
+        this.pantries = pantries;
+    }
+
     public Item() {
+    }
+
+    public Item( Item i) {
+        this.name = i.name;
+        this.quantity = i.quantity;
+        this.price = i.price;
+        this.id = i.id;
+        this.toPurchase = i.toPurchase;
+        this.productBarcode = i.productBarcode;
+        this.shops = i.shops;
+        this.inCart = i.inCart;
+        this.pantries = i.pantries;
     }
 
 
@@ -153,6 +185,8 @@ public class Item implements Parcelable {
         dest.writeInt(toPurchase);
         dest.writeString(productBarcode);
         dest.writeMap(shops);
+        dest.writeInt(inCart);
+        dest.writeList(pantries);
 
     }
 }

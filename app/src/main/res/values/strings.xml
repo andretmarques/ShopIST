@@ -46,4 +46,5 @@
     <string name="woriduuu">WORIDUUU</string>
     <string name="confirm">Confirm</string>
     <string name="click_to_add_a_price">Click to add a price</string>
+    <string name="cart_summary">Cart summary</string>
 </resources>
