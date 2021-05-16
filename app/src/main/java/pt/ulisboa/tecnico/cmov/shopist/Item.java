@@ -22,7 +22,8 @@ public class Item implements Parcelable {
     private int inCart;
     private String productBarcode = "No Barcode";
     private HashMap<String, String> shops = new HashMap<>();
-    private ArrayList<String> pantries = new ArrayList<>();
+    private HashMap<String, String> pantries = new HashMap<>();
+    private HashMap<String, String> pantriesMap = new HashMap<>();
 
 
 
@@ -35,7 +36,9 @@ public class Item implements Parcelable {
         productBarcode = in.readString();
         shops = in.readHashMap(String.class.getClassLoader());
         inCart = in.readInt();
-        pantries = in.readArrayList(String.class.getClassLoader());
+        pantries = in.readHashMap(String.class.getClassLoader());
+        pantriesMap = in.readHashMap(String.class.getClassLoader());
+
     }
 
 
@@ -147,12 +150,20 @@ public class Item implements Parcelable {
         this.productBarcode = productBarcode;
     }
 
-    public ArrayList<String> getPantries() {
+    public HashMap<String, String> getPantries() {
         return pantries;
     }
 
-    public void setPantries(ArrayList<String> pantries) {
+    public void setPantries(HashMap<String, String> pantries) {
         this.pantries = pantries;
+    }
+
+    public HashMap<String, String> getPantriesMap() {
+        return pantriesMap;
+    }
+
+    public void setPantriesMap(HashMap<String, String> pantriesMap) {
+        this.pantriesMap = pantriesMap;
     }
 
     public Item() {
@@ -168,6 +179,7 @@ public class Item implements Parcelable {
         this.shops = i.shops;
         this.inCart = i.inCart;
         this.pantries = i.pantries;
+        this.pantriesMap = i.pantriesMap;
     }
 
 
@@ -186,7 +198,8 @@ public class Item implements Parcelable {
         dest.writeString(productBarcode);
         dest.writeMap(shops);
         dest.writeInt(inCart);
-        dest.writeList(pantries);
+        dest.writeMap(pantries);
+        dest.writeMap(pantriesMap);
 
     }
 }

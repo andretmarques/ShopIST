@@ -65,7 +65,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
         slide.setOnSlideCompleteListener(view -> {
             if (net) {
                 for(Item i : itemsCart){
-                    for (String s : i.getPantries()){
+                    for (String s : i.getPantries().values()){
                         updateData(s, i);
                     }
                 }

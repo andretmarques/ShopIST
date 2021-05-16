@@ -102,6 +102,7 @@ public class EditProductActivity  extends AppCompatActivity {
         if(!newTobuy.equals("")) {
             toBuy = Integer.parseInt(newTobuy);
             item.setToPurchase(toBuy);
+            item.getPantriesMap().put(pantryId, String.valueOf(toBuy));
         }
         if(!newPrice.equals("")) {
             doublePrice = Double.parseDouble(newPrice);

@@ -56,6 +56,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private HashMap<String, String> positionsMap = new HashMap<>();
     String userId;
+    private String pantryName;
 
 
     @Override
@@ -64,7 +65,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         setContentView(R.layout.items_pantry);
         setSupportActionBar(findViewById(R.id.toolbar_pantry));
         ActionBar actionBar = getSupportActionBar();
-        String actionTitle;
+
         TextView toolbarTitle = findViewById(R.id.toolbar_pantry_title);
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
@@ -73,8 +74,8 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
         Bundle b = getIntent().getExtras();
         if(b != null){
-            actionTitle = b.getString("pantryListName");
-            actionTitle = "Pantry: " + actionTitle;
+            pantryName = b.getString("pantryListName");
+            String actionTitle = "Pantry: " + pantryName;
             toolbarTitle.setText(actionTitle);
             pantryId = b.getString("pantryListId");
             itemsPantry = b.getParcelableArrayList("pantryList");
@@ -176,8 +177,9 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 Item newItem = data.getParcelableExtra("returnedItem");
 
-                if(newItem.getToPurchase() > 0 &&  !newItem.getPantries().contains(pantryId))
-                    newItem.getPantries().add(pantryId);
+                if(newItem.getToPurchase() > 0 &&  !newItem.getPantries().containsValue(pantryId)) {
+                    newItem.getPantries().put(pantryName, pantryId);
+                }
 
                 myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(newItem.getId())).setValue(newItem);
                 itemsPantry.set(listPosition, newItem);

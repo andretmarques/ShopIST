@@ -6,15 +6,7 @@
     android:layout_marginLeft="4dp"
     android:layout_marginRight="4dp"
     android:layout_marginTop="16dp"
-    android:id="@+id/dialog101"
     android:orientation="vertical">
-
-    <NumberPicker
-        android:id="@+id/picker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="5dp" />
 
     <Spinner
         android:id="@+id/drop_down_pantries"
@@ -23,7 +15,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="5dp"
         android:background="@android:drawable/btn_dropdown"
-        android:layout_below="@id/picker"
         android:spinnerMode="dropdown" />
 
 </RelativeLayout>
