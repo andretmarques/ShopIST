@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +24,8 @@ import com.ncorti.slidetoact.SlideToActView;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
     private RecyclerView productsMainRecycler;
@@ -31,6 +34,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
     private ArrayList<ItemsList> allPantries = new ArrayList<>();
     private DatabaseReference myRef;
     private String uid;
+    private HashMap<String, HashMap<Item, Integer>> productsPurchase = new HashMap<>();
     boolean net;
 
 
@@ -47,6 +51,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
             itemsCart = b.getParcelableArrayList("cartList");
             allPantries = b.getParcelableArrayList("allPantries");
             uid = b.getString("UserId");
+            productsPurchase = (HashMap<String, HashMap<Item, Integer>>) b.getSerializable("fantasticHm");
         }
         setItemsRecycler(itemsCart);
         setupEventCallbacks();
@@ -63,13 +68,17 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
     private void setupEventCallbacks() {
         final SlideToActView slide = findViewById(R.id.slider_finish);
         slide.setOnSlideCompleteListener(view -> {
-            if (net) {
-                for(Item i : itemsCart){
-                    for (String s : i.getPantries().values()){
-                        updateData(s, i);
-                    }
+            String pantryName;
+            for(HashMap.Entry<String, HashMap<Item, Integer>> entry : productsPurchase.entrySet()){
+                for (HashMap.Entry<Item, Integer> secondEntry : entry.getValue().entrySet()){
+                    pantryName = getPantryName(secondEntry.getKey(), entry.getKey());
+                    Log.d("TAG", "setupEventCallbacks: " + pantryName);
+                    updateDataBase(entry.getKey(), secondEntry.getKey(), secondEntry.getValue(), pantryName);
                 }
+
             }
+
+
             itemsCart.clear();
             itemRecyclerAdapter.notifyDataSetChanged();
         });
@@ -101,47 +110,61 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
     });
     }
 
-    private void updateData(String pantryId, Item item) {
+    private String getPantryName(Item i, String pantryId){
+        String pantryName = "";
+        for(HashMap.Entry<String, String> hmhm : i.getPantries().entrySet()) {
+            if (hmhm.getValue().equals(pantryId))
+                pantryName = hmhm.getKey();
+        }
+        return pantryName;
+    }
+
+    private void updateDataBase(String pantryId, Item i, int purchased, String pantryName){
+
         myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
-                    if(item.getName().equals(dataSnapshot.getValue(Item.class).getName())){
-                        if(dataSnapshot.getValue(Item.class).getToPurchase() >= item.getInCart()){
-                            int sub = dataSnapshot.getValue(Item.class).getToPurchase() - item.getInCart();
-                            myRef.child("Users")
-                                    .child(uid)
-                                    .child("Pantries")
-                                    .child(pantryId)
-                                    .child("itemList")
-                                    .child(dataSnapshot.getKey())
-                                    .child("toPurchase").setValue(sub);
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    if (dataSnapshot.child("name").getValue().toString().equals(i.getName())){
 
-                            myRef.child("Users")
-                                    .child(uid)
-                                    .child("Pantries").child(pantryId)
-                                    .child("itemList")
-                                    .child(dataSnapshot.getKey())
-                                    .child("quantity").setValue(item.getQuantity() + item.getInCart());
+                        int toPurchase = Integer.parseInt(dataSnapshot.child("toPurchase").getValue().toString());
+                        int quantity = Integer.parseInt(dataSnapshot.child("quantity").getValue().toString()) + purchased;
+
+                        if(purchased >= toPurchase) {
+                            toPurchase = 0;
                         }else{
-                            myRef.child("Users")
-                                    .child(uid)
-                                    .child("Pantries").child(pantryId)
-                                    .child("itemList")
-                                    .child(dataSnapshot.getKey())
-                                    .child("quantity").setValue(item.getQuantity() + item.getInCart());
-
-                            myRef.child("Users")
-                                    .child(uid)
-                                    .child("Pantries")
-                                    .child(pantryId)
-                                    .child("itemList")
-                                    .child(dataSnapshot.getKey())
-                                    .child("toPurchase").setValue(0);
+                            toPurchase = toPurchase - purchased;
                         }
-                        break;
+                        i.setToPurchase(toPurchase);
+                        i.setQuantity(quantity);
+
+                        if(i.getToPurchase() == 0){
+                            i.getPantriesMap().remove(pantryId);
+                            i.getPantries().remove(pantryName);
+                            myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                    .child(dataSnapshot.getKey()).child("pantries").removeValue();
+
+                            myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                    .child(dataSnapshot.getKey()).child("pantriesMap").removeValue();
+                        }else {
+                            i.getPantriesMap().put(pantryId, String.valueOf(i.getToPurchase()));
+                            myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                    .child(dataSnapshot.getKey()).child("pantries").setValue(i.getPantries());
+
+                            myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                    .child(dataSnapshot.getKey()).child("pantriesMap").setValue(i.getPantriesMap());
+                        }
+
+                        myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                .child(dataSnapshot.getKey()).child("toPurchase").setValue(i.getToPurchase());
+
+                        myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                .child(dataSnapshot.getKey()).child("quantity").setValue(i.getQuantity());
+
+
                     }
                 }
+
             }
 
             @Override
@@ -149,7 +172,9 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
 
             }
         });
+
     }
+
 
 
     private Boolean isNetworkAvailable(Application application) {

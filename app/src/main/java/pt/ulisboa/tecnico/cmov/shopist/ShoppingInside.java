@@ -20,8 +20,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
@@ -35,9 +38,7 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private String uid;
     private String[] pantries;
-
-
-
+    private HashMap<String, HashMap<Item, Integer>> productsPurchase = new HashMap<>();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,7 +123,6 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
         ArrayList<String> pantriesList= new ArrayList<>(currentItem.getPantries().keySet());
 
         pantries = pantriesList.toArray(new String[0]);
-        Log.d("TAG", "populateList: " + Arrays.toString(pantries));
     }
 
 
@@ -145,9 +145,9 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
         picker.setMaxValue(50);
         picker.setWrapSelectorWheel(false);
         builder.setPositiveButton(android.R.string.ok, (dialog, id) -> {
-            String pantryId = currentItem.getPantries().get(spinner.getSelectedItem().toString());
+            String selectedPantryName = spinner.getSelectedItem().toString();
+            String pantryId = currentItem.getPantries().get(selectedPantryName);
             int toBuy = Integer.parseInt(currentItem.getPantriesMap().get(pantryId));
-            Log.d("TAG", "showPickerDialog: " + toBuy);
             int pickerValue = picker.getValue();
 
             if(pickerValue >= toBuy){
@@ -159,6 +159,25 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
                 currentItem.setToPurchase(updatedValue);
                 currentItem.getPantriesMap().put(pantryId, String.valueOf(updatedValue2));
             }
+
+            int quantity = currentItem.getQuantity() + pickerValue;
+            currentItem.setQuantity(quantity);
+
+            if(productsPurchase.containsKey(pantryId)){
+                if(productsPurchase.get(pantryId).containsKey(currentItem)) {
+                    Integer purchased = productsPurchase.get(pantryId).get(currentItem) + pickerValue;
+                    productsPurchase.get(pantryId).put(currentItem, purchased);
+                }else{
+                    productsPurchase.get(pantryId).put(currentItem, pickerValue);
+                }
+            }else {
+                HashMap<Item, Integer> hm = new HashMap<>();
+                hm.put(currentItem, pickerValue);
+
+                productsPurchase.put(pantryId, hm);
+            }
+
+
 
             if(cart.getItemList().contains(currentItem)){
                 Item inCart = cart.getItemList().get(cart.getItemList().indexOf(currentItem));
@@ -193,6 +212,7 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
             i.putExtra("cartList", cart.getItemList());
             i.putExtra("allPantries", allPantries);
             i.putExtra("UserId", uid);
+            i.putExtra("fantasticHm", (Serializable) productsPurchase);
             startActivityForResult(i, 10078);
         }
 }
