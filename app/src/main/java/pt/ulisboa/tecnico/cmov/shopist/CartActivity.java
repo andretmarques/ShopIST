@@ -36,6 +36,8 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
     private String uid;
     private HashMap<String, HashMap<Item, Integer>> productsPurchase = new HashMap<>();
     boolean net;
+    private String ownerId;
+    private String userId;
 
 
     @Override
@@ -50,7 +52,12 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
         if(b != null){
             itemsCart = b.getParcelableArrayList("cartList");
             allPantries = b.getParcelableArrayList("allPantries");
-            uid = b.getString("UserId");
+            Log.d("allp", allPantries.toString());
+            ownerId = b.getString("OwnerId");
+            if (ownerId != null) {
+                uid = ownerId;
+            } else uid = b.getString("UserId");
+            userId = b.getString("UserId");
             productsPurchase = (HashMap<String, HashMap<Item, Integer>>) b.getSerializable("fantasticHm");
         }
         setItemsRecycler(itemsCart);
@@ -102,10 +109,11 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
 
             @Override
             public void onSlideCompleteAnimationEnded(@NonNull SlideToActView view) {
-                Intent i = new Intent(CartActivity.this, MainActivity.class);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                i.putExtra("UserEmail", uid);
-                startActivity(i);
+                    Intent i = new Intent(CartActivity.this, MainActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    i.putExtra("UserEmail", userId);
+                    startActivity(i);
+
             }
     });
     }

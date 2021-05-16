@@ -23,19 +23,21 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
 public class SharedPantriesShopsActivity extends AppCompatActivity implements ListRecyclerAdapter.OnListListener {
 
     private ArrayList<ItemsList> sharedPantryLists = new ArrayList<>();
+    private ArrayList<ItemsList> sharedShopLists = new ArrayList<>();
     private DatabaseReference myRef;
     private String userId;
     private RecyclerView pantryListMainRecycler;
@@ -45,7 +47,8 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
     private Button sharedPantriesBtn;
     private Button sharedShopsBtn;
     private int listPosition;
-    private String ownerId;
+    private ArrayList<String> ownerIds = new ArrayList<>();
+    String owner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +71,8 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
 
     }
 
+
+
     @Override
     public void onBackPressed() {
         finish();
@@ -88,6 +93,7 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
             case R.id.single:
                 Intent i = new Intent(SharedPantriesShopsActivity.this, MainActivity.class);
                 i.putExtra("UserEmail", userId);
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(i);
                 return true;
 
@@ -185,6 +191,8 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
                 for (DataSnapshot singleSnapshot : snapshot.getChildren()) {
                     String pantryId = singleSnapshot.child("pantryId").getValue().toString();
                     String ownerId = singleSnapshot.child("ownerId").getValue().toString();
+                    ownerIds.add(ownerId);
+                    owner = ownerId;
                     myRef.child("Users").child(ownerId).child("Pantries").child(pantryId).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -210,6 +218,7 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
                         }
                     });
                 }
+                getSharedShops();
             }
 
             @Override
@@ -219,6 +228,34 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
         });
     }
 
+    public void getSharedShops() {
+        if (ownerIds.size() > 0) {
+            for (String ownerId : ownerIds) {
+                myRef.child("Users").child(ownerId).child("Stores").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
+                        sharedShopLists.clear();
+                        if(dataSnapshot.getValue() != null) {
+                            GenericTypeIndicator<ItemsList> t = new GenericTypeIndicator<ItemsList>() {};
+                            for(DataSnapshot singleSnapshot : dataSnapshot.getChildren()){
+                                ItemsList itemsList = singleSnapshot.getValue(t);
+                                sharedShopLists.add(itemsList);
+                            }
+                        }
+                        setShoppingRecycler(sharedShopLists);
+                    }
+
+                    @Override
+                    public void onCancelled(@NotNull DatabaseError databaseError) {
+                        Log.i("TAG", "onCancelled", databaseError.toException());
+                    }
+                });
+            }
+        }
+
+    }
+
+
     @Override
     public void onItemClick(int position) {
         if ((pantryListMainRecycler.getVisibility() == View.VISIBLE) && (shoppingListMainRecycler.getVisibility() == View.GONE)) {
@@ -227,33 +264,47 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     getPantryInside(position, snapshot);
                 }
-
                 @Override
                 public void onCancelled(@NonNull DatabaseError error) {
-
                 }
             });
 
-
         }
-        /*else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
+        else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
             Intent i = new Intent(this, ShoppingInside.class);
-            i.putExtra("userPantryLists", pantryLists);
-            i.putExtra("shoppingListName", shoppingLists.get(position).getName());
-            i.putExtra("shoppingListId", shoppingLists.get(position).getId());
+            i.putExtra("userPantryLists", sharedPantryLists);
+            System.out.println(sharedPantryLists.get(0).itemList.get(0).getToPurchase());
+            i.putExtra("shoppingListName", sharedShopLists.get(position).getName());
+            i.putExtra("shoppingListId", sharedShopLists.get(position).getId());
+            i.putExtra("OwnerId", owner);
             i.putExtra("EmailUser", userId);
             startActivity(i);
-        }*/
+        }
     }
 
     public void getPantryInside(int position, DataSnapshot snapshot) {
-        ownerId = snapshot.child("ownerId").getValue().toString();
+        owner = snapshot.child("ownerId").getValue().toString();
         Intent i = new Intent(SharedPantriesShopsActivity.this, PantryInside.class);
         i.putExtra("pantryListName", sharedPantryLists.get(position).getName());
         i.putExtra("pantryListId", sharedPantryLists.get(position).getId());
-        i.putExtra("OwnerId", ownerId);
+        i.putExtra("OwnerId", owner);
         listPosition = position;
         startActivityForResult(i, 10030);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 10030) {
+            if (resultCode == RESULT_OK) {
+                ArrayList<Item> itemsPantry = data.getParcelableArrayListExtra("returnedItemList");
+                ItemsList pantry = sharedPantryLists.get(listPosition);
+                pantry.setItemList(itemsPantry);
+                pantryListRecyclerAdapter.notifyItemChanged(listPosition);
+            }
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+
     }
 
 
