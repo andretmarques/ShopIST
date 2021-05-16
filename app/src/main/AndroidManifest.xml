@@ -23,6 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ShopIST"
         tools:remove="android:appComponentFactory">
+        <activity android:name=".CartActivity" />
         <activity android:name=".ForgotPassword" />
         <activity android:name=".LoginActivity">
             <intent-filter>
