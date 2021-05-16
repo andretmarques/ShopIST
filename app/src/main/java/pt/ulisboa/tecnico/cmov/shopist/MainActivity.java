@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private double actualLatitude;
     private DatabaseReference myRef;
     private int listPosition;
-    private final HashMap<String, String> storeNames = new HashMap<>();
+    private HashMap<String, String> storeNames = new HashMap<>();
 
     String userId;
 
@@ -243,14 +243,23 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         editor.apply();
     }
 
+    public void saveStoreNamesListToCache() {
+        Gson gson = new Gson();
+        String jsonShopping = gson.toJson(storeNames);
+        editor.putString("cachedStoreNames", jsonShopping);
+        editor.apply();
+    }
+
     private void loadDataCache() {
         prefs = getSharedPreferences("UserData", MODE_PRIVATE);
         Gson gson = new Gson();
         String jsonPantry = prefs.getString("cachedPantries", null);
         String jsonShopping = prefs.getString("cachedShopping", null);
+        String jsonStores = prefs.getString("cachedStoreNames", null);
         Type type = new TypeToken<ArrayList<ItemsList>>() {}.getType();
         pantryLists = gson.fromJson(jsonPantry, type);
         shoppingLists = gson.fromJson(jsonShopping, type);
+        storeNames = gson.fromJson(jsonStores, type);
         if (pantryLists == null && shoppingLists == null) {
             Log.d("cacheya", "Listas de cache vazias ");
         } else {
@@ -461,6 +470,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 saveShoppingListToCache();
                 myRef.child("Users").child(userId).child("Stores").child(shoppingList.getId()).setValue(shoppingList);
                 storeNames.put(shoppingList.getId(), shoppingList.getName());
+                saveStoreNamesListToCache();
                 myRef.child("Users").child(userId).child("StoreNames").setValue(storeNames);
             }
             return;
@@ -494,10 +504,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            /*case R.id.settings:
-                // User chose the "Settings" item, show the app settings UI...
-                Log.d("TAG", "onOptionsItemSelected: Settings");
-                return true;*/
 
             case R.id.rate:
                 onClickShareLove();
