@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
@@ -38,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     SharedPreferences.Editor editor;
     String cachedUsername;
     String cachedPassword;
+    String cachedUserID;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,8 +48,9 @@ public class LoginActivity extends AppCompatActivity {
         editor = prefs.edit();
         cachedUsername = prefs.getString("username", null);
         cachedPassword = prefs.getString("password", null);
+        cachedUserID = prefs.getString("userid", null);
 
-        if (cachedUsername != null && cachedPassword != null) {
+        if (cachedUserID != null) {
             cachedLogin();
         } else {
             setContentView(R.layout.activity_login);
@@ -111,6 +114,8 @@ public class LoginActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Intent i = new Intent(LoginActivity.this, MainActivity.class);
                     i.putExtra("UserEmail", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    editor.putString("userid", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                    editor.apply();
                     startActivity(i);
                 } else {
                     Toast.makeText(LoginActivity.this, "Failed to Login. Check your credentials", Toast.LENGTH_LONG).show();
@@ -127,7 +132,7 @@ public class LoginActivity extends AppCompatActivity {
         Toast.makeText(LoginActivity.this, "Welcome back", Toast.LENGTH_SHORT).show();
         Intent i = new Intent(LoginActivity.this, MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        i.putExtra("UserEmail", FirebaseAuth.getInstance().getCurrentUser().getUid());
+        i.putExtra("UserEmail", cachedUserID);
         startActivity(i);
         finish();
     }

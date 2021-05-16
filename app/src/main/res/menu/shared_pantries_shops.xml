@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/shared"
+        android:icon="@drawable/ic_baseline_group_24_white"
+        android:title=""
+        app:showAsAction="ifRoom">
+    </item>
+</menu>
