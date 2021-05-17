@@ -96,6 +96,7 @@ public class EditProductActivity  extends AppCompatActivity {
             barcodeView.setOnClickListener(view -> startActivityForResult(new Intent(EditProductActivity.this, ScanBarcodeActivity.class), 20025));
         } else {
             barcodeView.setText(item.getProductBarcode());
+            barcode = item.getProductBarcode();
             barcodeView.setTypeface(null, Typeface.BOLD);
         }
         if(item.getImageEncoded() != null) {
@@ -175,8 +176,8 @@ public class EditProductActivity  extends AppCompatActivity {
                 if (item.getImageEncoded() != null) {
                     pi.setPhotoEncoded(item.getImageEncoded());
                 }
+                System.out.println(barcode);
                 myRef.child("PublicItems").child(barcode).setValue(pi);
-            } else {
                 item.setPrice(doublePrice);
             }
 
