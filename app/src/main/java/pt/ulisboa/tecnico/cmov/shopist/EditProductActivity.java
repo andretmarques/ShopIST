@@ -1,12 +1,17 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -15,7 +20,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -26,6 +33,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -46,7 +55,7 @@ public class EditProductActivity  extends AppCompatActivity {
     String pantryId;
     boolean repeated = false;
     ImageView itemPhoto;
-    private Bitmap ResizedPhoto;
+    File photoFile;
 
 
     @Override
@@ -93,13 +102,46 @@ public class EditProductActivity  extends AppCompatActivity {
             Bitmap photo = convertStringToBitmap(item.getImageEncoded());
             itemPhoto.setImageBitmap(photo);
         }
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        itemPhoto.setOnClickListener(view -> startActivityForResult(takePictureIntent, 112));
+        itemPhoto.setOnClickListener(view -> openDialog());
+
 
     }
 
+
     public void onClickCancel(View view){
         finish();
+    }
+
+    public void openDialog() {
+        String[] way = {"Gallery", "Camera"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("How to set the photo");
+        builder.setItems(way, new DialogInterface.OnClickListener() {
+            @SuppressLint("IntentReset")
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if (way[which].equals("Gallery")) {
+                    Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                    getIntent.setType("image/*");
+
+                    @SuppressLint("IntentReset") Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    pickIntent.setType("image/*");
+
+                    Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+                    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+
+                    startActivityForResult(Intent.createChooser(chooserIntent, "Select Picture"), 111);
+
+                }
+                else if (way[which].equals("Camera")) {
+                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(takePictureIntent, 112);
+                }
+            }
+        });
+        builder.show();
+
     }
 
     public void onClickConfirm(View view){
@@ -226,9 +268,37 @@ public class EditProductActivity  extends AppCompatActivity {
 
                 item.setImageEncoded(stringImage);
             }
+        }
+
+        if (requestCode == 111) {
+            if (resultCode == RESULT_OK) {
+                Uri selectedImageURI = data.getData();
+                try {
+                    InputStream image_stream;
+                    image_stream = getApplicationContext().getContentResolver().openInputStream(selectedImageURI);
+                    Bitmap imageBitmap = BitmapFactory.decodeStream(image_stream);
+
+                    final float densityMultiplier = EditProductActivity.this.getResources().getDisplayMetrics().density;
+
+                    int h= (int) (100*densityMultiplier);
+                    int w= (int) (h * imageBitmap.getWidth()/((double) imageBitmap.getHeight()));
+
+                    imageBitmap = Bitmap.createScaledBitmap(imageBitmap, w, h, true);
+                    String stringImage = convertBitmapToString(imageBitmap);
+
+                    itemPhoto.setImageBitmap(imageBitmap);
+
+                    item.setImageEncoded(stringImage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+
 
             super.onActivityResult(requestCode, resultCode, data);
-        }
+
     }
 
     public static String convertBitmapToString(Bitmap bitmap) {
