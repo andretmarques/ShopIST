@@ -48,6 +48,11 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
             holder.itemCount.setText(numberItemsString);
             if(type.equals("SHOP")) {
                 holder.listLocation.setText(allLists.get(position).getLocation());
+                if(allLists.get(position).getEta() != null) {
+                    holder.etaText.setText(allLists.get(position).getEta());
+                }else {
+                    holder.etaText.setText("");
+                }
             }else if(type.equals("PANTRY")){
                 String toBuyStr = "Items to buy: " + allLists.get(position).getToBuy();
                 holder.toBuyCount.setText(toBuyStr);
@@ -80,6 +85,7 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
         TextView itemCount;
         TextView toBuyCount;
         TextView listLocation;
+        TextView etaText;
         OnListListener onListListener;
 
 
@@ -90,6 +96,7 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
             itemCount = itemView.findViewById(R.id.item_numbers);
             toBuyCount = itemView.findViewById(R.id.items_to_buy);
             listLocation = itemView.findViewById(R.id.list_location);
+            etaText = itemView.findViewById(R.id.eta);
             this.onListListener = onListListener;
             itemView.setOnClickListener(this);
 

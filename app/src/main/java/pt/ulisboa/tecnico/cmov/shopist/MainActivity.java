@@ -21,6 +21,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -42,6 +43,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -55,6 +60,12 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.GeocodingApi;
+import com.google.maps.PendingResult;
+import com.google.maps.model.DirectionsResult;
+import com.sucho.placepicker.AddressData;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -70,7 +81,7 @@ import nl.dionsegijn.konfetti.models.Shape;
 import nl.dionsegijn.konfetti.models.Size;
 
 
-public class MainActivity extends AppCompatActivity implements ListRecyclerAdapter.OnListListener {
+public class MainActivity extends AppCompatActivity implements ListRecyclerAdapter.OnListListener, OnMapReadyCallback {
 
     private Animation fromBottom;
     private Animation toBottom;
@@ -102,6 +113,14 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
     private long pressedTime;
+    private static final int MAP_LAYOUT_STATE_CONTRACTED = 0;
+    private static final int MAP_LAYOUT_STATE_EXPANDED = 1;
+    private GeoApiContext mGeoApiContext = null;
+    private MapView mMapView;
+    private GoogleMap mGoogleMap;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,6 +166,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 100, LocationListenerGPS);
         }
+
+        initGoogleMap(savedInstanceState);
+
         if (net){
             updateData();
         }else {
@@ -444,6 +466,10 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void showCreateShopPopUp(View v) {
         Intent i = new Intent(this, CreateShopActivity.class);
         i.putExtra("EmailUser", userId);
+        if (actualLatitude != 0.0 && actualLongitude != 0.0 ){
+            i.putExtra("ActualLatitude", actualLatitude);
+            i.putExtra("ActualLongitude", actualLongitude);
+        }
 
         handleAddMenu();
         startActivityForResult(i, 10002);
@@ -470,7 +496,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
-
                 shoppingLists.add(shoppingList);
                 shoppingList.generateId();
                 saveShoppingListToCache();
@@ -478,6 +503,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 storeNames.put(shoppingList.getId(), shoppingList.getName());
                 saveStoreNamesListToCache();
                 myRef.child("Users").child(userId).child("StoreNames").setValue(storeNames);
+                shoppingListRecyclerAdapter.notifyDataSetChanged();
+
             }
             return;
         }
@@ -617,6 +644,26 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         return address;
     }
 
+    private void initGoogleMap(Bundle savedInstanceState) {
+        // *** IMPORTANT ***
+        // MapView requires that the Bundle you pass contain _ONLY_ MapView SDK
+        // objects or sub-Bundles.
+/*        Bundle mapViewBundle = null;
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(getString(R.string.google_api_key));
+        }
+
+        mMapView.onCreate(mapViewBundle);
+
+        mMapView.getMapAsync(this);*/
+
+        if(mGeoApiContext == null){
+            mGeoApiContext = new GeoApiContext.Builder()
+                    .apiKey(getString(R.string.google_api_key))
+                    .build();
+        }
+    }
+
     @Override
     public void onItemClick(int position) {
         if ((pantryListMainRecycler.getVisibility() == View.VISIBLE) && (shoppingListMainRecycler.getVisibility() == View.GONE)) {
@@ -630,6 +677,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             i.putExtra("userPantryLists", pantryLists);
             i.putExtra("shoppingListName", shoppingLists.get(position).getName());
             i.putExtra("shoppingListId", shoppingLists.get(position).getId());
+            //i.putExtra("soppingList", shoppingLists.get(position));
             i.putExtra("EmailUser", userId);
             startActivityForResult(i, 20005);
         }
@@ -661,4 +709,12 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         alertDialog.setOnShowListener(dialogInterface -> animation.start());
         alertDialog.show();
     }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
+        //addMapMarkers();
+    }
+
+
 }

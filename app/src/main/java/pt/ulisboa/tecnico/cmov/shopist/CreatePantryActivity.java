@@ -13,6 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.libraries.places.api.Places;
+import com.google.maps.DirectionsApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.PendingResult;
+import com.google.maps.model.DirectionsResult;
 import com.sucho.placepicker.AddressData;
 import com.sucho.placepicker.MapType;
 import com.sucho.placepicker.PlacePicker;
@@ -26,8 +30,11 @@ public class CreatePantryActivity extends AppCompatActivity {
     private TextView textView;
     private TextView listLocation;
     private Intent i;
+    private double latitude;
+    private double longitude;
 
     String emailuser;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -37,6 +44,8 @@ public class CreatePantryActivity extends AppCompatActivity {
         setSupportActionBar(findViewById(R.id.toolbar_main));
         i = getIntent();
         processButton();
+        latitude = i.getDoubleExtra("ActualLatitude", 0);
+        longitude = i.getDoubleExtra("ActualLongitude", 0);
 
         textView = findViewById(R.id.list_name);
         listLocation = findViewById(R.id.list_location);
@@ -79,8 +88,7 @@ public class CreatePantryActivity extends AppCompatActivity {
 
     public void setActualLocation(View v){
 
-        double latitude = i.getDoubleExtra("ActualLatitude", 0);
-        double longitude = i.getDoubleExtra("ActualLongitude", 0);
+
         String home = getRoad(latitude, longitude);
         locationPicked = home;
         listLocation.setText(home);
@@ -91,8 +99,14 @@ public class CreatePantryActivity extends AppCompatActivity {
 
 
     private void showPlacePicker() {
+        double initialLat = 38.736982568082674;
+        double initialLong = -9.302610416802459;
+        if(latitude != 0 && longitude != 0) {
+            initialLat = latitude;
+            initialLong = longitude;
+        }
         Intent intent = new PlacePicker.IntentBuilder()
-                .setLatLong(40.748672, -73.985628)  // Initial Latitude and Longitude the Map will load into
+                .setLatLong(initialLat, initialLong)  // Initial Latitude and Longitude the Map will load into
                 .showLatLong(true)  // Show Coordinates in the Activity
                 .setMapZoom(12.0f)  // Map Zoom Level. Default: 14.0
                 .setAddressRequired(true) // Set If return only Coordinates if cannot fetch Address for the coordinates. Default: True
