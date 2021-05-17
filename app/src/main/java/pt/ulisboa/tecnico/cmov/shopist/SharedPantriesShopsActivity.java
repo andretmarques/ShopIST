@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -84,18 +85,14 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
     @SuppressLint("NonConstantResourceId")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.single:
-                Intent i = new Intent(SharedPantriesShopsActivity.this, MainActivity.class);
-                i.putExtra("UserEmail", userId);
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(i);
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-
+        if (item.getItemId() == R.id.single) {
+            Intent i = new Intent(SharedPantriesShopsActivity.this, MainActivity.class);
+            i.putExtra("UserEmail", userId);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     public void showPantries(View v){
