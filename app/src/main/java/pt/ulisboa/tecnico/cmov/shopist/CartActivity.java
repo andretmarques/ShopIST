@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -37,6 +36,8 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
     private String uid;
     private HashMap<String, HashMap<Item, Integer>> productsPurchase = new HashMap<>();
     boolean net;
+    private String ownerId;
+    private String userId;
 
 
     @Override
@@ -51,7 +52,11 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
         if(b != null){
             itemsCart = b.getParcelableArrayList("cartList");
             allPantries = b.getParcelableArrayList("allPantries");
-            uid = b.getString("UserId");
+            ownerId = b.getString("OwnerId");
+            if (ownerId != null) {
+                uid = ownerId;
+            } else uid = b.getString("UserId");
+            userId = b.getString("UserId");
             productsPurchase = (HashMap<String, HashMap<Item, Integer>>) b.getSerializable("fantasticHm");
         }
         setItemsRecycler(itemsCart);
@@ -74,7 +79,6 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
                 for (HashMap.Entry<Item, Integer> secondEntry : entry.getValue().entrySet()){
                     pantryName = getPantryName(secondEntry.getKey(), entry.getKey());
                     updateDataBase(entry.getKey(), secondEntry.getKey(), secondEntry.getValue(), pantryName);
-
                 }
 
             }
@@ -105,7 +109,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
             public void onSlideCompleteAnimationEnded(@NonNull SlideToActView view) {
                 Intent i = new Intent(CartActivity.this, MainActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                i.putExtra("UserEmail", uid);
+                i.putExtra("UserEmail", userId);
                 setResult(CartActivity.RESULT_OK, i);
                 finish();
                 startActivity(i);
@@ -180,7 +184,6 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
 
                         myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
                                 .child(dataSnapshot.getKey()).child("quantity").setValue(i.getQuantity());
-
 
 
                     }
