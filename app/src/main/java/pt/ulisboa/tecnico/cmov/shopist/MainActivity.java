@@ -1,19 +1,9 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -27,7 +17,6 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.annotation.SuppressLint;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -41,8 +30,17 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -57,7 +55,6 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-
 
 import org.jetbrains.annotations.NotNull;
 
@@ -227,6 +224,21 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
+
+        myRef.child("Users").child(userId).child("StoreNames").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NotNull DataSnapshot dataSnapshot) {
+                if(dataSnapshot.getValue() != null) {
+                    GenericTypeIndicator<HashMap<String, String>> t = new GenericTypeIndicator<HashMap<String, String>>() {};
+                    storeNames = dataSnapshot.getValue(t);
+                    }
+                }
+
+            @Override
+            public void onCancelled(@NotNull DatabaseError databaseError) {
+                Log.i("TAG", "onCancelled", databaseError.toException());
+            }
+        });
     }
 
     public void savePantryListToCache() {
@@ -260,11 +272,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         pantryLists = gson.fromJson(jsonPantry, type);
         shoppingLists = gson.fromJson(jsonShopping, type);
         storeNames = gson.fromJson(jsonStores, type);
-        if (pantryLists == null && shoppingLists == null) {
-            Log.d("cacheya", "Listas de cache vazias ");
-        } else {
-            Log.d("cacheya", "Cache loaded successfully");
-        }
 
     }
 
@@ -416,12 +423,10 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
         @Override
         public void onProviderDisabled(String provider) {
-            Log.d("Latitude", "disable");
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            Log.d("Latitude", "enable");
         }
     };
 
@@ -456,6 +461,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 pantryList.generateId();
                 savePantryListToCache();
                 myRef.child("Users").child(userId).child("Pantries").child(pantryList.getId()).setValue(pantryList);
+                pantryListRecyclerAdapter.notifyDataSetChanged();
             }
             return;
         }
@@ -480,8 +486,10 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ArrayList<Item> itemsPantry = data.getParcelableArrayListExtra("returnedItemList");
+                int toBuy = data.getIntExtra("pantryToBuy", 0);
                 ItemsList pantry = pantryLists.get(listPosition);
                 pantry.setItemList(itemsPantry);
+                pantry.setToBuy(toBuy);
                 pantryListRecyclerAdapter.notifyItemChanged(listPosition);
 
             }
@@ -507,7 +515,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
             case R.id.rate:
                 onClickShareLove();
-                Log.d("TAG", "onOptionsItemSelected: Rate");
                 return true;
 
             case R.id.logout:
@@ -614,11 +621,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void onItemClick(int position) {
         if ((pantryListMainRecycler.getVisibility() == View.VISIBLE) && (shoppingListMainRecycler.getVisibility() == View.GONE)) {
             Intent i = new Intent(this, PantryInside.class);
-            i.putExtra("pantryListName", pantryLists.get(position).getName());
-            i.putExtra("pantryListId", pantryLists.get(position).getId());
+            i.putExtra("pantry", pantryLists.get(position));
             i.putExtra("EmailUser", userId);
             listPosition = position;
-            i.putExtra("pantryList", pantryLists.get(position).getItemList());
             startActivityForResult(i, 10030);
         }else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
             Intent i = new Intent(this, ShoppingInside.class);
@@ -626,7 +631,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             i.putExtra("shoppingListName", shoppingLists.get(position).getName());
             i.putExtra("shoppingListId", shoppingLists.get(position).getId());
             i.putExtra("EmailUser", userId);
-            startActivity(i);
+            startActivityForResult(i, 20005);
         }
     }
 
@@ -653,12 +658,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 .setMessage("We appreciate your love!")
                 .setTitle("Thanks");
         final AlertDialog alertDialog = builder.create();
-        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialogInterface) {
-                    animation.start();
-            }
-        });
+        alertDialog.setOnShowListener(dialogInterface -> animation.start());
         alertDialog.show();
     }
 }

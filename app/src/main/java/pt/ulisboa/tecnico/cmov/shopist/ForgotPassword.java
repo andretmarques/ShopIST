@@ -1,8 +1,5 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
@@ -12,8 +9,8 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 
 public class ForgotPassword extends AppCompatActivity {
@@ -54,17 +51,14 @@ public class ForgotPassword extends AppCompatActivity {
 
         progressBar.setVisibility(View.VISIBLE);
 
-        mAuth.sendPasswordResetEmail(email).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(ForgotPassword.this, "Check your email to reset your password", Toast.LENGTH_LONG).show();
-                    Intent i = new Intent(ForgotPassword.this, LoginActivity.class);
-                    i.putExtra("email", email);
-                    startActivity(i);
-                } else {
-                    Toast.makeText(ForgotPassword.this, "Something failed. Try again", Toast.LENGTH_LONG).show();
-                }
+        mAuth.sendPasswordResetEmail(email).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Toast.makeText(ForgotPassword.this, "Check your email to reset your password", Toast.LENGTH_LONG).show();
+                Intent i = new Intent(ForgotPassword.this, LoginActivity.class);
+                i.putExtra("email", email);
+                startActivity(i);
+            } else {
+                Toast.makeText(ForgotPassword.this, "Something failed. Try again", Toast.LENGTH_LONG).show();
             }
         });
         progressBar.setVisibility(View.VISIBLE);

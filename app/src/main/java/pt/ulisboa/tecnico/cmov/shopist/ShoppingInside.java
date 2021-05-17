@@ -1,23 +1,14 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.Patterns;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.Nullable;
@@ -27,21 +18,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.ValueEventListener;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
     private final ArrayList<Item> itemsShop = new ArrayList<>();
@@ -87,9 +68,7 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
             toolbarTitle.setText(actionTitle);
             assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
-
         }
-
 
         cart = new ItemsList("Cart " + shopId, ItemsList.ListType.CART);
 
@@ -236,8 +215,22 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
             i.putExtra("cartList", cart.getItemList());
             i.putExtra("allPantries", allPantries);
             i.putExtra("UserId", uid);
-            i.putExtra("fantasticHm", (Serializable) productsPurchase);
+            i.putExtra("fantasticHm", productsPurchase);
             i.putExtra("OwnerId", ownerId);
             startActivityForResult(i, 10078);
         }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode == 10078){
+            if(resultCode == RESULT_OK){
+                Intent i = new Intent();
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                i.putExtra("UserEmail", uid);
+                setResult(CartActivity.RESULT_OK, i);
+                finish();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

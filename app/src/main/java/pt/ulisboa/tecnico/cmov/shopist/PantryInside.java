@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
@@ -36,15 +35,14 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.database.GenericTypeIndicator;
-import com.google.firebase.database.core.UserWriteRecord;
+import com.google.firebase.database.ValueEventListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -68,6 +66,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     private HashMap<String, String> positionsMap = new HashMap<>();
     String userId;
     private String pantryName;
+    private ItemsList pantry;
     FirebaseAuth mAuth;
     boolean shared = false;
 
@@ -105,18 +104,20 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
         Bundle b = getIntent().getExtras();
         if(b != null){
-            pantryName = b.getString("pantryListName");
+            pantry = b.getParcelable("pantry");
+            pantryName = pantry.getName();
+            pantryId = pantry.getId();
+            itemsPantry = pantry.getItemList();
+
             String actionTitle = "Pantry: " + pantryName;
             toolbarTitle.setText(actionTitle);
-            pantryId = b.getString("pantryListId");
-            if (b.getParcelableArrayList("pantryList") != null) {
-                itemsPantry = b.getParcelableArrayList("pantryList");
+            if (pantry.getItemList() != null) {
                 userId = getIntent().getStringExtra("EmailUser");
                 setItemsRecycler(itemsPantry);
             } else {
                 populateLists();
                 shared = true;
-                Log.d("populate", "ye");}
+                }
 
             assert actionBar != null;
             actionBar.setDisplayShowTitleEnabled(false);
@@ -128,6 +129,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             public void handleOnBackPressed() {
                 Intent intent = new Intent();
                 intent.putParcelableArrayListExtra("returnedItemList", itemsPantry);
+                intent.putExtra("pantryToBuy", pantry.getToBuy());
                 setResult(PantryInside.RESULT_OK, intent);
                 finish();
             }
@@ -158,25 +160,19 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         alertDialog.setView(input);
 
         alertDialog.setPositiveButton("Confirm",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        String email = input.getText().toString();
-                        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                            Toast.makeText(getApplicationContext(), "Wrong email format", Toast.LENGTH_SHORT).show();
-                            onOptionsItemSelected(item);
+                (dialog, which) -> {
+                    String email = input.getText().toString();
+                    if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                        Toast.makeText(getApplicationContext(), "Wrong email format", Toast.LENGTH_SHORT).show();
+                        onOptionsItemSelected(item);
 
-                        }
-                        Toast.makeText(getApplicationContext(), "Your friend has now access to the pantry", Toast.LENGTH_SHORT).show();
-                        sharePantry(email);
                     }
+                    Toast.makeText(getApplicationContext(), "Your friend has now access to the pantry", Toast.LENGTH_SHORT).show();
+                    sharePantry(email);
                 });
 
         alertDialog.setNegativeButton("Back",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+                (dialog, which) -> dialog.cancel());
 
         alertDialog.show();
         return true;
@@ -284,7 +280,9 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                 if(newItem.getToPurchase() > 0 &&  !newItem.getPantries().containsValue(pantryId)) {
                     newItem.getPantries().put(pantryName, pantryId);
                 }
-
+                int preToPurchase = itemsPantry.get(listPosition).getToPurchase();
+                pantry.setToBuy(pantry.getToBuy() - preToPurchase + newItem.getToPurchase());
+                myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("toBuy").setValue(pantry.getToBuy());
                 myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(newItem.getId())).setValue(newItem);
                 itemsPantry.set(listPosition, newItem);
                 itemRecyclerAdapter.notifyItemChanged(listPosition);
@@ -312,7 +310,6 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                 }
 
                 if (!shared) {
-                    Log.d("pop", "not shared");
                     setItemsRecycler(itemsPantry);
                     populatePositionMap();
                 }
