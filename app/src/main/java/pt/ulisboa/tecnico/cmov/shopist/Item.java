@@ -1,9 +1,13 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -21,10 +25,10 @@ public class Item implements Parcelable {
     private HashMap<String, String> shops = new HashMap<>();
     private HashMap<String, String> pantries = new HashMap<>();
     private HashMap<String, String> pantriesMap = new HashMap<>();
+    private String imageEncoded;
 
 
-
-    protected Item(Parcel in) {
+    public Item(Parcel in) {
         name = in.readString();
         quantity = in.readInt();
         price = in.readDouble();
@@ -35,9 +39,8 @@ public class Item implements Parcelable {
         inCart = in.readInt();
         pantries = in.readHashMap(String.class.getClassLoader());
         pantriesMap = in.readHashMap(String.class.getClassLoader());
-
+        imageEncoded = in.readString();
     }
-
 
     public static final Creator<Item> CREATOR = new Creator<Item>() {
         @Override
@@ -163,22 +166,16 @@ public class Item implements Parcelable {
         this.pantriesMap = pantriesMap;
     }
 
+    public String getImageEncoded() {
+        return imageEncoded;
+    }
+
+    public void setImageEncoded(String imageEncoded) {
+        this.imageEncoded = imageEncoded;
+    }
+
     public Item() {
     }
-
-    public Item( Item i) {
-        this.name = i.name;
-        this.quantity = i.quantity;
-        this.price = i.price;
-        this.id = i.id;
-        this.toPurchase = i.toPurchase;
-        this.productBarcode = i.productBarcode;
-        this.shops = i.shops;
-        this.inCart = i.inCart;
-        this.pantries = i.pantries;
-        this.pantriesMap = i.pantriesMap;
-    }
-
 
     @Override
     public int describeContents() {
@@ -197,6 +194,6 @@ public class Item implements Parcelable {
         dest.writeInt(inCart);
         dest.writeMap(pantries);
         dest.writeMap(pantriesMap);
-
+        dest.writeString(imageEncoded);
     }
 }

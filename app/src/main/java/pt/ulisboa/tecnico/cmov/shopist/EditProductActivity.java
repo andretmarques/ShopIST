@@ -1,10 +1,15 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -12,13 +17,20 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class EditProductActivity  extends AppCompatActivity {
     private Item item;
@@ -33,6 +45,8 @@ public class EditProductActivity  extends AppCompatActivity {
     String userId;
     String pantryId;
     boolean repeated = false;
+    ImageView itemPhoto;
+    private Bitmap ResizedPhoto;
 
 
     @Override
@@ -51,6 +65,8 @@ public class EditProductActivity  extends AppCompatActivity {
         quantityToBuy = findViewById(R.id.product_quantity_to_buy);
         price = findViewById(R.id.product_price);
         barcodeView = findViewById(R.id.product_barcode_text);
+        itemPhoto = findViewById(R.id.item_image);
+
         userId = getIntent().getStringExtra("UserId");
         pantryId = getIntent().getStringExtra("PantryId");
 
@@ -73,6 +89,12 @@ public class EditProductActivity  extends AppCompatActivity {
             barcodeView.setText(item.getProductBarcode());
             barcodeView.setTypeface(null, Typeface.BOLD);
         }
+        if(item.getImageEncoded() != null) {
+            Bitmap photo = convertStringToBitmap(item.getImageEncoded());
+            itemPhoto.setImageBitmap(photo);
+        }
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        itemPhoto.setOnClickListener(view -> startActivityForResult(takePictureIntent, 112));
 
     }
 
@@ -108,7 +130,11 @@ public class EditProductActivity  extends AppCompatActivity {
             doublePrice = Math.floor(doublePrice * 100) / 100;
 
             if ((!item.getProductBarcode().equals("No Barcode") || barcode != null) && !newPrice.equals(String.valueOf(item.getPrice()))) {
-                myRef.child("PublicItems").child(barcode).setValue(new PublicItem(barcode, doublePrice));
+                PublicItem pi = new PublicItem(barcode, doublePrice);
+                if (item.getImageEncoded() != null) {
+                    pi.setPhotoEncoded(item.getImageEncoded());
+                }
+                myRef.child("PublicItems").child(barcode).setValue(pi);
             } else {
                 item.setPrice(doublePrice);
             }
@@ -156,12 +182,14 @@ public class EditProductActivity  extends AppCompatActivity {
                 if (snapshot.child("PublicItems").child(barcode).exists()) {
                     Toast.makeText(EditProductActivity.this, "Product has already been shared. Price has been written", Toast.LENGTH_LONG).show();
                     Double varPrice = Double.parseDouble(snapshot.child("PublicItems").child(barcode).child("price").getValue().toString());
+                    String imageEncoded = snapshot.child("PublicItems").child(barcode).child("photoEncoded").getValue().toString();
                     item.setPrice(varPrice);
                     price.setText(String.valueOf(varPrice));
                     price.setFocusable(true);
                     price.requestFocus();
                     barcodeView.setText(barcode);
                     barcodeView.setTypeface(null, Typeface.BOLD);
+                    itemPhoto.setImageBitmap(convertStringToBitmap(imageEncoded));
                 } else {
                     Toast.makeText(EditProductActivity.this, "Write a Price and press confirm to share product info", Toast.LENGTH_LONG).show();
                     barcodeView.setText(barcode);
@@ -177,15 +205,43 @@ public class EditProductActivity  extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == 20025) {
+        if (requestCode == 20025) {
             if (resultCode == RESULT_OK) {
                 barcode = data.getStringExtra("Barcode");
                 userHasRepeatedBarcode();
 
             }
         }
+        if (requestCode == 112) {
+            if (resultCode == RESULT_OK) {
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                Bitmap croppedBmp = Bitmap.createBitmap(imageBitmap, 0, 0,
+                        100, 100);
 
-        super.onActivityResult(requestCode, resultCode, data);
+                String stringImage = convertBitmapToString(croppedBmp);
+                System.out.println(stringImage);
+
+                itemPhoto.setImageBitmap(croppedBmp);
+
+                item.setImageEncoded(stringImage);
+            }
+
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
+    public static String convertBitmapToString(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
+    public static Bitmap convertStringToBitmap(String string) {
+        byte[] byteArray1;
+        byteArray1 = Base64.decode(string, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(byteArray1, 0, byteArray1.length);
     }
 
 
