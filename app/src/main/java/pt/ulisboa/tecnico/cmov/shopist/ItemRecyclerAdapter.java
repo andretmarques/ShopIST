@@ -1,7 +1,6 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +9,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 
 import java.util.List;
 
@@ -22,6 +20,7 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
     private final String type;
     private View.OnClickListener clickListener;
     private OnAddCartClick addCartListener;
+    private int toBuy;
 
 
     public void setOnItemClickListener(View.OnClickListener clickListener) {

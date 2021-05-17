@@ -3,7 +3,6 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -22,10 +21,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
     private final ArrayList<Item> itemsShop = new ArrayList<>();
@@ -212,7 +208,21 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
             i.putExtra("cartList", cart.getItemList());
             i.putExtra("allPantries", allPantries);
             i.putExtra("UserId", uid);
-            i.putExtra("fantasticHm", (Serializable) productsPurchase);
+            i.putExtra("fantasticHm", productsPurchase);
             startActivityForResult(i, 10078);
         }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if(requestCode == 10078){
+            if(resultCode == RESULT_OK){
+                Intent i = new Intent();
+                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                i.putExtra("UserEmail", uid);
+                setResult(CartActivity.RESULT_OK, i);
+                finish();
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 }

@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -25,12 +26,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
     private RecyclerView productsMainRecycler;
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private ArrayList<Item> itemsCart = new ArrayList<>();
+    private ArrayList<Item> updatedItems = new ArrayList<>();
     private ArrayList<ItemsList> allPantries = new ArrayList<>();
     private DatabaseReference myRef;
     private String uid;
@@ -72,8 +73,8 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
             for(HashMap.Entry<String, HashMap<Item, Integer>> entry : productsPurchase.entrySet()){
                 for (HashMap.Entry<Item, Integer> secondEntry : entry.getValue().entrySet()){
                     pantryName = getPantryName(secondEntry.getKey(), entry.getKey());
-                    Log.d("TAG", "setupEventCallbacks: " + pantryName);
                     updateDataBase(entry.getKey(), secondEntry.getKey(), secondEntry.getValue(), pantryName);
+
                 }
 
             }
@@ -105,7 +106,10 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
                 Intent i = new Intent(CartActivity.this, MainActivity.class);
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 i.putExtra("UserEmail", uid);
+                setResult(CartActivity.RESULT_OK, i);
+                finish();
                 startActivity(i);
+
             }
     });
     }
@@ -120,6 +124,22 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
     }
 
     private void updateDataBase(String pantryId, Item i, int purchased, String pantryName){
+        myRef.child("Users").child(uid).child("Pantries").child(pantryId).addListenerForSingleValueEvent(new ValueEventListener() {
+
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int toBuy = Integer.parseInt(snapshot.child("toBuy").getValue().toString()) - purchased;
+                if (toBuy < 0)
+                    toBuy = 0;
+                myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("toBuy").setValue(toBuy);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
 
         myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -160,6 +180,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
 
                         myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
                                 .child(dataSnapshot.getKey()).child("quantity").setValue(i.getQuantity());
+
 
 
                     }

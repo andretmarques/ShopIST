@@ -108,8 +108,7 @@ public class EditProductActivity  extends AppCompatActivity {
             doublePrice = Double.parseDouble(newPrice);
             doublePrice = Math.floor(doublePrice * 100) / 100;
 
-            // This warning is STUPID because it prevents from constant DB update when the price remains the same
-            if ((!item.getProductBarcode().equals("No Barcode") || barcode != null) && !newPrice.equals(item.getPrice())) {
+            if ((!item.getProductBarcode().equals("No Barcode") || barcode != null) && !newPrice.equals(String.valueOf(item.getPrice()))) {
                 myRef.child("PublicItems").child(barcode).setValue(new PublicItem(barcode, doublePrice));
             } else {
                 item.setPrice(doublePrice);
@@ -130,10 +129,8 @@ public class EditProductActivity  extends AppCompatActivity {
         myRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Log.d("scan", pantryId);
                 for (DataSnapshot singleSnapshot : snapshot.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").getChildren()) {
                     if (singleSnapshot.child("productBarcode").getValue().toString().equals(barcode)) {
-                        Log.d("repeated", singleSnapshot.child("productBarcode").getValue().toString());
                         Toast.makeText(EditProductActivity.this, "You already have an item with this barcode", Toast.LENGTH_LONG).show();
                         repeated = true;
                         finish();
@@ -184,7 +181,6 @@ public class EditProductActivity  extends AppCompatActivity {
         if(requestCode == 20025) {
             if (resultCode == RESULT_OK) {
                 barcode = data.getStringExtra("Barcode");
-                Log.d("barcode", barcode);
                 userHasRepeatedBarcode();
 
             }

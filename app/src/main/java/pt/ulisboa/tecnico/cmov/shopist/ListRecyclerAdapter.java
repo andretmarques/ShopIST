@@ -46,7 +46,13 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
             String numberItemsString = "Number of items: " + allLists.get(position).listSizeString();
             holder.listTitle.setText(allLists.get(position).getName());
             holder.itemCount.setText(numberItemsString);
-            holder.listLocation.setText(allLists.get(position).getLocation());
+            if(type.equals("SHOP")) {
+                holder.listLocation.setText(allLists.get(position).getLocation());
+            }else if(type.equals("PANTRY")){
+                String toBuyStr = "Items to buy: " + allLists.get(position).getToBuy();
+                holder.toBuyCount.setText(toBuyStr);
+            }
+
         }
 
     }
@@ -72,6 +78,7 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
 
         TextView listTitle;
         TextView itemCount;
+        TextView toBuyCount;
         TextView listLocation;
         OnListListener onListListener;
 
@@ -81,6 +88,7 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
 
             listTitle = itemView.findViewById(R.id.list_title);
             itemCount = itemView.findViewById(R.id.item_numbers);
+            toBuyCount = itemView.findViewById(R.id.items_to_buy);
             listLocation = itemView.findViewById(R.id.list_location);
             this.onListListener = onListListener;
             itemView.setOnClickListener(this);

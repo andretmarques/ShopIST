@@ -1,6 +1,5 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.Manifest;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
@@ -34,12 +33,10 @@ public class GPSUpdater extends AppCompatActivity implements LocationListener{
         }
         @Override
         public void onProviderDisabled(String provider) {
-             Log.d("Latitude","disable");
         }
 
         @Override
         public void onProviderEnabled(String provider) {
-            Log.d("Latitude","enable");
         }
 
     public String getRoad(double latitude, double longitude) {
