@@ -154,7 +154,6 @@ public class EditProductActivity  extends AppCompatActivity {
         int toBuy;
         double doublePrice;
 
-
         if(!newName.equals("")) {
             item.setName(newName);
         }
