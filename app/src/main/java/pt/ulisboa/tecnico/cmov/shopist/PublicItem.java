@@ -6,6 +6,7 @@ import android.os.Parcelable;
 public class PublicItem implements Parcelable {
     String barcode;
     Double price;
+    String photoEncoded;
 
     public PublicItem(String barcode, Double price) {
         this.barcode = barcode;
@@ -19,6 +20,7 @@ public class PublicItem implements Parcelable {
         } else {
             price = in.readDouble();
         }
+        photoEncoded = in.readString();
     }
 
 
@@ -51,6 +53,14 @@ public class PublicItem implements Parcelable {
         this.price = price;
     }
 
+    public String getPhotoEncoded() {
+        return photoEncoded;
+    }
+
+    public void setPhotoEncoded(String photoEncoded) {
+        this.photoEncoded = photoEncoded;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -65,5 +75,6 @@ public class PublicItem implements Parcelable {
             parcel.writeByte((byte) 1);
             parcel.writeDouble(price);
         }
+        parcel.writeString(photoEncoded);
     }
 }
