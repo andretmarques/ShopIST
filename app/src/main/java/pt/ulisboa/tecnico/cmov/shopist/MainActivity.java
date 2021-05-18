@@ -20,7 +20,9 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -29,6 +31,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -42,6 +45,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -55,6 +59,7 @@ import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.maps.GeoApiContext;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -77,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private Animation rotateOpen;
     private Animation rotateClose;
     private boolean clicked = false;
-    private ExtendedFloatingActionButton joinButton;
     private ExtendedFloatingActionButton createPantryButton;
     private ExtendedFloatingActionButton createShopButton;
     private FloatingActionButton addButton;
@@ -102,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
     private long pressedTime;
+    private GeoApiContext mGeoApiContext = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         editor = prefs.edit();
 
         addButton = findViewById(R.id.add_btn);
-        joinButton = findViewById(R.id.join_btn);
         createPantryButton = findViewById(R.id.create_pantry_btn);
         createShopButton = findViewById(R.id.create_shop_btn);
         fromBottom = AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim);
@@ -133,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             editor.putString("userId", userId);
             editor.apply();
         }
+        initGoogleMap();
         if (prefs.getString("userId", null) != null){
             userId = prefs.getString("userId", null);
         }
@@ -147,6 +153,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         } else {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 100, LocationListenerGPS);
         }
+
         if (net){
             updateData();
         }else {
@@ -241,6 +248,15 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         });
     }
 
+    private void initGoogleMap() {
+
+        if(mGeoApiContext == null){
+            mGeoApiContext = new GeoApiContext.Builder()
+                    .apiKey(getString(R.string.key_google_apis_android))
+                    .build();
+        }
+    }
+
     public void savePantryListToCache() {
         Gson gson = new Gson();
         String jsonPantry = gson.toJson(pantryLists);
@@ -285,10 +301,12 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     }
 
     private void setShoppingRecycler(ArrayList<ItemsList> allLists) {
-
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         shoppingListMainRecycler.setLayoutManager(layoutManager);
         shoppingListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "SHOP", this);
+        shoppingListRecyclerAdapter.setDirectionsListener(((view, position) -> {
+            onClickLocation(shoppingLists.get(position).getLocation());
+        }));
         shoppingListMainRecycler.setAdapter(shoppingListRecyclerAdapter);
     }
 
@@ -444,6 +462,10 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void showCreateShopPopUp(View v) {
         Intent i = new Intent(this, CreateShopActivity.class);
         i.putExtra("EmailUser", userId);
+        if (actualLatitude != 0.0 && actualLongitude != 0.0 ){
+            i.putExtra("ActualLatitude", actualLatitude);
+            i.putExtra("ActualLongitude", actualLongitude);
+        }
 
         handleAddMenu();
         startActivityForResult(i, 10002);
@@ -470,7 +492,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
             if (resultCode == RESULT_OK) {
                 // get the list of strings here
                 ItemsList shoppingList = data.getParcelableExtra("returnedShoppingList");
-
                 shoppingLists.add(shoppingList);
                 shoppingList.generateId();
                 saveShoppingListToCache();
@@ -478,6 +499,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 storeNames.put(shoppingList.getId(), shoppingList.getName());
                 saveStoreNamesListToCache();
                 myRef.child("Users").child(userId).child("StoreNames").setValue(storeNames);
+                shoppingListRecyclerAdapter.notifyDataSetChanged();
+
             }
             return;
         }
@@ -548,7 +571,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 addButton.getGlobalVisibleRect(outRectAdd);
                 createPantryButton.getGlobalVisibleRect(outRectPantry);
                 createShopButton.getGlobalVisibleRect(outRectShop);
-                joinButton.getGlobalVisibleRect(outRectCreate);
                 if (!outRectAdd.contains((int) event.getRawX(), (int) event.getRawY())
                         && !outRectPantry.contains((int) event.getRawX(), (int) event.getRawY()) &&
                         !outRectShop.contains((int) event.getRawX(), (int) event.getRawY()) &&
@@ -576,13 +598,11 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         if (!clicked) {
             createShopButton.setClickable(true);
             createPantryButton.setClickable(true);
-            joinButton.setVisibility(View.VISIBLE);
             createPantryButton.setVisibility(View.VISIBLE);
             createShopButton.setVisibility(View.VISIBLE);
         } else {
             createShopButton.setClickable(false);
             createPantryButton.setClickable(false);
-            joinButton.setVisibility(View.GONE);
             createPantryButton.setVisibility(View.GONE);
             createShopButton.setVisibility(View.GONE);
 
@@ -592,11 +612,9 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     public void setAnimation(Boolean clicked) {
         if (!clicked) {
             addButton.startAnimation(rotateOpen);
-            joinButton.startAnimation(fromBottom);
             createPantryButton.startAnimation(fromBottom);
             createShopButton.startAnimation(fromBottom);
         } else {
-            joinButton.startAnimation(toBottom);
             createPantryButton.startAnimation(toBottom);
             createShopButton.startAnimation(toBottom);
             addButton.startAnimation(rotateClose);
@@ -616,7 +634,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         }
         return address;
     }
-
     @Override
     public void onItemClick(int position) {
         if ((pantryListMainRecycler.getVisibility() == View.VISIBLE) && (shoppingListMainRecycler.getVisibility() == View.GONE)) {
@@ -661,4 +678,41 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         alertDialog.setOnShowListener(dialogInterface -> animation.start());
         alertDialog.show();
     }
+
+
+    public Barcode.GeoPoint getLocationFromAddress(String strAddress){
+        Log.d("TAG", "getLocationFromAddress: " + strAddress);
+
+        Geocoder coder = new Geocoder(this);
+        List<Address> address;
+        Barcode.GeoPoint p1 = null;
+
+        try {
+            address = coder.getFromLocationName(strAddress,5);
+            if (address==null) {
+                return null;
+            }
+            Address location=address.get(0);
+            location.getLatitude();
+            location.getLongitude();
+
+            p1 = new Barcode.GeoPoint((double) (location.getLatitude()),
+                    (double) (location.getLongitude()));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return p1;
+    }
+
+    private void onClickLocation(String location){
+        Barcode.GeoPoint addrCoords = getLocationFromAddress(location);
+        Uri gmUri = Uri.parse("google.navigation:q=" + addrCoords.lat + "," + addrCoords.lng);
+        Intent intent = new Intent(Intent.ACTION_VIEW, gmUri);
+        intent.setPackage("com.google.android.apps.maps");
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.getApplicationContext().startActivity(intent);
+    }
+
+
 }
