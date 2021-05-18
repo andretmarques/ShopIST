@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -12,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -144,38 +146,62 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.pantry_menu_share, menu);
+        inflater.inflate(R.menu.share_product, menu);
         return true;
     }
 
+
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(PantryInside.this);
-        alertDialog.setTitle("Share this pantry");
-        alertDialog.setMessage("Enter your friend's email");
-        final EditText input = new EditText(PantryInside.this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        input.setLayoutParams(lp);
-        alertDialog.setView(input);
+    public boolean onOptionsItemSelected(MenuItem it) {
+        switch (it.getItemId()) {
+            case R.id.overflowMenu:
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(PantryInside.this);
+                alertDialog.setTitle("Share this pantry");
+                alertDialog.setMessage("Enter your friend's email");
+                final EditText input = new EditText(PantryInside.this);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT);
+                input.setLayoutParams(lp);
+                alertDialog.setView(input);
 
-        alertDialog.setPositiveButton("Confirm",
-                (dialog, which) -> {
-                    String email = input.getText().toString();
-                    if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                        Toast.makeText(getApplicationContext(), "Wrong email format", Toast.LENGTH_SHORT).show();
-                        onOptionsItemSelected(item);
+                alertDialog.setPositiveButton("Confirm",
+                        (dialog, which) -> {
+                            String email = input.getText().toString();
+                            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                                Toast.makeText(getApplicationContext(), "Wrong email format", Toast.LENGTH_SHORT).show();
+                                onOptionsItemSelected(it);
 
-                    }
-                    Toast.makeText(getApplicationContext(), "Your friend has now access to the pantry", Toast.LENGTH_SHORT).show();
-                    sharePantry(email);
-                });
+                            }
+                            Toast.makeText(getApplicationContext(), "Your friend has now access to the pantry", Toast.LENGTH_SHORT).show();
+                            sharePantry(email);
+                        });
 
-        alertDialog.setNegativeButton("Back",
-                (dialog, which) -> dialog.cancel());
+                alertDialog.setNegativeButton("Back",
+                        (dialog, which) -> dialog.cancel());
 
-        alertDialog.show();
+                alertDialog.show();
+                return true;
+
+            case R.id.shareButton:
+                StringBuilder items = new StringBuilder();
+                for (Item i : itemsPantry){
+                    items.append("\n").append(i.getName()).append(" - ").append("inStock: ").append(i.getQuantity());
+                }
+                String pantryName = pantry.getName();
+
+
+                Intent sendIntent = new Intent();
+                sendIntent.putExtra(Intent.EXTRA_TITLE, pantryName);
+
+                sendIntent.setAction(Intent.ACTION_SEND);
+                sendIntent.putExtra(Intent.EXTRA_TEXT, items.toString());
+                sendIntent.setType("text/plain");
+                Intent shareIntent = Intent.createChooser(sendIntent, null);
+                startActivity(shareIntent);
+        }
         return true;
+
     }
 
     public void sharePantry(String email){

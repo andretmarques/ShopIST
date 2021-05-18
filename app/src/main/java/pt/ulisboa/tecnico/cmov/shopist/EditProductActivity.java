@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,6 +13,9 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -36,9 +40,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class EditProductActivity  extends AppCompatActivity {
@@ -106,6 +112,50 @@ public class EditProductActivity  extends AppCompatActivity {
         itemPhoto.setOnClickListener(view -> openDialog());
 
 
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.share_product, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem i) {
+        if  (i.getItemId() == R.id.shareButton) {
+            String name = item.getName();
+            String barcode = item.getProductBarcode();
+            String price = String.valueOf(item.getPrice());
+            Intent shareIntent = new Intent();
+            String toShare = "Hey, check this Product:\n" + name + "\n" + barcode + "\n" + "Price: " + price;
+            if (item.getImageEncoded() != null) {
+                Bitmap image = convertStringToBitmap(item.getImageEncoded());
+                Uri contentUri = getImageUri(EditProductActivity.this, image);
+
+
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_TEXT, toShare);
+                shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                shareIntent.setType("image/jpeg");
+                shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            }
+            else {
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_TEXT, toShare);
+                shareIntent.setType("text/plain");
+            }
+            startActivity(Intent.createChooser(shareIntent, "send"));
+        }
+        return true;
+    }
+
+    public Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
     }
 
 

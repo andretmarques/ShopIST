@@ -24,4 +24,9 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
+    <style name="TextAppearance" parent="Theme.ShopIST">
+        <item name="actionMenuTextColor">@color/white</item>
+        <item name="android:actionMenuTextColor">@color/white</item>
+    </style>
+
 </resources>
