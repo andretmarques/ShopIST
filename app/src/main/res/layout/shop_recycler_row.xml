@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="10dp"
@@ -10,38 +11,48 @@
 
     <TextView
         android:id="@+id/list_title"
-        android:layout_width="351dp"
-        android:layout_height="36dp"
+        android:layout_width="203dp"
+        android:layout_height="28dp"
         android:layout_marginTop="4dp"
         android:text=""
-        android:textAlignment="center"
+        android:textAlignment="textEnd"
         android:textColor="@color/white"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.093"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/list_location"
-        android:layout_width="185dp"
-        android:layout_height="36dp"
-        android:layout_marginStart="52dp"
+        android:layout_width="194dp"
+        android:layout_height="56dp"
         android:text=""
         android:textAlignment="center"
         android:textColor="@color/white"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.045"
+        app:layout_constraintEnd_toEndOf="@+id/get_directions"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/item_numbers"
         app:layout_constraintTop_toBottomOf="@+id/list_title"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/get_directions"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@drawable/ic_baseline_directions_24"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.487" />
 
     <TextView
         android:id="@+id/item_numbers"
         android:layout_width="111dp"
         android:layout_height="38dp"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="20dp"
         android:text=""
         android:textAlignment="center"
         android:textColor="@color/white"
@@ -49,7 +60,24 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/list_title"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintVertical_bias="0.44" />
+
+    <TextView
+        android:id="@+id/eta"
+        android:layout_width="115dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginBottom="1dp"
+        android:text=""
+        android:textAlignment="center"
+        android:textColor="@color/white"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/list_location"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.017"
+        app:layout_constraintStart_toEndOf="@+id/list_title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

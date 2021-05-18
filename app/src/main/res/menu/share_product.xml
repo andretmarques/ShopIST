@@ -1,11 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-
     <item
-        android:id="@+id/overflowMenu"
-        android:icon="@drawable/ic_baseline_share_24"
+        android:id="@+id/shareButton"
         android:title=""
+        android:icon="@drawable/ic_baseline_facebook_24"
+        android:iconTint="@color/white"
         app:showAsAction="ifRoom">
     </item>
 </menu>

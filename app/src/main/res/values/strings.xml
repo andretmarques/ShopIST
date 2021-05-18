@@ -50,4 +50,9 @@
     <string name="shared_pantries">Shared Pantries</string>
     <string name="cart_summary">Cart summary</string>
     <string name="consume">Consume</string>
+    <string name="login_as_a_guest_user">Login as a Guest User</string>
+    <string name="set_new_product_name">Set new product name</string>
+    <string name="set_quantity_available">Set quantity available</string>
+    <string name="set_quantity_to_buy">Set quantity to buy</string>
+    <string name="share_this_product">Share this product</string>
 </resources>

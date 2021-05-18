@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,7 +17,13 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
     private final Context context;
     private final ArrayList<ItemsList> allLists;
     private final OnListListener mOnListListener;
+    private ListRecyclerAdapter.OnClickGetDirections getDirectionsListener;
     private final String type;
+
+
+    public void setDirectionsListener(ListRecyclerAdapter.OnClickGetDirections getDirectionsListener) {
+        this.getDirectionsListener= getDirectionsListener;
+    }
 
     public ListRecyclerAdapter(Context context, ArrayList<ItemsList> allLists, String type, OnListListener onListListener) {
         this.context = context;
@@ -48,9 +55,23 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
             holder.itemCount.setText(numberItemsString);
             if(type.equals("SHOP")) {
                 holder.listLocation.setText(allLists.get(position).getLocation());
+                if(allLists.get(position).getEta() != null) {
+                    holder.etaText.setText(allLists.get(position).getEta());
+                }else {
+                    holder.etaText.setText("");
+                }
+
             }else if(type.equals("PANTRY")){
                 String toBuyStr = "Items to buy: " + allLists.get(position).getToBuy();
                 holder.toBuyCount.setText(toBuyStr);
+            }
+
+            if(allLists.get(position).getLocation() == null || allLists.get(position).getLocation().equals("")) {
+                holder.getDirectionsButton().setVisibility(View.GONE);
+            }
+
+            if (getDirectionsListener!= null) {
+                holder.getDirectionsButton().setOnClickListener(v -> getDirectionsListener.onGetDirections(v, position));
             }
 
         }
@@ -69,6 +90,7 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
 
 
 
+
     @Override
     public int getItemCount() {
         return allLists.size();
@@ -80,6 +102,8 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
         TextView itemCount;
         TextView toBuyCount;
         TextView listLocation;
+        TextView etaText;
+        Button getDirections;
         OnListListener onListListener;
 
 
@@ -90,8 +114,16 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
             itemCount = itemView.findViewById(R.id.item_numbers);
             toBuyCount = itemView.findViewById(R.id.items_to_buy);
             listLocation = itemView.findViewById(R.id.list_location);
+            etaText = itemView.findViewById(R.id.eta);
+            getDirections = itemView.findViewById(R.id.get_directions);
             this.onListListener = onListListener;
             itemView.setOnClickListener(this);
+
+
+        }
+
+        public Button getDirectionsButton() {
+            return getDirections;
 
         }
 
@@ -104,6 +136,10 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
 
     public interface OnListListener {
         void onItemClick(int position);
+    }
+
+    public interface OnClickGetDirections{
+        void onGetDirections(View view, int position);
     }
 
 }
