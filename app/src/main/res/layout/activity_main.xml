@@ -65,24 +65,9 @@
         app:srcCompat="@android:drawable/ic_input_add" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/join_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:text="@string/Join"
-        android:visibility="invisible"
-        app:fabSize="mini"
-        app:icon="@drawable/ic_baseline_group_24"
-        app:layout_constraintBottom_toTopOf="@+id/add_btn"
-        app:layout_constraintEnd_toEndOf="@+id/add_btn" />
-
-    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/create_pantry_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
         android:onClick="showCreatePantryPopUp"
@@ -90,14 +75,13 @@
         android:visibility="invisible"
         app:fabSize="mini"
         app:icon="@drawable/ic_baseline_playlist_add_24"
-        app:layout_constraintBottom_toTopOf="@+id/join_btn"
-        app:layout_constraintEnd_toEndOf="@+id/join_btn" />
+        app:layout_constraintBottom_toTopOf="@+id/create_shop_btn"
+        app:layout_constraintEnd_toEndOf="@+id/create_shop_btn" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/create_shop_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:clickable="true"
         android:focusable="true"
         android:onClick="showCreateShopPopUp"
@@ -105,30 +89,30 @@
         android:visibility="invisible"
         app:fabSize="mini"
         app:icon="@drawable/ic_baseline_playlist_add_24"
-        app:layout_constraintBottom_toTopOf="@+id/create_pantry_btn"
-        app:layout_constraintEnd_toEndOf="@+id/create_pantry_btn" />
+        app:layout_constraintBottom_toTopOf="@+id/add_btn"
+        app:layout_constraintEnd_toEndOf="@+id/add_btn" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/pantry_recycler"
-        android:layout_width="411dp"
+        android:layout_width="match_parent"
         android:layout_height="508dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toggleButton"
-        app:layout_constraintVertical_bias="0.266" />
+        app:layout_constraintVertical_bias="0.091" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/shopping_recycler"
-        android:layout_width="411dp"
-        android:layout_height="508dp"
+        android:layout_width="match_parent"
+        android:layout_height="478dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toggleButton"
-        app:layout_constraintVertical_bias="0.266" />
+        app:layout_constraintVertical_bias="0.058" />
 
     <nl.dionsegijn.konfetti.KonfettiView
         android:id="@+id/viewKonfetti"
@@ -136,6 +120,7 @@
         android:layout_height="match_parent"
         tools:layout_editor_absoluteX="0dp"
         tools:layout_editor_absoluteY="0dp" />
+
 
 
 
