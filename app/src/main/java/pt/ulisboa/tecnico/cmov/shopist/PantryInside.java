@@ -125,7 +125,6 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             actionBar.setDisplayShowTitleEnabled(false);
         }
 
-
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
@@ -273,6 +272,10 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         productsMainRecycler.setLayoutManager(layoutManager);
         itemRecyclerAdapter = new ItemRecyclerAdapter(this, products, "P", this);
+        itemRecyclerAdapter.setConsumeListener((view, position) -> {
+            consumeItem(itemsPantry.get(position));
+            itemRecyclerAdapter.notifyItemChanged(position);
+        });
         productsMainRecycler.setAdapter(itemRecyclerAdapter);
         populatePositionMap();
         enableSwipeLeft();
@@ -362,91 +365,6 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             }
 
         }
-
-        /*
-        else if (requestCode == 10025) {
-            if (resultCode == RESULT_OK) {
-                barcode = data.getStringExtra("Barcode");
-                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        listPublic = (ArrayList<PublicItem>) snapshot.child("PublicItems").child(barcode).getValue();
-                        if (listPublic == null) { listPublic = new ArrayList<>(); }
-
-                        if (!snapshot.child("PublicItems").child(barcode).exists()) {
-                            ScanBarcodeAssist();
-                        }
-                        else {
-                            if (listPublic.size() > 1) {
-                                messageAll = "";
-                                for (DataSnapshot singleSnapshot : snapshot.child("PublicItems").child(barcode).getChildren()) {
-                                    messageAll = messageAll + "Shop: " +
-                                            singleSnapshot.child("shop").getValue()
-                                            + "\n" + "Price: " +
-                                            singleSnapshot.child("price").getValue() + "€"
-                                            + "\n\n";
-                                }
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(PantryInside.this)
-                                        .setTitle("Product " + barcode)
-                                        .setMessage(messageAll)
-                                        .setNegativeButton("Thank you", null)
-                                        .setPositiveButton("Add new shop", (dialogInterface, i) -> ScanBarcodeAssist());
-                                alertDialogBuilder.show();
-                                messageAll = "";
-                            }
-                            else {
-                                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(PantryInside.this)
-                                        .setTitle("Product " + barcode)
-                                        .setMessage("Shop: " + snapshot.child("PublicItems").child(barcode).child("0").child("shop").getValue()
-                                                + "\n" + "Price: " + snapshot.child("PublicItems").child(barcode).child("0").child("price").getValue() + "€")
-                                        .setNegativeButton("Thank you", null)
-                                        .setPositiveButton("Add new shop", (dialogInterface, i) -> ScanBarcodeAssist());
-                                alertDialogBuilder.show();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-            }
-            return;
-        }
-        if (requestCode == 20221) {
-            if (resultCode == RESULT_OK) {
-                price = data.getDoubleExtra("price", 0);
-                shop = data.getStringExtra("shop");
-                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        boolean exists = false;
-                        for (DataSnapshot singleSnapshot : snapshot.child("PublicItems").child(barcode).getChildren()) {
-                            if (singleSnapshot.child("shop").getValue().toString().equals(shop)) {
-                                Toast.makeText(getApplicationContext(), "This shop already has this item and price for it", Toast.LENGTH_LONG).show();
-                                exists = true;
-                                break;
-                            }
-                        }
-                        if (!exists) {
-                            PublicItem newPublicItem = new PublicItem(barcode, price, shop);
-                            if (listPublic != null) {
-                                listPublic.add(newPublicItem);
-                                myRef.child("PublicItems").child(barcode).setValue(listPublic);
-                            }
-                        }
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                    }
-                });
-
-            }
-            return;
-        }*/
         super.onActivityResult(requestCode, resultCode, data);
     }
     public void ScanBarcodeAssist() {
@@ -586,6 +504,26 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         };
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(productsMainRecycler);
+    }
+
+    private void consumeItem(Item i){
+
+        if(i.getQuantity() == 0) {
+            Snackbar snackbar = Snackbar.make(productsMainRecycler, "You don't have  " + i.getName() + " in your pantry", 1000);
+            snackbar.show();
+            return;
+        }
+
+        i.setQuantity(i.getQuantity()-1);
+        i.setToPurchase(i.getToPurchase()+1);
+        i.getPantriesMap().put(pantryId, String.valueOf(i.getToPurchase()));
+        i.getPantries().put(pantryName, pantryId);
+
+        Snackbar snackbar = Snackbar.make(productsMainRecycler, "One  " + i.getName() + " consumed!", 1000);
+        snackbar.show();
+        myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList")
+                .child(positionsMap.get(i.getId())).setValue(i);
+
     }
 
     @Override

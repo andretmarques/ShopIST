@@ -61,7 +61,6 @@ public class EditProductActivity  extends AppCompatActivity {
     String pantryId;
     boolean repeated = false;
     ImageView itemPhoto;
-    File photoFile;
 
 
     @Override

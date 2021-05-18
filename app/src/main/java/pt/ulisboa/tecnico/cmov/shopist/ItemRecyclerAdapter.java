@@ -20,6 +20,7 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
     private final String type;
     private View.OnClickListener clickListener;
     private OnAddCartClick addCartListener;
+    private OnConsumeClick consumeListener;
 
 
     public void setOnItemClickListener(View.OnClickListener clickListener) {
@@ -28,6 +29,10 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
 
     public void setAddCartListener(OnAddCartClick  addCartListener) {
         this.addCartListener= addCartListener;
+    }
+
+    public void setConsumeListener(OnConsumeClick addConsumeListener) {
+        this.consumeListener = addConsumeListener;
     }
 
 
@@ -88,6 +93,9 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         if (addCartListener!= null) {
             holder.getAddCartButton().setOnClickListener(v -> addCartListener.onAddCart(v, position));
         }
+        if(consumeListener !=null)
+            holder.getConsumeButton().setOnClickListener(v -> consumeListener.onConsume(v, position));
+
     }
 
     public void removeItem(int position){
@@ -142,6 +150,7 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         TextView itemQuantity;
         TextView itemPrice;
         Button addToCart;
+        Button consume;
         OnItemListener onItemListener;
 
         public ItemViewHolder(@NonNull View itemView, OnItemListener onItemListener) {
@@ -150,14 +159,21 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
             itemQuantity = itemView.findViewById(R.id.item_quantity);
             itemPrice = itemView.findViewById(R.id.item_price);
             addToCart = itemView.findViewById(R.id.add_to_cart);
+            consume = itemView.findViewById(R.id.consume);
             this.onItemListener = onItemListener;
             itemView.setOnClickListener(this);
             if(addToCart != null)
                 addToCart.setOnClickListener(this);
+            if(consume != null)
+                consume.setOnClickListener(this);
 
             }
         public Button getAddCartButton() {
             return addToCart;
+
+        }
+        public Button getConsumeButton() {
+            return consume;
 
         }
 
@@ -174,6 +190,10 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
 
     public interface OnAddCartClick{
         void onAddCart(View view, int position);
+    }
+
+    public interface OnConsumeClick{
+        void onConsume(View view, int position);
     }
 
 

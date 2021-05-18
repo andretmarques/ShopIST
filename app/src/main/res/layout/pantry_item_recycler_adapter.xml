@@ -41,4 +41,17 @@
         app:layout_constraintTop_toBottomOf="@+id/item_name"
         app:layout_constraintVertical_bias="1.0" />
 
+    <Button
+        android:id="@+id/consume"
+        android:layout_width="80dp"
+        android:layout_height="58dp"
+        android:drawableTop="@drawable/ic_baseline_fastfood_24"
+        android:textSize="8sp"
+        android:text="@string/consume"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.953"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
