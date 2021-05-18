@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -59,6 +60,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
             userId = b.getString("UserId");
             productsPurchase = (HashMap<String, HashMap<Item, Integer>>) b.getSerializable("fantasticHm");
         }
+        Log.d("cart", "onCreate: ");
         setItemsRecycler(itemsCart);
         setupEventCallbacks();
         if (itemsCart != null && itemsCart.size() != 0) {
