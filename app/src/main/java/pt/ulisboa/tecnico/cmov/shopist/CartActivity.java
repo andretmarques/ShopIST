@@ -29,8 +29,6 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
     private RecyclerView productsMainRecycler;
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private ArrayList<Item> itemsCart = new ArrayList<>();
-    private ArrayList<Item> updatedItems = new ArrayList<>();
-    private ArrayList<ItemsList> allPantries = new ArrayList<>();
     private DatabaseReference myRef;
     private String uid;
     private HashMap<String, HashMap<Item, Integer>> productsPurchase = new HashMap<>();
@@ -50,7 +48,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
         Bundle b = getIntent().getExtras();
         if(b != null){
             itemsCart = b.getParcelableArrayList("cartList");
-            allPantries = b.getParcelableArrayList("allPantries");
+            ArrayList<ItemsList> allPantries = b.getParcelableArrayList("allPantries");
             ownerId = b.getString("OwnerId");
             if (ownerId != null) {
                 uid = ownerId;

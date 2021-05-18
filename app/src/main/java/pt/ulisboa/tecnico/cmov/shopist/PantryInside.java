@@ -5,7 +5,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -13,7 +12,6 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -53,27 +51,24 @@ import java.util.HashMap;
 
 public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
     private ArrayList<Item> itemsPantry = new ArrayList<>();
-    private ArrayList<PublicItem> listPublic = new ArrayList<>();
     private DatabaseReference myRef;
     private String pantryId;
-    Button scanBarcodeBtn;
-    String barcode = "";
-    String ownerId;
-    Double price;
-    String shop;
-    String messageAll = "";
+    private String barcode = "";
     private int listPosition;
     private RecyclerView productsMainRecycler;
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private HashMap<String, String> positionsMap = new HashMap<>();
-    String userId;
+    private String userId;
     private String pantryName;
     private ItemsList pantry;
-    FirebaseAuth mAuth;
-    boolean shared = false;
+    private FirebaseAuth mAuth;
+    private boolean shared = false;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
+
+    public PantryInside() {
+    }
 
 
     @Override
@@ -93,7 +88,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         boolean net = isNetworkAvailable(this.getApplication());
 
 
-        ownerId = getIntent().getStringExtra("OwnerId");
+        String ownerId = getIntent().getStringExtra("OwnerId");
         if (prefs.getString("ownerId", null) != null){
             ownerId = prefs.getString("ownerId", null);
         }
@@ -106,14 +101,15 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
         Bundle b = getIntent().getExtras();
         if(b != null){
-            pantry = b.getParcelable("pantry");
-            pantryName = pantry.getName();
-            pantryId = pantry.getId();
-            itemsPantry = pantry.getItemList();
+            Log.d("TAG", "onCreate: " + pantry);
+            pantryName = b.getString("pantryListName");
+            pantryId = b.getString("pantryListId");
 
             String actionTitle = "Pantry: " + pantryName;
             toolbarTitle.setText(actionTitle);
-            if (pantry.getItemList() != null) {
+            if (pantry != null) {
+                pantry = b.getParcelable("pantry");
+                itemsPantry = pantry.getItemList();
                 userId = getIntent().getStringExtra("EmailUser");
                 setItemsRecycler(itemsPantry);
             } else {
@@ -128,16 +124,18 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+
                 Intent intent = new Intent();
                 intent.putParcelableArrayListExtra("returnedItemList", itemsPantry);
-                intent.putExtra("pantryToBuy", pantry.getToBuy());
+                if(!shared)
+                    intent.putExtra("pantryToBuy", pantry.getToBuy());
                 setResult(PantryInside.RESULT_OK, intent);
                 finish();
             }
         };
         this.getOnBackPressedDispatcher().addCallback(this, callback);
 
-        scanBarcodeBtn = findViewById(R.id.scan_barcode);
+        Button scanBarcodeBtn = findViewById(R.id.scan_barcode);
         scanBarcodeBtn.setOnClickListener(view -> startActivityForResult(new Intent(PantryInside.this, ScanBarcodeActivity.class), 10025));
     }
 

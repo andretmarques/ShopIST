@@ -1,13 +1,8 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Layout;
-import android.text.SpannableString;
-import android.text.style.AlignmentSpan;
-import android.util.Log;
 import android.util.Patterns;
 import android.view.Gravity;
 import android.view.View;
@@ -17,46 +12,27 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText emailEditText;
-    EditText passwordEditText;
-    TextView register;
-    TextView forgotPassword;
-    TextView guestUser;
-    Button loginButton;
-    ProgressBar loadingProgressBar;
+    private EditText emailEditText;
+    private EditText passwordEditText;
+    private ProgressBar loadingProgressBar;
 
-    String emailRegistered;
-    String passwordRegistered;
+    private FirebaseAuth mAuth;
 
-    FirebaseAuth mAuth;
-
-    SharedPreferences prefs;
-    SharedPreferences.Editor editor;
-    String cachedUsername;
-    String cachedPassword;
-    String cachedUserID;
+    private SharedPreferences.Editor editor;
+    private String cachedUserID;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prefs = getSharedPreferences("UserData", MODE_PRIVATE);
+        SharedPreferences prefs = getSharedPreferences("UserData", MODE_PRIVATE);
         editor = prefs.edit();
-        cachedUsername = prefs.getString("username", null);
-        cachedPassword = prefs.getString("password", null);
         cachedUserID = prefs.getString("userid", null);
 
         if (cachedUserID != null) {
@@ -67,19 +43,19 @@ public class LoginActivity extends AppCompatActivity {
 
             emailEditText = findViewById(R.id.email_login);
             passwordEditText = findViewById(R.id.password_login);
-            loginButton = findViewById(R.id.sign_in);
+            Button loginButton = findViewById(R.id.sign_in);
             loadingProgressBar = findViewById(R.id.loading);
-            register = findViewById(R.id.register);
-            forgotPassword = findViewById(R.id.forgotPassword);
-            guestUser = findViewById(R.id.guest);
+            TextView register = findViewById(R.id.register);
+            TextView forgotPassword = findViewById(R.id.forgotPassword);
+            TextView guestUser = findViewById(R.id.guest);
 
             register.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, RegisterUser.class)));
             forgotPassword.setOnClickListener(view -> startActivity(new Intent(LoginActivity.this, ForgotPassword.class)));
             loginButton.setOnClickListener(view -> userLogin());
             guestUser.setOnClickListener(view -> guestLogin());
 
-            emailRegistered = getIntent().getStringExtra("email");
-            passwordRegistered = getIntent().getStringExtra("password");
+            String emailRegistered = getIntent().getStringExtra("email");
+            String passwordRegistered = getIntent().getStringExtra("password");
             if (emailRegistered != null) {
                 emailEditText.setText(emailRegistered);
             }

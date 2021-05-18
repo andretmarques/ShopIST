@@ -9,10 +9,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,41 +24,31 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 
 public class EditProductActivity  extends AppCompatActivity {
     private Item item;
-    TextView productName;
-    TextView quantityAval;
-    TextView quantityToBuy;
-    EditText price;
-    TextView barcodeView;
-    String barcode;
+    private TextView productName;
+    private TextView quantityAval;
+    private TextView quantityToBuy;
+    private EditText price;
+    private TextView barcodeView;
+    private String barcode;
     private DatabaseReference myRef;
-    private ArrayList<PublicItem> listPublic = new ArrayList<>();
-    String userId;
-    String pantryId;
-    boolean repeated = false;
-    ImageView itemPhoto;
+    private String userId;
+    private String pantryId;
+    private boolean repeated = false;
+    private ImageView itemPhoto;
 
 
     @Override
