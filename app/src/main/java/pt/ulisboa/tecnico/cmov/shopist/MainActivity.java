@@ -635,6 +635,8 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         if ((pantryListMainRecycler.getVisibility() == View.VISIBLE) && (shoppingListMainRecycler.getVisibility() == View.GONE)) {
             Intent i = new Intent(this, PantryInside.class);
             i.putExtra("pantry", pantryLists.get(position));
+            i.putExtra("pantryListName", pantryLists.get(position).getName());
+            i.putExtra("pantryListId", pantryLists.get(position).getId());
             i.putExtra("EmailUser", userId);
             listPosition = position;
             startActivityForResult(i, 10030);

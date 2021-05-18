@@ -21,7 +21,6 @@ public class RegisterUser extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private EditText emailEditText, passwordEditText;
     private ProgressBar progressBar;
-    private Button registerBtn;
     private DatabaseReference myRef;
 
     String email;
@@ -39,7 +38,7 @@ public class RegisterUser extends AppCompatActivity {
         emailEditText = findViewById(R.id.email_register);
         passwordEditText = findViewById(R.id.password_register);
         progressBar = findViewById(R.id.progress_bar);
-        registerBtn = findViewById(R.id.register_btn);
+        Button registerBtn = findViewById(R.id.register_btn);
 
         registerBtn.setOnClickListener(view -> {
             if (registerUser()) {

@@ -51,7 +51,6 @@ import java.util.HashMap;
 
 public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapter.OnItemListener {
     private ArrayList<Item> itemsPantry = new ArrayList<>();
-    private ArrayList<PublicItem> listPublic = new ArrayList<>();
     private DatabaseReference myRef;
     private String pantryId;
     private String barcode = "";
@@ -102,14 +101,15 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
         Bundle b = getIntent().getExtras();
         if(b != null){
-            pantry = b.getParcelable("pantry");
-            pantryName = pantry.getName();
-            pantryId = pantry.getId();
-            itemsPantry = pantry.getItemList();
+            Log.d("TAG", "onCreate: " + pantry);
+            pantryName = b.getString("pantryListName");
+            pantryId = b.getString("pantryListId");
 
             String actionTitle = "Pantry: " + pantryName;
             toolbarTitle.setText(actionTitle);
-            if (pantry.getItemList() != null) {
+            if (pantry != null) {
+                pantry = b.getParcelable("pantry");
+                itemsPantry = pantry.getItemList();
                 userId = getIntent().getStringExtra("EmailUser");
                 setItemsRecycler(itemsPantry);
             } else {
@@ -124,9 +124,11 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+
                 Intent intent = new Intent();
                 intent.putParcelableArrayListExtra("returnedItemList", itemsPantry);
-                intent.putExtra("pantryToBuy", pantry.getToBuy());
+                if(!shared)
+                    intent.putExtra("pantryToBuy", pantry.getToBuy());
                 setResult(PantryInside.RESULT_OK, intent);
                 finish();
             }
