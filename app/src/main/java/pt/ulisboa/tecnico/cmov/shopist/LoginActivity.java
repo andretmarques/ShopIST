@@ -159,7 +159,7 @@ public class LoginActivity extends AppCompatActivity {
                             editor.apply();
                             startActivity(intent);
                         })
-                        .setMessage("⚠️ \nIf you Logout, all your stored data will be lost. \nPlease create an account to avoid it.\n⚠️")
+                        .setMessage(" ⚠️ \nIf you Logout, all your stored data will be lost. \nPlease create an account to avoid it.\n⚠️")
                         .setTitle("Guest User");
                 AlertDialog dialog = builder.show(); //builder is your just created builder
                 TextView messageText = (TextView) dialog.findViewById(android.R.id.message);
@@ -167,7 +167,6 @@ public class LoginActivity extends AppCompatActivity {
                 dialog.show();
 
             } else {
-                // If sign in fails, display a message to the user.
                 Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
             }
         });
