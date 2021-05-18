@@ -19,7 +19,6 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterUser extends AppCompatActivity {
     private FirebaseAuth mAuth;
-    private TextView banner;
     private EditText emailEditText, passwordEditText;
     private ProgressBar progressBar;
     private Button registerBtn;
@@ -37,7 +36,6 @@ public class RegisterUser extends AppCompatActivity {
         myRef = database.getReference();
         mAuth = FirebaseAuth.getInstance();
 
-        banner = findViewById(R.id.banner);
         emailEditText = findViewById(R.id.email_register);
         passwordEditText = findViewById(R.id.password_register);
         progressBar = findViewById(R.id.progress_bar);

@@ -34,16 +34,13 @@ import java.util.ArrayList;
 
 public class SharedPantriesShopsActivity extends AppCompatActivity implements ListRecyclerAdapter.OnListListener {
 
-    private ArrayList<ItemsList> sharedPantryLists = new ArrayList<>();
-    private ArrayList<ItemsList> sharedShopLists = new ArrayList<>();
+    private final ArrayList<ItemsList> sharedPantryLists = new ArrayList<>();
+    private final ArrayList<ItemsList> sharedShopLists = new ArrayList<>();
     private DatabaseReference myRef;
     private String userId;
     private RecyclerView pantryListMainRecycler;
     private RecyclerView shoppingListMainRecycler;
     private ListRecyclerAdapter pantryListRecyclerAdapter;
-    private ListRecyclerAdapter shoppingListRecyclerAdapter;
-    private Button sharedPantriesBtn;
-    private Button sharedShopsBtn;
     private int listPosition;
     private ArrayList<String> ownerIds = new ArrayList<>();
     String owner;
@@ -60,8 +57,6 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
 
         pantryListMainRecycler = findViewById(R.id.pantry_recycler);
         shoppingListMainRecycler = findViewById(R.id.shopping_recycler);
-        sharedPantriesBtn = findViewById(R.id.shared_pantries);
-        sharedShopsBtn = findViewById(R.id.shared_stores);
 
         getSharedPantries();
 
@@ -117,7 +112,7 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
 
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         shoppingListMainRecycler.setLayoutManager(layoutManager);
-        shoppingListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "SHOP", this);
+        ListRecyclerAdapter shoppingListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "SHOP", this);
         shoppingListMainRecycler.setAdapter(shoppingListRecyclerAdapter);
     }
 

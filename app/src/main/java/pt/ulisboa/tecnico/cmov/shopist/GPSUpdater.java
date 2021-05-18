@@ -16,8 +16,7 @@ import java.util.Locale;
 
 public class GPSUpdater extends AppCompatActivity implements LocationListener{
     private final Context mcontext;
-    MainActivity mainActivity;
-    TextView GPStxt;
+    private TextView GPStxt;
     protected LocationManager lm;
 
     public GPSUpdater(Context context){

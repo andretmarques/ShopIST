@@ -25,13 +25,12 @@ import java.util.HashMap;
 public class CreateProductActivity extends AppCompatActivity {
     private TextView productName;
     private TextView productQuantity;
-    //private final ArrayList<String> shopsSelected = new ArrayList<>();
     private final HashMap<String, String> shopsSelected = new HashMap<>();
     private HashMap<String, String> hashStoreNames = new HashMap<>();
     private ArrayList<String> storeKey;
     private String[] storeNames;
     private DatabaseReference myRef;
-    String userId;
+    private String userId;
 
 
     @Override

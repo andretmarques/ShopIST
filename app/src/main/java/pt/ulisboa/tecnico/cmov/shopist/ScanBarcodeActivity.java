@@ -22,8 +22,7 @@ import com.google.android.gms.vision.barcode.BarcodeDetector;
 import java.io.IOException;
 
 public class ScanBarcodeActivity extends AppCompatActivity {
-    SurfaceView surfaceView;
-    private BarcodeDetector barcodeDetector;
+    private SurfaceView surfaceView;
     private CameraSource cameraSource;
     private static final int REQUEST_CAMERA_PERMISSION = 201;
 
@@ -42,7 +41,7 @@ public class ScanBarcodeActivity extends AppCompatActivity {
 
     private void initialiseDetectorsAndSources() {
         Toast.makeText(getApplicationContext(), "Barcode scanner started", Toast.LENGTH_SHORT).show();
-        barcodeDetector = new BarcodeDetector.Builder(this)
+        BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(this)
                 .setBarcodeFormats(Barcode.ALL_FORMATS)
                 .build();
 

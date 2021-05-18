@@ -5,7 +5,6 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -13,7 +12,6 @@ import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.Patterns;
@@ -56,24 +54,22 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     private ArrayList<PublicItem> listPublic = new ArrayList<>();
     private DatabaseReference myRef;
     private String pantryId;
-    Button scanBarcodeBtn;
-    String barcode = "";
-    String ownerId;
-    Double price;
-    String shop;
-    String messageAll = "";
+    private String barcode = "";
     private int listPosition;
     private RecyclerView productsMainRecycler;
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private HashMap<String, String> positionsMap = new HashMap<>();
-    String userId;
+    private String userId;
     private String pantryName;
     private ItemsList pantry;
-    FirebaseAuth mAuth;
-    boolean shared = false;
+    private FirebaseAuth mAuth;
+    private boolean shared = false;
 
     SharedPreferences prefs;
     SharedPreferences.Editor editor;
+
+    public PantryInside() {
+    }
 
 
     @Override
@@ -93,7 +89,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         boolean net = isNetworkAvailable(this.getApplication());
 
 
-        ownerId = getIntent().getStringExtra("OwnerId");
+        String ownerId = getIntent().getStringExtra("OwnerId");
         if (prefs.getString("ownerId", null) != null){
             ownerId = prefs.getString("ownerId", null);
         }
@@ -137,7 +133,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         };
         this.getOnBackPressedDispatcher().addCallback(this, callback);
 
-        scanBarcodeBtn = findViewById(R.id.scan_barcode);
+        Button scanBarcodeBtn = findViewById(R.id.scan_barcode);
         scanBarcodeBtn.setOnClickListener(view -> startActivityForResult(new Intent(PantryInside.this, ScanBarcodeActivity.class), 10025));
     }
 

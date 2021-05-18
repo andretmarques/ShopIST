@@ -13,10 +13,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.libraries.places.api.Places;
-import com.google.maps.DirectionsApiRequest;
-import com.google.maps.GeoApiContext;
-import com.google.maps.PendingResult;
-import com.google.maps.model.DirectionsResult;
 import com.sucho.placepicker.AddressData;
 import com.sucho.placepicker.MapType;
 import com.sucho.placepicker.PlacePicker;
@@ -33,7 +29,7 @@ public class CreatePantryActivity extends AppCompatActivity {
     private double latitude;
     private double longitude;
 
-    String emailuser;
+    private String emailuser;
 
 
     @Override

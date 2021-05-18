@@ -1,13 +1,9 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
-import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -15,7 +11,6 @@ public class Item implements Parcelable {
 
 
     private String name;
-    //private int photoId;
     private int quantity = 0;
     private Double price = 0.0;
     private String id;

@@ -4,9 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class PublicItem implements Parcelable {
-    String barcode;
-    Double price;
-    String photoEncoded;
+    private String barcode;
+    private Double price;
+    private String photoEncoded;
 
     public PublicItem(String barcode, Double price) {
         this.barcode = barcode;

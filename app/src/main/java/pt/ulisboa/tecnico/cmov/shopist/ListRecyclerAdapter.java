@@ -60,19 +60,19 @@ public class ListRecyclerAdapter extends RecyclerView.Adapter<ListRecyclerAdapte
                 }else {
                     holder.etaText.setText("");
                 }
+                if(allLists.get(position).getLocation() == null || allLists.get(position).getLocation().equals("")) {
+                    holder.getDirectionsButton().setVisibility(View.GONE);
+                }
+                if (getDirectionsListener!= null) {
+                    holder.getDirectionsButton().setOnClickListener(v -> getDirectionsListener.onGetDirections(v, position));
+                }
 
             }else if(type.equals("PANTRY")){
                 String toBuyStr = "Items to buy: " + allLists.get(position).getToBuy();
                 holder.toBuyCount.setText(toBuyStr);
             }
 
-            if(allLists.get(position).getLocation() == null || allLists.get(position).getLocation().equals("")) {
-                holder.getDirectionsButton().setVisibility(View.GONE);
-            }
 
-            if (getDirectionsListener!= null) {
-                holder.getDirectionsButton().setOnClickListener(v -> getDirectionsListener.onGetDirections(v, position));
-            }
 
         }
 

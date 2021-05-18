@@ -11,14 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class PriceShopActivity extends AppCompatActivity {
-    EditText priceText;
-    EditText shopText;
-    Button cancel;
-    Button confirm;
-    TextView barcodeView;
-    String barcode;
-    Double itemPrice;
-    String itemShop;
+    private EditText priceText;
+    private EditText shopText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,35 +21,25 @@ public class PriceShopActivity extends AppCompatActivity {
 
         priceText = findViewById(R.id.editTextPrice);
         shopText = findViewById(R.id.editTextShop);
-        cancel = findViewById(R.id.cancel_price_shop);
-        confirm = findViewById(R.id.confirm_price_shop);
-        barcodeView = findViewById(R.id.product_barcode_text);
+        Button cancel = findViewById(R.id.cancel_price_shop);
+        Button confirm = findViewById(R.id.confirm_price_shop);
+        TextView barcodeView = findViewById(R.id.product_barcode_text);
         Bundle b = getIntent().getExtras();
-        barcode = b.getString("barcode");
+        String barcode = b.getString("barcode");
 
         barcodeView.setText(barcode);
 
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        cancel.setOnClickListener(view -> finish());
 
-        confirm.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                confirmButton();
-            }
-        });
+        confirm.setOnClickListener(view -> confirmButton());
     }
 
     public void confirmButton() {
         if (!priceText.getText().toString().equals("") && !shopText.getText().toString().equals("")
                 && priceText.getText().toString().matches("[0-9.]*")) {
-            itemPrice = Double.parseDouble(priceText.getText().toString());
+            Double itemPrice = Double.parseDouble(priceText.getText().toString());
             itemPrice = Math.floor(itemPrice * 100) / 100;
-            itemShop = shopText.getText().toString();
+            String itemShop = shopText.getText().toString();
             Intent i = new Intent();
             i.putExtra("price", itemPrice);
             i.putExtra("shop", itemShop);

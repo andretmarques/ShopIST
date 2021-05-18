@@ -22,7 +22,6 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,7 +30,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -87,7 +85,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private FloatingActionButton addButton;
     private ArrayList<ItemsList> pantryLists = new ArrayList<>();
     private ArrayList<ItemsList> shoppingLists = new ArrayList<>();
-    private ArrayList<ItemsList> sharedPantryLists = new ArrayList<>();
     private RecyclerView pantryListMainRecycler;
     private RecyclerView shoppingListMainRecycler;
     private ListRecyclerAdapter pantryListRecyclerAdapter;
@@ -98,13 +95,12 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
     private int listPosition;
     private HashMap<String, String> storeNames = new HashMap<>();
 
-    String userId;
+    private String userId;
 
     protected LocationManager locationManager;
-    GPSUpdater mGPS;
 
-    SharedPreferences prefs;
-    SharedPreferences.Editor editor;
+    private SharedPreferences prefs;
+    private SharedPreferences.Editor editor;
     private long pressedTime;
     private GeoApiContext mGeoApiContext = null;
 
@@ -145,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
         boolean net = isNetworkAvailable(this.getApplication());
 
-        mGPS = new GPSUpdater(this.getApplicationContext());
+        GPSUpdater mGPS = new GPSUpdater(this.getApplicationContext());
 
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

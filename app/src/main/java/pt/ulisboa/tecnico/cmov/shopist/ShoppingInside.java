@@ -35,9 +35,8 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
     private ItemRecyclerAdapter itemRecyclerAdapter;
     private String uid;
     private String[] pantries;
-    private HashMap<String, HashMap<Item, Integer>> productsPurchase = new HashMap<>();
+    private final HashMap<String, HashMap<Item, Integer>> productsPurchase = new HashMap<>();
     private String ownerId;
-    private DatabaseReference myRef;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,7 +53,7 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
         cartCount.setVisibility(View.GONE);
 
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
-        myRef = database.getReference();
+        DatabaseReference myRef = database.getReference();
 
 
         Bundle b = getIntent().getExtras();
