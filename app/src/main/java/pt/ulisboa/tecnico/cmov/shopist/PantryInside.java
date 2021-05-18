@@ -105,7 +105,6 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         Bundle b = getIntent().getExtras();
         if(b != null){
             pantry = b.getParcelable("pantry");
-            Log.d("TAG", "onCreate: " + pantry);
             pantryName = b.getString("pantryListName");
             pantryId = b.getString("pantryListId");
 

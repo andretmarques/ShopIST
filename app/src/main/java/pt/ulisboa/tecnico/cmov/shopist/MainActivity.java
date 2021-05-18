@@ -523,7 +523,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                     }
                     il.setToBuy(toBuy);
                 }
-                System.out.println(pantryLists.get(0).getToBuy());
                 setPantryRecycler(pantryLists);
             }
             return;
@@ -693,7 +692,6 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
 
     public Barcode.GeoPoint getLocationFromAddress(String strAddress){
-        Log.d("TAG", "getLocationFromAddress: " + strAddress);
 
         Geocoder coder = new Geocoder(this);
         List<Address> address;

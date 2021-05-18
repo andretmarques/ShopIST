@@ -39,6 +39,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class EditProductActivity  extends AppCompatActivity {
     private Item item;
@@ -122,11 +123,12 @@ public class EditProductActivity  extends AppCompatActivity {
             String toShare = "Hey, check this Product:\n" + name + "\n" + barcode + "\n" + "Price: " + price;
             if (item.getImageEncoded() != null) {
                 Bitmap image = convertStringToBitmap(item.getImageEncoded());
-                Uri contentUri = saveImageExternal(image);
+                Uri contentUri = getImageUri(EditProductActivity.this, image);
 
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_TEXT, toShare);
                 shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+
                 shareIntent.setType("image/jpeg");
                 shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
@@ -136,23 +138,18 @@ public class EditProductActivity  extends AppCompatActivity {
                 shareIntent.putExtra(Intent.EXTRA_TEXT, toShare);
                 shareIntent.setType("text/plain");
             }
-            startActivity(Intent.createChooser(shareIntent, "send"));
+            startActivityForResult(Intent.createChooser(shareIntent, "send"), 1143);
+
+
         }
         return true;
     }
 
-    private Uri saveImageExternal(Bitmap image) {
-        Uri uri = null;
-        try {
-            File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "products-to-share.png");
-            FileOutputStream stream = new FileOutputStream(file);
-            image.compress(Bitmap.CompressFormat.PNG, 90, stream);
-            stream.close();
-            uri = Uri.fromFile(file);
-        } catch (IOException e) {
-            Log.d("Error", "IOException while trying to write file for sharing: " + e.getMessage());
-        }
-        return uri;
+    public static Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "IMG_" + Calendar.getInstance().getTime(), null);
+        return Uri.parse(path);
     }
 
 
@@ -170,7 +167,7 @@ public class EditProductActivity  extends AppCompatActivity {
                 Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
                 getIntent.setType("image/*");
 
-                @SuppressLint("IntentReset") Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                 pickIntent.setType("image/*");
 
                 Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
