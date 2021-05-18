@@ -117,6 +117,8 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             } else {
                 populateLists();
                 shared = true;
+                toolbarTitle.setText(pantryName + " - Shared");
+                setSupportActionBar(findViewById(R.id.toolbar_pantry));
                 }
 
             assert actionBar != null;
@@ -144,7 +146,8 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.pantry_menu_share, menu);
+        if(!shared)
+            inflater.inflate(R.menu.pantry_menu_share, menu);
         inflater.inflate(R.menu.share_product, menu);
         return true;
     }
