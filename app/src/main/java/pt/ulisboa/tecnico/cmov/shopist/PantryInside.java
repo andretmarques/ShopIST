@@ -35,6 +35,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.actions.ItemListIntents;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -111,7 +112,6 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             String actionTitle = "Pantry: " + pantryName;
             toolbarTitle.setText(actionTitle);
             if (pantry != null) {
-
                 itemsPantry = pantry.getItemList();
                 setItemsRecycler(itemsPantry);
             } else {
@@ -250,14 +250,29 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                     }
 
                 }
-                setItemsRecycler(itemsPantry);
             }
-
             @Override
             public void onCancelled(@NotNull DatabaseError databaseError) {
                 Log.i("TAG", "onCancelled", databaseError.toException());
             }
         });
+
+        myRef.child("Users").child(userId).child("Pantries").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(snapshot.getValue() != null) {
+                    GenericTypeIndicator<ItemsList> t = new GenericTypeIndicator<ItemsList>() {};
+                    pantry = snapshot.child(pantryId).getValue(t);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        setItemsRecycler(itemsPantry);
     }
 
     private void populatePositionMap(){
@@ -515,7 +530,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             snackbar.show();
             return;
         }
-
+        pantry.setToBuy(pantry.getToBuy()+1);
         i.setQuantity(i.getQuantity()-1);
         i.setToPurchase(i.getToPurchase()+1);
         i.getPantriesMap().put(pantryId, String.valueOf(i.getToPurchase()));
@@ -525,6 +540,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         snackbar.show();
         myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList")
                 .child(positionsMap.get(i.getId())).setValue(i);
+        myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("toBuy").setValue(pantry.getToBuy());
 
     }
 
