@@ -337,7 +337,6 @@ public class EditProductActivity  extends AppCompatActivity {
             }
         }
 
-
             super.onActivityResult(requestCode, resultCode, data);
 
     }
@@ -354,8 +353,5 @@ public class EditProductActivity  extends AppCompatActivity {
         byteArray1 = Base64.decode(string, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(byteArray1, 0, byteArray1.length);
     }
-
-
-
 
 }

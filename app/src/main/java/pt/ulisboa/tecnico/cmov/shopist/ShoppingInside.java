@@ -242,6 +242,7 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
                     for (HashMap.Entry<Item, Integer> secondEntry : entry.getValue().entrySet()){
                         pantryName = getPantryName(secondEntry.getKey(), entry.getKey());
                         updateDataBase(entry.getKey(), secondEntry.getKey(), secondEntry.getValue(), pantryName);
+
                     }
 
                 }
@@ -282,6 +283,7 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
                 if (toBuy < 0)
                     toBuy = 0;
                 myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("toBuy").setValue(toBuy);
+
             }
 
             @Override
@@ -329,8 +331,6 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
 
                         myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
                                 .child(dataSnapshot.getKey()).child("quantity").setValue(i.getQuantity());
-
-
                     }
                 }
 

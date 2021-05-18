@@ -516,6 +516,15 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         if (requestCode == 20005) {
             if (resultCode == RESULT_OK) {
                 pantryLists = data.getParcelableArrayListExtra("allPantries");
+                for (ItemsList il : pantryLists) {
+                    int toBuy = 0;
+                    for (Item i : il.getItemList()) {
+                        toBuy = toBuy + i.getToPurchase();
+                    }
+                    il.setToBuy(toBuy);
+                }
+                System.out.println(pantryLists.get(0).getToBuy());
+                setPantryRecycler(pantryLists);
             }
             return;
         }

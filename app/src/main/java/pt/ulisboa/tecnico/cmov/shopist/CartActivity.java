@@ -102,6 +102,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
 
             @Override
             public void onSlideCompleteAnimationEnded(@NonNull SlideToActView view) {
+
                 Intent i = new Intent();
                 i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 i.putExtra("UserEmail", uid);
