@@ -39,14 +39,14 @@ public class CreateShopActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Places.initialize(getApplicationContext(),getString(R.string.key_google_apis_android));
+        //Places.initialize(getApplicationContext(),getString(R.string.key_google_apis_android));
         setContentView(R.layout.new_shop_layout);
         setSupportActionBar(findViewById(R.id.toolbar_main));
 
         textView = findViewById(R.id.list_name);
         listLocation = findViewById(R.id.list_location);
         Intent i = getIntent();
-        initGoogleMap(savedInstanceState);
+        initGoogleMap();
 
         currentLatitude = i.getDoubleExtra("ActualLatitude", 0);
         currentLongitude = i.getDoubleExtra("ActualLongitude", 0);
@@ -69,8 +69,9 @@ public class CreateShopActivity extends AppCompatActivity {
             locationPicked = "";
             if (eta == null){
                 newList.setEta("");
+            }else {
+                newList.setEta(eta.toString());
             }
-            newList.setEta(eta.toString());
             Intent intent = new Intent();
             intent.putExtra("returnedShoppingList", newList);
             setResult(MainActivity.RESULT_OK, intent);
@@ -116,13 +117,17 @@ public class CreateShopActivity extends AppCompatActivity {
         if (requestCode == 100) {
             try {
                 AddressData addressData = data.getParcelableExtra("ADDRESS_INTENT");
-                if(addressData != null)
+                if(addressData != null) {
                     locationPicked = getRoad(addressData.getLatitude(), addressData.getLongitude());
-                    listLocation.setText(locationPicked);
-                    listLocation.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
-                    if(currentLatitude != 0 && currentLongitude != 0) {
-                        calculateDirections(addressData);
-                    }
+                }else {
+                    locationPicked = "";
+                }
+
+                listLocation.setText(locationPicked);
+                listLocation.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_baseline_location_on_24, 0, 0, 0);
+                if(currentLatitude != 0 && currentLongitude != 0) {
+                    calculateDirections(addressData);
+                }
 
 
             } catch (Exception e) {
@@ -147,18 +152,7 @@ public class CreateShopActivity extends AppCompatActivity {
         return address;
     }
 
-    private void initGoogleMap(Bundle savedInstanceState) {
-        // *** IMPORTANT ***
-        // MapView requires that the Bundle you pass contain _ONLY_ MapView SDK
-        // objects or sub-Bundles.
-        /*Bundle mapViewBundle = null;
-        if (savedInstanceState != null) {
-            mapViewBundle = savedInstanceState.getBundle("MapViewBundleKey");
-        }
-
-        mMapView.onCreate(mapViewBundle);
-
-        mMapView.getMapAsync(this);*/
+    private void initGoogleMap() {
 
         if(mGeoApiContext == null){
             mGeoApiContext = new GeoApiContext.Builder()
@@ -168,21 +162,17 @@ public class CreateShopActivity extends AppCompatActivity {
     }
 
     private void calculateDirections(AddressData addressData){
-        Log.d("TAG", "calculateDirections: calculating directions.");
-
         com.google.maps.model.LatLng destination = new com.google.maps.model.LatLng(
                 addressData.getLatitude(),
                 addressData.getLongitude()
-
         );
+
         DirectionsApiRequest directions = new DirectionsApiRequest(mGeoApiContext);
         directions.origin(
                 new com.google.maps.model.LatLng(
                         currentLatitude,
                         currentLongitude));
 
-        Log.d("TAG", "calculateDirections: destination: " + destination.toString());
-        Log.d("TAG", "calculateDirections: Origin: " + directions.toString());
         directions.destination(destination).setCallback(new PendingResult.Callback<DirectionsResult>() {
             @Override
             public void onResult(DirectionsResult result) {

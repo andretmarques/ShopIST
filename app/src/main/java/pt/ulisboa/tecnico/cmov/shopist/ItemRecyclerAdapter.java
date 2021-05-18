@@ -20,7 +20,6 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
     private final String type;
     private View.OnClickListener clickListener;
     private OnAddCartClick addCartListener;
-    private int toBuy;
 
 
     public void setOnItemClickListener(View.OnClickListener clickListener) {
