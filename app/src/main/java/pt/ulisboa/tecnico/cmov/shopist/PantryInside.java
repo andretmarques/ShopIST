@@ -84,6 +84,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
         prefs = getSharedPreferences("UserData", MODE_PRIVATE);
         editor = prefs.edit();
+        userId = getIntent().getStringExtra("EmailUser");
 
         boolean net = isNetworkAvailable(this.getApplication());
 
@@ -110,7 +111,6 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             if (pantry != null) {
                 pantry = b.getParcelable("pantry");
                 itemsPantry = pantry.getItemList();
-                userId = getIntent().getStringExtra("EmailUser");
                 setItemsRecycler(itemsPantry);
             } else {
                 populateLists();
@@ -308,8 +308,10 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
                     newItem.getPantries().put(pantryName, pantryId);
                 }
                 int preToPurchase = itemsPantry.get(listPosition).getToPurchase();
-                pantry.setToBuy(pantry.getToBuy() - preToPurchase + newItem.getToPurchase());
-                myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("toBuy").setValue(pantry.getToBuy());
+                if (pantry != null) {
+                    pantry.setToBuy(pantry.getToBuy() - preToPurchase + newItem.getToPurchase());
+                    myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("toBuy").setValue(pantry.getToBuy());
+                }
                 myRef.child("Users").child(userId).child("Pantries").child(pantryId).child("itemList").child(positionsMap.get(newItem.getId())).setValue(newItem);
                 itemsPantry.set(listPosition, newItem);
                 itemRecyclerAdapter.notifyItemChanged(listPosition);

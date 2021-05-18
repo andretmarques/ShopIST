@@ -1,15 +1,20 @@
 package pt.ulisboa.tecnico.cmov.shopist;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapter.ItemViewHolder> {
@@ -96,6 +101,12 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         if(consumeListener !=null)
             holder.getConsumeButton().setOnClickListener(v -> consumeListener.onConsume(v, position));
 
+        if (itemsList.get(position).getImageEncoded() != null) {
+            String imageEncoded = itemsList.get(position).getImageEncoded();
+            Bitmap bitmap = convertStringToBitmap(imageEncoded);
+            holder.itemPhoto.setImageBitmap(bitmap);
+        }
+
     }
 
     public void removeItem(int position){
@@ -151,6 +162,7 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
         TextView itemPrice;
         Button addToCart;
         Button consume;
+        ImageView itemPhoto;
         OnItemListener onItemListener;
 
         public ItemViewHolder(@NonNull View itemView, OnItemListener onItemListener) {
@@ -160,6 +172,7 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
             itemPrice = itemView.findViewById(R.id.item_price);
             addToCart = itemView.findViewById(R.id.add_to_cart);
             consume = itemView.findViewById(R.id.consume);
+            itemPhoto = itemView.findViewById(R.id.item_image);
             this.onItemListener = onItemListener;
             itemView.setOnClickListener(this);
             if(addToCart != null)
@@ -195,6 +208,13 @@ public class ItemRecyclerAdapter extends RecyclerView.Adapter<ItemRecyclerAdapte
     public interface OnConsumeClick{
         void onConsume(View view, int position);
     }
+
+    public static Bitmap convertStringToBitmap(String string) {
+        byte[] byteArray1;
+        byteArray1 = Base64.decode(string, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(byteArray1, 0, byteArray1.length);
+    }
+
 
 
 

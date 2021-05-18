@@ -7,6 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -35,6 +36,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
     boolean net;
     private String ownerId;
     private String userId;
+    private TextView totalPrice;
 
 
     @Override
@@ -44,6 +46,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
         net = isNetworkAvailable(this.getApplication());
         FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
         myRef = database.getReference();
+        totalPrice = findViewById(R.id.total_price);
 
         Bundle b = getIntent().getExtras();
         if(b != null){
@@ -58,6 +61,13 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
         }
         setItemsRecycler(itemsCart);
         setupEventCallbacks();
+        if (itemsCart != null && itemsCart.size() != 0) {
+            getTotalPrice();
+        }
+        else  {
+            String local = "Total price: 0$";
+            totalPrice.setText(local);
+        }
     }
 
     private void setItemsRecycler(ArrayList<Item> products) {
@@ -194,6 +204,16 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
             }
         });
 
+    }
+
+    private void getTotalPrice() {
+        double finalPrice = 0.0;
+        for (Item i : itemsCart) {
+            finalPrice = finalPrice + i.getPrice()*i.getInCart();
+            System.out.println(i.getName());
+        }
+        String price = "Total price: ".concat(String.valueOf(finalPrice)).concat("$");
+        totalPrice.setText(price);
     }
 
 
