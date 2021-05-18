@@ -9,8 +9,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -32,6 +34,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -118,8 +122,7 @@ public class EditProductActivity  extends AppCompatActivity {
             String toShare = "Hey, check this Product:\n" + name + "\n" + barcode + "\n" + "Price: " + price;
             if (item.getImageEncoded() != null) {
                 Bitmap image = convertStringToBitmap(item.getImageEncoded());
-                Uri contentUri = getImageUri(EditProductActivity.this, image);
-
+                Uri contentUri = saveImageExternal(image);
 
                 shareIntent.setAction(Intent.ACTION_SEND);
                 shareIntent.putExtra(Intent.EXTRA_TEXT, toShare);
@@ -138,11 +141,18 @@ public class EditProductActivity  extends AppCompatActivity {
         return true;
     }
 
-    public Uri getImageUri(Context inContext, Bitmap inImage) {
-        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
-        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
-        return Uri.parse(path);
+    private Uri saveImageExternal(Bitmap image) {
+        Uri uri = null;
+        try {
+            File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), "products-to-share.png");
+            FileOutputStream stream = new FileOutputStream(file);
+            image.compress(Bitmap.CompressFormat.PNG, 90, stream);
+            stream.close();
+            uri = Uri.fromFile(file);
+        } catch (IOException e) {
+            Log.d("Error", "IOException while trying to write file for sharing: " + e.getMessage());
+        }
+        return uri;
     }
 
 

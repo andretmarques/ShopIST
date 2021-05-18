@@ -477,7 +477,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 pantryList.generateId();
                 savePantryListToCache();
                 myRef.child("Users").child(userId).child("Pantries").child(pantryList.getId()).setValue(pantryList);
-                pantryListRecyclerAdapter.notifyDataSetChanged();
+                setPantryRecycler(pantryLists);
             }
             return;
         }

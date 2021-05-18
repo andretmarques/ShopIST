@@ -86,6 +86,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
         editor = prefs.edit();
         userId = getIntent().getStringExtra("EmailUser");
 
+
         boolean net = isNetworkAvailable(this.getApplication());
 
 
@@ -102,6 +103,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
 
         Bundle b = getIntent().getExtras();
         if(b != null){
+            pantry = b.getParcelable("pantry");
             Log.d("TAG", "onCreate: " + pantry);
             pantryName = b.getString("pantryListName");
             pantryId = b.getString("pantryListId");
@@ -109,7 +111,7 @@ public class PantryInside extends AppCompatActivity implements ItemRecyclerAdapt
             String actionTitle = "Pantry: " + pantryName;
             toolbarTitle.setText(actionTitle);
             if (pantry != null) {
-                pantry = b.getParcelable("pantry");
+
                 itemsPantry = pantry.getItemList();
                 setItemsRecycler(itemsPantry);
             } else {
