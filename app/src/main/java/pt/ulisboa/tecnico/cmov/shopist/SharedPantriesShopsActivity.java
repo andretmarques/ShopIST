@@ -260,7 +260,6 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
         else if((pantryListMainRecycler.getVisibility() == View.GONE) && (shoppingListMainRecycler.getVisibility() == View.VISIBLE)){
             Intent i = new Intent(this, ShoppingInside.class);
             i.putExtra("userPantryLists", sharedPantryLists);
-            System.out.println(sharedPantryLists.get(0).itemList.get(0).getToPurchase());
             i.putExtra("shoppingListName", sharedShopLists.get(position).getName());
             i.putExtra("shoppingListId", sharedShopLists.get(position).getId());
             i.putExtra("OwnerId", owner);

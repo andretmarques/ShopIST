@@ -3,6 +3,7 @@ package pt.ulisboa.tecnico.cmov.shopist;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -11,6 +12,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,9 +20,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -37,6 +43,8 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
     private String[] pantries;
     private final HashMap<String, HashMap<Item, Integer>> productsPurchase = new HashMap<>();
     private String ownerId;
+    private DatabaseReference myRef;
+    private String cartPrice;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,15 +53,15 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
         setSupportActionBar(findViewById(R.id.toolbar_shop));
         ActionBar actionBar = getSupportActionBar();
 
+        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        myRef = database.getReference();
+
         TextView toolbarTitle = findViewById(R.id.toolbar_shop_title);
         cartCount = findViewById(R.id.count_cart);
         cartButton = findViewById(R.id.cart);
 
         cartButton.setVisibility(View.GONE);
         cartCount.setVisibility(View.GONE);
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
-        DatabaseReference myRef = database.getReference();
 
 
         Bundle b = getIntent().getExtras();
@@ -210,12 +218,15 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
     }
 
     public void showCart(View view) {
+            getTotalPrice();
             Intent i = new Intent(this, CartActivity.class);
             i.putExtra("cartList", cart.getItemList());
-            i.putExtra("allPantries", allPantries);
             i.putExtra("UserId", uid);
-            i.putExtra("fantasticHm", productsPurchase);
+            if (ownerId != null) {
             i.putExtra("OwnerId", ownerId);
+            }
+            i.putExtra("allPantries", allPantries);
+            i.putExtra("cartPrice", cartPrice);
             startActivityForResult(i, 10078);
         }
 
@@ -223,13 +234,114 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(requestCode == 10078){
             if(resultCode == RESULT_OK){
+                data.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                uid = data.getStringExtra("UserEmail");
+                allPantries = data.getParcelableArrayListExtra("allPantries");
+                String pantryName;
+                for(HashMap.Entry<String, HashMap<Item, Integer>> entry : productsPurchase.entrySet()){
+                    for (HashMap.Entry<Item, Integer> secondEntry : entry.getValue().entrySet()){
+                        pantryName = getPantryName(secondEntry.getKey(), entry.getKey());
+                        updateDataBase(entry.getKey(), secondEntry.getKey(), secondEntry.getValue(), pantryName);
+                    }
+
+                }
                 Intent i = new Intent();
-                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                i.putExtra("UserEmail", uid);
-                setResult(CartActivity.RESULT_OK, i);
+                i.putParcelableArrayListExtra("allPantries", allPantries);
+
+                setResult(ShoppingInside.RESULT_OK, i);
                 finish();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
+    private void getTotalPrice() {
+        double finalPrice = 0.0;
+        for (Item i : cart.getItemList()) {
+            finalPrice = finalPrice + i.getPrice()* (double) i.getInCart();
+        }
+        String value = String.valueOf(finalPrice);
+        cartPrice = "Total price: " + value + "$";
+    }
+
+    private String getPantryName(Item i, String pantryId){
+        String pantryName = "";
+        for(HashMap.Entry<String, String> hmhm : i.getPantries().entrySet()) {
+            if (hmhm.getValue().equals(pantryId))
+                pantryName = hmhm.getKey();
+        }
+        return pantryName;
+    }
+    private void updateDataBase(String pantryId, Item i, int purchased, String pantryName){
+        myRef.child("Users").child(uid).child("Pantries").child(pantryId).addListenerForSingleValueEvent(new ValueEventListener() {
+
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                int toBuy = Integer.parseInt(snapshot.child("toBuy").getValue().toString()) - purchased;
+                if (toBuy < 0)
+                    toBuy = 0;
+                myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("toBuy").setValue(toBuy);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
+
+        myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList").addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
+                    if (dataSnapshot.child("name").getValue().toString().equals(i.getName())){
+
+                        int toPurchase = Integer.parseInt(dataSnapshot.child("toPurchase").getValue().toString());
+                        int quantity = Integer.parseInt(dataSnapshot.child("quantity").getValue().toString()) + purchased;
+
+                        if(purchased >= toPurchase) {
+                            toPurchase = 0;
+                        }else{
+                            toPurchase = toPurchase - purchased;
+                        }
+                        i.setToPurchase(toPurchase);
+                        i.setQuantity(quantity);
+
+                        if(i.getToPurchase() == 0){
+                            i.getPantriesMap().remove(pantryId);
+                            i.getPantries().remove(pantryName);
+                            myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                    .child(dataSnapshot.getKey()).child("pantries").removeValue();
+
+                            myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                    .child(dataSnapshot.getKey()).child("pantriesMap").removeValue();
+                        }else {
+                            i.getPantriesMap().put(pantryId, String.valueOf(i.getToPurchase()));
+                            myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                    .child(dataSnapshot.getKey()).child("pantries").setValue(i.getPantries());
+
+                            myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                    .child(dataSnapshot.getKey()).child("pantriesMap").setValue(i.getPantriesMap());
+                        }
+
+                        myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                .child(dataSnapshot.getKey()).child("toPurchase").setValue(i.getToPurchase());
+
+                        myRef.child("Users").child(uid).child("Pantries").child(pantryId).child("itemList")
+                                .child(dataSnapshot.getKey()).child("quantity").setValue(i.getQuantity());
+
+
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+    }
+
 }

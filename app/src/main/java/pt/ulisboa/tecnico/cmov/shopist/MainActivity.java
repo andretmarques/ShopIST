@@ -300,9 +300,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         shoppingListMainRecycler.setLayoutManager(layoutManager);
         shoppingListRecyclerAdapter = new ListRecyclerAdapter(this, allLists, "SHOP", this);
-        shoppingListRecyclerAdapter.setDirectionsListener(((view, position) -> {
-            onClickLocation(shoppingLists.get(position).getLocation());
-        }));
+        shoppingListRecyclerAdapter.setDirectionsListener(((view, position) -> onClickLocation(shoppingLists.get(position).getLocation())));
         shoppingListMainRecycler.setAdapter(shoppingListRecyclerAdapter);
     }
 
@@ -511,6 +509,13 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
                 pantry.setToBuy(toBuy);
                 pantryListRecyclerAdapter.notifyItemChanged(listPosition);
 
+            }
+            return;
+        }
+
+        if (requestCode == 20005) {
+            if (resultCode == RESULT_OK) {
+                pantryLists = data.getParcelableArrayListExtra("allPantries");
             }
             return;
         }

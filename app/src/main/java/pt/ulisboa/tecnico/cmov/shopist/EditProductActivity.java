@@ -155,27 +155,23 @@ public class EditProductActivity  extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("How to set the photo");
-        builder.setItems(way, new DialogInterface.OnClickListener() {
-            @SuppressLint("IntentReset")
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (way[which].equals("Gallery")) {
-                    Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
-                    getIntent.setType("image/*");
+        builder.setItems(way, (dialog, which) -> {
+            if (way[which].equals("Gallery")) {
+                Intent getIntent = new Intent(Intent.ACTION_GET_CONTENT);
+                getIntent.setType("image/*");
 
-                    @SuppressLint("IntentReset") Intent pickIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                    pickIntent.setType("image/*");
+                @SuppressLint("IntentReset") Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                pickIntent.setType("image/*");
 
-                    Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
-                    chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
+                Intent chooserIntent = Intent.createChooser(getIntent, "Select Image");
+                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Intent[] {pickIntent});
 
-                    startActivityForResult(Intent.createChooser(chooserIntent, "Select Picture"), 111);
+                startActivityForResult(Intent.createChooser(chooserIntent, "Select Picture"), 111);
 
-                }
-                else if (way[which].equals("Camera")) {
-                    Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    startActivityForResult(takePictureIntent, 112);
-                }
+            }
+            else if (way[which].equals("Camera")) {
+                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(takePictureIntent, 112);
             }
         });
         builder.show();
@@ -213,7 +209,6 @@ public class EditProductActivity  extends AppCompatActivity {
                 if (item.getImageEncoded() != null) {
                     pi.setPhotoEncoded(item.getImageEncoded());
                 }
-                System.out.println(barcode);
                 myRef.child("PublicItems").child(barcode).setValue(pi);
                 item.setPrice(doublePrice);
             }
@@ -299,7 +294,6 @@ public class EditProductActivity  extends AppCompatActivity {
                         100, 100);
 
                 String stringImage = convertBitmapToString(croppedBmp);
-                System.out.println(stringImage);
 
                 itemPhoto.setImageBitmap(croppedBmp);
 
