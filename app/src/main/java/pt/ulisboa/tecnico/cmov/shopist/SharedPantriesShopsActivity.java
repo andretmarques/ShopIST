@@ -50,7 +50,7 @@ public class SharedPantriesShopsActivity extends AppCompatActivity implements Li
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shared_pantries_shops);
         setSupportActionBar(findViewById(R.id.toolbar_shared));
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        FirebaseDatabase database = FirebaseDatabase.getInstance("DATABASE_URL");
         myRef = database.getReference();
 
         userId = getIntent().getStringExtra("UserEmail");

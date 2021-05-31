@@ -53,7 +53,7 @@ public class ShoppingInside extends AppCompatActivity implements ItemRecyclerAda
         setSupportActionBar(findViewById(R.id.toolbar_shop));
         ActionBar actionBar = getSupportActionBar();
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        FirebaseDatabase database = FirebaseDatabase.getInstance("DATABASE_URL");
         myRef = database.getReference();
 
         TextView toolbarTitle = findViewById(R.id.toolbar_shop_title);

@@ -45,7 +45,7 @@ public class CartActivity extends AppCompatActivity implements ItemRecyclerAdapt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cart);
         net = isNetworkAvailable(this.getApplication());
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        FirebaseDatabase database = FirebaseDatabase.getInstance("DATABASE_URL");
         myRef = database.getReference();
         totalPrice = findViewById(R.id.total_price);
 

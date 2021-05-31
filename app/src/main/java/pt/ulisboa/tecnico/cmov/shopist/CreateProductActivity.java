@@ -38,7 +38,7 @@ public class CreateProductActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.new_product_layout);
         setSupportActionBar(findViewById(R.id.toolbar_main));
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        FirebaseDatabase database = FirebaseDatabase.getInstance("DATABASE_URL");
         myRef = database.getReference();
         userId = getIntent().getStringExtra("EmailUser");
 

@@ -60,7 +60,7 @@ public class EditProductActivity  extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.product);
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        FirebaseDatabase database = FirebaseDatabase.getInstance("DATABASE_URL");
         myRef = database.getReference();
         String actionTitle;
         TextView toolbarTitle = findViewById(R.id.toolbar_product_title);

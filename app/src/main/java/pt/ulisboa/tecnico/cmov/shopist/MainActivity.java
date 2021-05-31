@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements ListRecyclerAdapt
 
         shoppingListMainRecycler.setVisibility(View.GONE);
         pantryListMainRecycler.setVisibility(View.VISIBLE);
-        FirebaseDatabase database = FirebaseDatabase.getInstance("https://shopist-310217-default-rtdb.europe-west1.firebasedatabase.app/");
+        FirebaseDatabase database = FirebaseDatabase.getInstance("DATABASE_URL");
         myRef = database.getReference();
         userId = getIntent().getStringExtra("UserEmail");
         if (userId != null) {
